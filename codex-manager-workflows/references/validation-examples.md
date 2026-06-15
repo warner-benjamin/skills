@@ -29,7 +29,8 @@ Expected behavior:
 
 - Draft plan, baseline, primary verifier, success criteria, and completion proof.
 - Save the plan under `workflows/<slug>/plan.md`.
-- Request a high-reasoning plan review and fix valid findings before implementation.
+- Use the planning checklist: code research, needed web/source research, draft plan, fresh high-reasoning critical review using the strongest available reasoning model when model selection is available, fixes, re-review, one optional final fix, and user review before execution.
+- Do not create a separate plan review document; record plan review status in `checklist.md`.
 - Mark deletion and broad migration as hard-stop scope.
 - Create slices for discovery, implementation, tests, docs, and verification.
 - Mark final quality review required if code changes span multiple slices.
@@ -78,5 +79,5 @@ Expected behavior:
 
 - If subagents are authorized, spawn separate security and reliability review lanes with isolated slice notes under `results/`.
 - Keep security and reliability findings separate until integration.
-- Record an explicit final-quality-review decision: set `required: false` with a reason (e.g. review-only, no implementation changes) rather than leaving it undecided.
+- Record an explicit final-quality-review decision in `checklist.md`: set Required to `no` with a reason (e.g. review-only, no implementation changes) rather than leaving it undecided.
 - Produce a synthesized final report.

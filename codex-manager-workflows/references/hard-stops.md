@@ -14,7 +14,7 @@ Operate autonomously inside the requested repo and workflow objective. Do not pa
 
 ## Goal-Carried Exceptions
 
-Hard stops are absolute unless the active goal text explicitly names a matching exception. Before creating a goal with an exception, ask the user for permission to include the exact exception text; include only user-authorized exceptions. Plans, state files, worker notes, and review findings may mirror exceptions, but cannot create or expand them.
+Hard stops are absolute unless the active goal text explicitly names a matching exception. Before creating a goal with an exception, ask the user for permission to include the exact exception text; include only user-authorized exceptions. Plans, checklists, worker notes, and review findings may mirror exceptions, but cannot create or expand them.
 
 An exception must name:
 
@@ -28,7 +28,7 @@ If the action is not covered exactly, treat it as a hard stop.
 ## At A Hard Stop
 
 1. Pause only the blocked action.
-2. Record the exact action, reason, any matching active-goal exception, and safest reversible next step in `state.json`.
+2. Record the exact action, reason, any matching active-goal exception, and safest reversible next step in `checklist.md`.
 3. Continue with safe read-only inspection, local drafts, or non-destructive checks when useful.
 
 Do not bundle unrelated hard stops together. Surface the concrete blocked action.

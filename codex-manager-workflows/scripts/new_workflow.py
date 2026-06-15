@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from datetime import datetime, timezone
@@ -49,42 +48,6 @@ def main() -> int:
             skipped.append(path)
 
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    state = {
-        "title": args.title,
-        "slug": slug,
-        "created_at": now,
-        "status": "scaffolded",
-        "hard_stops": {
-            "encountered": [],
-            "goal_exceptions_mirror": [],
-            "notes": "",
-        },
-        "plan_review": {
-            "agent_type": "default",
-            "model": None,
-            "reasoning_effort": "high",
-            "reviewer": None,
-            "status": "pending",
-            "path": "reviews/plan-review.md",
-        },
-        "agent_limits": {
-            "max_concurrent_agents": 4,
-            "max_total_agents": 12,
-            "hard_stop_above_limits": True,
-        },
-        "slices": [],
-        "verification": {"status": "not_started", "checks": []},
-        "final_quality_review": {
-            "required": None,
-            "status": "undecided",
-            "path": "reviews/final-quality-review.md",
-            "reason": "",
-            "reviewer": None,
-            "cleanup_slice": None,
-        },
-        "commits": [],
-    }
-
     add_file(
         run_dir / "plan.md",
         f"""# {args.title}
@@ -109,7 +72,9 @@ def main() -> int:
 
 ## Hard Stops
 
-## Plan Review
+## Workflow Artifact Path
+
+`{run_dir}`
 
 ## Implementation Slices
 
@@ -125,47 +90,74 @@ def main() -> int:
 """,
     )
     add_file(
-        run_dir / "reviews" / "plan-review.md",
-        f"""# Plan Review: {args.title}
+        run_dir / "checklist.md",
+        f"""# Workflow Checklist: {args.title}
 
-## Reviewer
+Created: {now}
+Status: scaffolded
 
-Agent type: default
-Model: inherited unless an explicit override is needed
-Reasoning effort: high
+Keep this as a status ledger only. Do not duplicate `plan.md`; update the plan for goal, constraints, risks, slice details, and verification strategy.
 
-## Verdict
+## Lifecycle
 
-blocking | non-blocking
+- [ ] Local/code research complete
+- [ ] External research complete or not needed
+- [ ] Plan drafted
+- [ ] Fresh plan review complete or marked unavailable
+- [ ] User cleared implementation
+- [ ] Slices complete
+- [ ] Slice reviews complete
+- [ ] Targeted verification passed
+- [ ] Final quality review complete or explicitly skipped
+- [ ] Final report complete
 
-## Blocking Findings
+## Plan Review
 
-## Non-blocking Findings
+Reviewer:
+Model/effort: strongest available reasoning model / high
+Status: pending
+Blocking findings:
+Rejected findings:
+User review before execution: pending
 
-## Unsafe Assumptions
+## Agent Limits
 
-## Missing Context
+Max concurrent agents: 4
+Max total agents: 12
+Hard stop above limits: yes
 
-## Slice Boundary Issues
+## Hard Stops
 
-## Verification Gaps
+| Status | Action | Reason | Resolution |
+| --- | --- | --- | --- |
 
-## Commit Boundary Issues
+Goal exceptions mirror: none
 
-## Required Plan Changes
+## Slices
 
-## Fixes Applied
+| ID | Status | Review | Commit |
+| --- | --- | --- | --- |
 
-## Rejected Findings
+## Verification
 
-## Re-review Required
+| Check | Required | Status | Evidence |
+| --- | --- | --- | --- |
 
-yes | no
+## Final Quality Review
 
-## Re-review Notes
+Required: undecided
+Status: undecided
+Review path: reviews/final-quality-review.md
+Reason if skipped:
+Reviewer:
+Cleanup slice:
+
+## Commits
+
+| Slice | Commit | Notes |
+| --- | --- | --- |
 """,
     )
-    add_file(run_dir / "state.json", json.dumps(state, indent=2) + "\n")
     add_file(
         run_dir / "final-report.md",
         f"""# Final Report: {args.title}
