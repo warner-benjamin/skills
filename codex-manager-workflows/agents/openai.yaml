@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Manager Workflows"
+  short_description: "Plan, review, slice, and commit agent workflows"
+  default_prompt: "Use $codex-manager-workflows to plan, review, and run a manager-led multi-agent implementation for this task."
