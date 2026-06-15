@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -15,10 +16,11 @@ def slugify(value: str) -> str:
     return slug[:64].strip("-") or "workflow"
 
 
-def write_new(path: Path, content: str) -> None:
+def write_new(path: Path, content: str) -> bool:
     if path.exists():
-        return
+        return False
     path.write_text(content, encoding="utf-8")
+    return True
 
 
 def main() -> int:
@@ -40,40 +42,72 @@ def main() -> int:
     slices_dir.mkdir(parents=True, exist_ok=True)
     results_dir.mkdir(parents=True, exist_ok=True)
     reviews_dir.mkdir(parents=True, exist_ok=True)
+    skipped: list[Path] = []
+
+    def add_file(path: Path, content: str) -> None:
+        if not write_new(path, content):
+            skipped.append(path)
 
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     state = {
         "title": args.title,
         "slug": slug,
         "created_at": now,
-        "status": "planned",
-        "approval": {"required": None, "granted": None, "notes": ""},
+        "status": "scaffolded",
+        "hard_stops": {
+            "encountered": [],
+            "goal_exceptions_mirror": [],
+            "notes": "",
+        },
         "plan_review": {
-            "model": "gpt-5.5-high",
+            "agent_type": "default",
+            "model": None,
+            "reasoning_effort": "high",
             "reviewer": None,
             "status": "pending",
             "path": "reviews/plan-review.md",
         },
+        "agent_limits": {
+            "max_concurrent_agents": 4,
+            "max_total_agents": 12,
+            "hard_stop_above_limits": True,
+        },
         "slices": [],
         "verification": {"status": "not_started", "checks": []},
+        "final_quality_review": {
+            "required": None,
+            "status": "undecided",
+            "path": "reviews/final-quality-review.md",
+            "reason": "",
+            "reviewer": None,
+            "cleanup_slice": None,
+        },
         "commits": [],
     }
 
-    write_new(
+    add_file(
         run_dir / "plan.md",
         f"""# {args.title}
 
 ## Goal
 
+## Baseline
+
 ## Success Criteria
+
+## Primary Verifier
+
+## Completion Proof
 
 ## Current Context
 
 ## Constraints
 
+## Anti-cheating Constraints
+
 ## Risks
 
-## Approval Required
+## Hard Stops
 
 ## Plan Review
 
@@ -83,41 +117,22 @@ def main() -> int:
 
 ## Verification
 
+## Final Quality Review
+
 ## Commit Policy
 
 ## Reusable Artifacts
 """,
     )
-    write_new(
-        run_dir / "orchestration.md",
-        f"""# Orchestration: {args.title}
-
-## Execution Rules
-
-- Keep the original objective intact.
-- Ask for approval before risky, expensive, external, or destructive actions.
-- Keep immediate blocking work local.
-- Review and repair the plan before implementation.
-- Delegate only bounded, disjoint, materially useful slices.
-- Review, fix, sanity-check, and commit each slice before moving on.
-- Integrate slice results before final verification.
-
-## Branching Rules
-
-## Slice Prompts
-
-## Review Prompts
-
-## Completion Audit
-""",
-    )
-    write_new(
+    add_file(
         run_dir / "reviews" / "plan-review.md",
         f"""# Plan Review: {args.title}
 
 ## Reviewer
 
-Model: gpt-5.5-high plan reviewer
+Agent type: default
+Model: inherited unless an explicit override is needed
+Reasoning effort: high
 
 ## Verdict
 
@@ -150,8 +165,8 @@ yes | no
 ## Re-review Notes
 """,
     )
-    write_new(run_dir / "state.json", json.dumps(state, indent=2) + "\n")
-    write_new(
+    add_file(run_dir / "state.json", json.dumps(state, indent=2) + "\n")
+    add_file(
         run_dir / "final-report.md",
         f"""# Final Report: {args.title}
 
@@ -167,6 +182,10 @@ yes | no
 
 ## Verification Evidence
 
+## Final Quality Review
+
+## Completion Proof
+
 ## Remaining Risks
 
 ## Reusable Follow-up
@@ -174,6 +193,12 @@ yes | no
     )
 
     print(run_dir)
+    if skipped:
+        print(
+            "Warning: existing workflow files were left unchanged: "
+            + ", ".join(str(path) for path in skipped),
+            file=sys.stderr,
+        )
     return 0
 
 

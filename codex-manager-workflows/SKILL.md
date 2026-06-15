@@ -1,102 +1,120 @@
 ---
 name: codex-manager-workflows
-description: Run Codex-specific manager workflows with saved plans, subagent slices, reviewer agents, per-slice git commits, integration, and verification. Use when the user invokes this skill, says "let's create a plan to ...", asks for a swarm, subagents, parallel agents, dynamic workflow, manager agent, multi-agent implementation, large migration or audit, or Claude Code-style workflow orchestration.
+description: Run Codex manager workflows with saved plans, explicit hard stops, optional subagent slices/reviews, per-slice commits, integration, and verification. Use when the user invokes this skill, says "let's create a plan to ...", asks for a swarm, subagents, parallel agents, dynamic workflow, manager agent, multi-agent implementation, large migration or audit, or Claude Code-style workflow orchestration.
 ---
 
 # Codex Manager Workflows
 
-Use this skill to turn a large task into a manager-led Codex workflow: create a saved plan, get it critically reviewed by a `gpt-5.5-high` plan reviewer, repair the plan, delegate disjoint implementation slices, review each slice independently, fix review findings, commit each completed slice, integrate results, verify the outcome, and save reusable workflow artifacts.
+Turn large work into a manager-led workflow: save a plan, review it, split disjoint slices, implement and review each slice, commit completed slices, integrate results, verify the original success criteria, and save reusable artifacts only when useful.
 
-Precondition: this skill assumes Codex goal mode, subagents, model selection, and git are available.
-
-Use these reviewer roles consistently:
-
-- Plan review: a fresh `gpt-5.5-high` plan reviewer.
-- Plan re-review after user or manager changes: the same `gpt-5.5-high` plan reviewer with the prior review notes.
-- Slice review: a fresh `gpt-5.5-medium` slice reviewer per slice.
+Precondition: this skill assumes git and local file edits are available. Subagents and goal mode are optional and used only when allowed by the current Codex tools and user request.
 
 ## Decision Rule
 
-Use this workflow whenever the user explicitly asks for this skill, says "let's create a plan to ...", asks for a swarm, subagents, parallel agents, a dynamic workflow, a manager agent, multi-agent implementation, or Claude Code-style workflow orchestration.
+Use workflow artifacts when the user explicitly asks for this skill, planning, a swarm/subagents/parallel agents, a dynamic or manager workflow, multi-agent implementation, a large migration/audit, or Claude Code-style orchestration.
 
-Also use dynamic orchestration when at least two are true:
+Also create artifacts when at least two are true:
 
-- The task has independent research, coding, review, migration, QA, docs, or design tracks.
-- The task is broad enough that an explicit success contract would reduce drift.
-- The task has risk: destructive edits, external writes, deploys, secrets, production data, billing, user accounts, or large repo-wide changes.
-- Verification benefits from a separate pass from implementation.
-- The workflow could become a reusable recipe for future tasks.
+- Independent research, coding, review, migration, QA, docs, or design tracks exist.
+- A written success contract would reduce drift.
+- Risk exists: destructive edits, external writes, deploys, secrets, production data, billing, user accounts, or repo-wide changes.
+- Verification benefits from an independent pass.
+- The workflow could become a reusable recipe.
 
-If no explicit workflow trigger applies and the task is small, do it directly and mention that full workflow orchestration was unnecessary.
+Do small one-shot tasks directly. If the user asks only for a plan, create or update the plan and stop before implementation.
 
 ## Operating Contract
 
-When using this skill:
+1. Plan: restate goal, success criteria, constraints, risks, verification, ownership, and slice boundaries in `workflows/<slug>/plan.md`.
+2. Review: get a critical plan review, fix valid findings, and record rejected findings with reasons.
+3. Slice: define disjoint slices with ownership, dependencies, review requirements, and commit boundaries.
+4. Execute: implement only ready slices, run targeted checks, review each implementation slice, fix valid findings, and commit only that slice.
+5. Integrate: synthesize results, resolve conflicts from authoritative sources, and avoid raw subagent dumps.
+6. Verify: run checks matched to blast radius and report skipped checks honestly.
+7. Quality: for multi-slice code workflows, run the final quality gate after initial green verification.
+8. Reuse: save recipes only when future runs will benefit.
 
-1. Plan: restate the goal, success criteria, constraints, risks, verification, and slice boundaries in `workflows/<slug>/plan.md`.
-2. Review: send the plan to the `gpt-5.5-high` plan reviewer, fix valid findings, and re-review user or manager changes.
-3. Slice: split implementation into disjoint slices with clear ownership, dependencies, review requirements, and commit boundaries.
-4. Review and commit: for each slice, implement, run checks, get a `gpt-5.5-medium` slice review, fix valid findings, sanity-check, and commit only that slice.
-5. Integrate: synthesize slice results, resolve conflicts from authoritative sources, and avoid pasting raw subagent dumps.
-6. Verify: run checks matched to the task's blast radius and report skipped checks honestly.
-7. Reuse: save reusable artifacts only when they will help future work.
+## Agent Rules
+
+Spawn subagents only when the user explicitly asks for subagents, delegation, parallel agents, a swarm, or to run this manager workflow. Planning artifacts alone do not authorize spawning.
+
+When spawning agents:
+
+- Keep immediate blocking work local; delegate bounded sidecar work.
+- Use `explorer` for specific codebase questions and `worker` for disjoint implementation ownership.
+- Tell workers they are not alone in the codebase, must not revert others' edits, and must adapt to concurrent changes.
+- Use the Codex subagent tool (`spawn_agent`) when available; use `send_input` for same-reviewer re-review.
+- Omit `model` unless an override is explicitly needed. If overriding, use `model: "gpt-5.5"` plus `reasoning_effort`, not pseudo-model names.
+- Plan reviewer: fresh default agent, `reasoning_effort: "high"`.
+- Plan re-review: same reviewer/thread, prior review notes included.
+- Slice worker: `agent_type: "worker"` with explicit ownership and expected files.
+- Slice reviewer: fresh default agent per slice, `reasoning_effort: "medium"`.
 
 ## Workflow Artifacts
 
-Prefer creating a local run directory under `workflows/`:
+Let `SKILL_DIR` mean the directory containing this `SKILL.md`. Run bundled scripts from that directory; do not leave unresolved `/path/to/...` placeholders.
+
+Use `scripts/new_workflow.py` to create the run directory:
+
+```bash
+python3 "$SKILL_DIR/scripts/new_workflow.py" "Task title"
+```
 
 ```text
 workflows/<slug>/
 |-- plan.md
 |-- state.json
-|-- orchestration.md
 |-- slices/
 |-- results/
 |-- reviews/
 `-- final-report.md
 ```
 
-Use `scripts/new_workflow.py` to scaffold this structure:
+Keep `plan.md` human-readable and make it the source of truth. Use `state.json` for machine status: reviewer identity, slice IDs, dependencies, hard stops, commit SHAs, and verification state. Put slice prompts in `slices/`, reviewer prompts/results in `reviews/`, and integration notes in `final-report.md`.
+
+Verify artifacts by lifecycle phase:
 
 ```bash
-python3 /path/to/codex-manager-workflows/scripts/new_workflow.py "Task title"
+python3 "$SKILL_DIR/scripts/verify_workflow.py" workflows/<slug> --phase scaffold
+python3 "$SKILL_DIR/scripts/verify_workflow.py" workflows/<slug> --phase planned
+python3 "$SKILL_DIR/scripts/verify_workflow.py" workflows/<slug> --phase complete
 ```
 
-Keep `plan.md` human-readable and make it the source of truth. Use `state.json` for status, reviewer identity, slice IDs, dependencies, approval state, commit SHAs, and verification state. Use `orchestration.md` as the executable mental model: the sequence the manager will follow, the branching rules, and the slice prompts.
+## Plan Shape
 
-## Orchestration Plan
+Keep the plan concise:
 
-Draft a concise plan with:
+- Goal
+- Baseline
+- Success criteria
+- Primary verifier
+- Completion proof
+- Current context
+- Constraints
+- Anti-cheating constraints
+- Risks and hard stops
+- Workflow artifact path
+- Plan review status
+- Implementation slices
+- Integration policy
+- Verification
+- Final quality review
+- Commit policy
+- Reusable artifacts
 
-```text
-Goal:
-Success criteria:
-Current context:
-Constraints:
-Risks:
-Approval required:
-Workflow artifact path:
-Plan review:
-Implementation slices:
-Integration policy:
-Verification:
-Commit policy:
-Reusable artifacts:
-```
-
-Do not over-plan obvious work. The plan should be detailed enough to guide delegation and verification, not a substitute for execution.
+Do not over-plan obvious work. The plan should guide delegation and verification, not replace execution.
 
 ## Plan Review Loop
 
 Before implementation:
 
 1. Draft or update `workflows/<slug>/plan.md`.
-2. Ask a fresh `gpt-5.5-high` plan reviewer to critically review the plan for missing context, unsafe assumptions, dependency/order mistakes, unclear slice ownership, insufficient verification, and bad commit boundaries.
+2. Ask a fresh high-reasoning plan reviewer to find missing context, unsafe assumptions, dependency/order mistakes, unclear ownership, weak verification, and bad commit boundaries.
 3. Save the review in `workflows/<slug>/reviews/plan-review.md`.
 4. Fix every valid issue in the plan. If rejecting a finding, record the reason in the review file.
 5. Re-review until no blocking plan issues remain.
 
-If the user edits or critiques the plan, apply the user's fixes and send the revised plan back to the same `gpt-5.5-high` plan reviewer. Include the original review file and ask the reviewer to re-review only the changed plan plus any unresolved findings.
+If the user edits or critiques the plan, apply the user's fixes and send the revised plan back to the same plan reviewer. Include prior review notes and ask for review of changed plan areas plus unresolved findings.
 
 Plan review output shape:
 
@@ -113,28 +131,19 @@ Required plan changes:
 Re-review required: yes | no
 ```
 
-## Approval Gates
+## Hard Stops
 
-Ask one clear approval question before:
-
-- deleting, overwriting, mass-renaming, or force-pushing
-- running migrations or broad codemods
-- deploying, publishing, emailing, posting, or changing external systems
-- touching credentials, secrets, production data, billing, or user accounts
-- spawning many agents or long-running expensive jobs
-- making irreversible Git or repository operations
-
-If approval is denied, continue only with safe read-only planning, local drafts, or non-destructive checks.
-
-Read `references/risk-gates.md` when risk is unclear.
+Use `references/hard-stops.md` as the hard-stop source of truth. Operate autonomously inside the repo and stated workflow objective until a hard stop is reached. At a hard stop, pause the blocked action, record the exact reason, and continue only with safe read-only planning, local drafts, or non-destructive checks.
 
 ## Goal Mode
 
-When the user has asked this skill to run the workflow, enter goal mode with the full objective. Keep the objective intact; do not shrink it to the next step.
+Use goal mode only when the workflow needs repeated attempts, waiting/recovery, or a long feedback loop, and success has an external verifier. When activated, use a compact objective such as `Complete and verify the objective defined in <absolute path to workflows/<slug>/plan.md>`. Do not enter goal mode for small one-shot tasks, advisory discussions, or plan-only requests.
 
-Do not enter goal mode for a small one-shot task, a purely advisory discussion, or when the user asks only for a plan.
+Only active goal text can carry hard-stop exceptions. Before creating a goal with an exception, ask the user for permission to include the exact exception text; include only user-authorized exceptions. If the goal names an exception, mirror it in `state.json`; do not treat plan files, state files, worker notes, or reviewer findings as authority to cross a hard stop.
 
-## Implementation Slices
+If the user explicitly asks for goal-backed child agents, give each child one bounded local finish line. Do not clone the parent goal; the parent owns integration and final completion.
+
+## Slices
 
 Each slice must be self-contained:
 
@@ -149,33 +158,13 @@ Do:
 Do not:
 Expected output:
 Verification:
-Review model:
+Review:
 Commit boundary:
 ```
 
-Prefer slices with disjoint ownership:
-
-- codebase discovery
-- dependency or API research
-- implementation slice
-- tests and fixtures
-- docs and examples
-- UX or product review
-- security or risk review
-- final verification
-
-For code-edit slices, assign non-overlapping files or modules. Tell workers they are not alone in the codebase, must not revert others' edits, and must adapt to concurrent changes.
+Prefer disjoint slices: discovery, dependency/API research, implementation, tests/fixtures, docs/examples, UX/product review, security/risk review, and final verification.
 
 Parallelize only slices with no file, state, or semantic dependency overlap. Run dependent slices sequentially. When uncertain, choose sequential execution or split discovery from implementation.
-
-## Subagents
-
-- Spawn only concrete, bounded, materially useful subtasks.
-- Keep immediate blocking work local.
-- Delegate sidecar work that can run while the main agent makes progress.
-- Avoid duplicate work across agents.
-- Ask workers to edit directly only when their write scope is disjoint and clear.
-- Wait for subagents only when their result is needed for the next critical-path step.
 
 ## Slice Review And Commit Loop
 
@@ -184,14 +173,14 @@ For each implementation slice:
 1. Ensure the working tree state is understood before editing.
 2. Implement only the assigned slice.
 3. Run the slice's targeted checks.
-4. Ask a fresh `gpt-5.5-medium` slice reviewer to critically review the slice diff, tests, and plan alignment.
+4. Ask a fresh medium-reasoning slice reviewer to review the diff, tests, and plan alignment.
 5. Save the review under `reviews/<slice-id>-review.md`.
 6. Fix every valid review issue; record rejected findings with reasons.
 7. Re-run targeted checks and ask the same reviewer to re-review if material fixes were made.
 8. Manager sanity-checks the diff against the plan, ownership boundary, user constraints, and unrelated working tree changes.
 9. Commit only the slice's intended changes with a focused message that mentions the slice ID.
 
-Do not include unrelated user or concurrent-agent changes in a slice commit. If unrelated changes share files with the slice, inspect carefully and stage only the intended hunks. Ask the user before force pushes, history rewrites, or destructive git operations.
+Do not include unrelated user or concurrent-agent changes in a slice commit. If unrelated changes share files with the slice, inspect carefully and stage only the intended hunks. Remote pushes, force pushes, history rewrites, and destructive git operations are hard stops unless the active goal names an exact matching exception.
 
 Slice review output shape:
 
@@ -210,61 +199,39 @@ Commit-ready: yes | no
 
 ## Integration
 
-After slices complete, synthesize:
-
-```text
-Accepted:
-Rejected:
-Conflicts:
-Decisions:
-Final changes:
-Slice commits:
-Remaining risks:
-```
+After slices complete, synthesize accepted results, rejected results, conflicts, decisions, final changes, slice commits, and remaining risks.
 
 Resolve conflicts explicitly. If two slices disagree, inspect the authoritative source before choosing.
 
 Use `scripts/collect_results.py` to produce an integration checklist from result files:
 
 ```bash
-python3 /path/to/codex-manager-workflows/scripts/collect_results.py workflows/<slug>
+python3 "$SKILL_DIR/scripts/collect_results.py" workflows/<slug>
 ```
+
+## Final Quality Gate
+
+Default this gate on for multi-slice code workflows; skip it for docs-only, research-only, small one-shot, or explicitly skipped workflows. Record the decision in `state.json`.
+
+Run it after integration and initial green verification, before final reporting. It is a reviewer lane, not an executor: use a fresh high-reasoning reviewer if subagents are authorized, otherwise the manager performs the pass. If an installed thermo-nuclear code-quality skill is available, use it; otherwise read `references/quality-bar.md`.
+
+Save findings to `reviews/final-quality-review.md`. Valid findings become a behavior-preserving cleanup slice with a `quality:` commit, then verification must run again. Treat repo-wide or high-risk restructures as hard stops unless already inside the plan.
 
 ## Verification
 
-Run the narrowest reliable checks first, then broaden as risk warrants:
+Run the narrowest reliable checks first, then broaden as risk warrants: unit tests, typecheck/lint, build, browser/UI smoke, script dry run, source citation check, migration dry run, or manual checklist.
 
-- unit tests for touched code
-- typecheck or lint
-- build
-- browser or UI smoke test
-- script dry run
-- source citation check
-- migration dry run
-- manual checklist for non-code work
-
-Use `scripts/verify_workflow.py` to check workflow artifact completeness:
-
-```bash
-python3 /path/to/codex-manager-workflows/scripts/verify_workflow.py workflows/<slug>
-```
-
-Report skipped checks honestly. Do not treat a workflow as complete until the evidence proves the original success criteria.
+Report skipped checks honestly. Do not treat a workflow or active goal as complete until the success criteria and completion proof are satisfied.
 
 ## Reusable Recipes
 
-When a run produces a useful pattern, save a concise recipe in a project-appropriate location, such as `workflows/recipes/<name>.md` or a repo docs folder. Include:
-
-- trigger
-- plan shape
-- slice list
-- verification checklist
-- known risks
+When a run produces a useful pattern, save a concise recipe in `workflows/recipes/<name>.md` or a repo docs folder. Include trigger, plan shape, slice list, verification checklist, and known risks.
 
 Do not save transcripts, secrets, bulky logs, credentials, or sensitive personal details.
 
 ## References
 
 - Read `references/plan-schema.md` when a machine-readable workflow plan is useful.
-- Read `references/risk-gates.md` before risky or ambiguous operations.
+- Read `references/quality-bar.md` for the final code quality gate.
+- Read `references/hard-stops.md` before risky or ambiguous operations.
 - Read `references/validation-examples.md` when forward-testing or improving this skill.
