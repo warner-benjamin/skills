@@ -1,0 +1,5 @@
+*.c
+.agents/
+.claude/
+.codex/
+.devcontainer/
