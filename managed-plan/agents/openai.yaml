@@ -1,0 +1,6 @@
+interface:
+  display_name: "Managed Plan"
+  short_description: "Research, review, and hand off workflow plans"
+  default_prompt: "Use $managed-plan to research this project and produce a reviewed managed workflow plan."
+policy:
+  allow_implicit_invocation: false

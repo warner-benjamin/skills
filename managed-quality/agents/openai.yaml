@@ -1,0 +1,6 @@
+interface:
+  display_name: "Managed Quality"
+  short_description: "Simplify and review completed workflow changes"
+  default_prompt: "Use $managed-quality to simplify and quality-review the completed managed workflow implementation."
+policy:
+  allow_implicit_invocation: false

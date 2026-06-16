@@ -1,0 +1,4 @@
+interface:
+  display_name: "Managed Workflow"
+  short_description: "Orchestrate managed planning, slice reports, implementation, and quality"
+  default_prompt: "Use $managed-workflow to run a managed plan, implementation, and quality workflow for this task."

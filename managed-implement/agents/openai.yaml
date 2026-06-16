@@ -1,0 +1,6 @@
+interface:
+  display_name: "Managed Implement"
+  short_description: "Execute approved plans with slice prompts, reports, and reviews"
+  default_prompt: "Use $managed-implement to implement the approved managed workflow plan in reviewed slices."
+policy:
+  allow_implicit_invocation: false
