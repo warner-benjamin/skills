@@ -21,6 +21,7 @@ Read:
 - `$WORKFLOW_SKILL_DIR/references/agents.md` before spawning workers or reviewers
 - `$WORKFLOW_SKILL_DIR/references/hard-stops.md` before risky or ambiguous operations
 - `$WORKFLOW_SKILL_DIR/references/verification.md` before initial verification
+- `$PHASE_SKILL_DIR/references/goal-mode.md` before activating, skipping, or resuming goal mode
 - `$PHASE_SKILL_DIR/references/slice-template.md`
 - `$PHASE_SKILL_DIR/references/slice-report.md`
 - `$PHASE_SKILL_DIR/references/slice-review.md`
@@ -34,6 +35,16 @@ Before editing, inspect `plan.md`, `checklist.md`, and the working tree. Do not 
 - Slice boundaries, ownership, verification, and commit policy are clear enough to avoid unrelated changes.
 
 If a precondition is missing, pause implementation, update `checklist.md` with the blocker, and ask for the smallest needed user decision.
+
+When resuming from an existing plan, preserve completed slice commits and reports. Continue from the first ready incomplete slice unless the plan is stale against the codebase; if stale, route back to `managed-plan` for a targeted update and re-review.
+
+## Goal Mode
+
+Default to goal mode for approved managed implementation. Skip goal mode only for a genuinely small one-shot implementation that can finish in the current turn without waiting, recovery, parallel workers, or meaningful restart risk.
+
+Before slice work, read `references/goal-mode.md`. Either activate goal mode using its activation packet and `create_goal` sequence, resume the existing active goal, or record the small-work skip reason in `checklist.md`'s `Decision Log`.
+
+For goal-backed child agents, use one bounded local finish line with its own verifier and stop condition. Do not clone the parent goal; the parent owns scope, integration, conflict resolution, and final completion.
 
 ## Slice Loop
 
@@ -58,15 +69,31 @@ Do not include unrelated user or concurrent-agent changes in a slice commit. If 
 
 ## Worker Integration
 
-The manager owns the current branch. Worker agents may edit only their assigned workspace or write scope, but the manager imports, stages, verifies, and commits final changes unless the plan explicitly says otherwise.
+The manager owns the current branch. The manager imports, stages, verifies, and commits every final change unless the plan explicitly assigns commit authority elsewhere. Never commit a worker diff you have not inspected.
 
-Require each worker to report changed files, verification evidence, blockers, and remaining risks in the shape from `slice-report.md`. Before committing, inspect the worker diff, apply only intended changes to the manager workspace, update `checklist.md` with the source workspace or branch, and run the slice checks locally.
+Choose the simplest isolation model that keeps changes attributable and safe, and record the decision in `plan.md`. The manager decides per workflow or slice; worktrees are useful but not required when slices are independent enough and the runner model already keeps changes isolated.
+
+- Runner-provided isolated workspace: prefer this when the agent runner already gives each worker a separate workspace or patch stream. Require the worker to report its workspace and changed paths; the manager imports only intended changes.
+- Worktree-per-worker: use `git worktree add` on a per-worker branch when parallel coding lanes need local isolation and no runner-provided isolation is available. Record branch, path, import method, and cleanup responsibility.
+- Shared-tree with disjoint write scope: acceptable when the manager judges slices independent enough, especially for sequential slices or parallel slices with strictly non-overlapping files and no shared uncommitted state. Do not run parallel coding workers against one shared working tree when their edits can interleave.
+
+Require each worker to report its workspace or branch, changed files, verification evidence, blockers, and remaining risks in the shape from `slice-report.md`. Before committing, inspect the worker diff, apply only intended changes, update `checklist.md` with the source workspace or branch, and re-run the slice checks in the manager's tree.
 
 ## Parallelism
 
 Parallelize only slices with no file, workflow-artifact, or semantic dependency overlap and keep parallelism within the agent limits. Run dependent slices sequentially. When uncertain, choose sequential execution or split discovery from implementation.
 
 Spawn a workgroup only when it materially helps. For small or tightly coupled implementation, use one coding lane and one review lane.
+
+## Failure Handling
+
+A slice is not done until its targeted checks pass and its review is non-blocking. When a slice does not converge, do not loop indefinitely or weaken the bar:
+
+- If a worker stalls past an explicit timeout, returns unmergeable or off-scope work, or reverts others' edits, stop that lane, record it in `checklist.md`, and either retry with a tighter prompt or take the slice local.
+- If review stays blocking or checks stay red after about two fix attempts, stop editing. Re-read the plan slice: the boundary, approach, or a missing dependency is the likely cause. Re-slice, sequence the missing dependency first, or take the slice local.
+- Escalate to the user when a slice cannot pass without weakening tests, exceeding the plan's scope or hard stops, or making a decision the plan does not cover. Surface the concrete blocker and the smallest decision needed.
+
+Never narrow scope, weaken or skip tests, or commit red checks to force a slice closed. Record abandoned or re-sliced work in `checklist.md` with the reason.
 
 ## Integration
 

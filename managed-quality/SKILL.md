@@ -43,9 +43,9 @@ If the workflow is docs-only, research-only, small one-shot, or explicitly skipp
 4. Treat valid blocking findings as a behavior-preserving cleanup slice with `slices/final-quality-cleanup.md` and `results/final-quality-cleanup.md`.
 5. Implement the smallest cleanup that materially reduces complexity and preserves behavior.
 6. Re-run relevant targeted checks and broad verification.
-7. Ask for re-review if material cleanup changes were made.
+7. Ask the same reviewer/thread for re-review when material cleanup changes were made.
 8. Update `checklist.md` with final quality status, cleanup slice, re-verification evidence, and final verification status.
-9. Update `final-report.md` with the final quality decision, cleanup summary, verification evidence, completion proof, and remaining risks.
+9. Update `final-report.md` with the cleanup summary, verification evidence, completion proof, and remaining risks.
 
 This is a reviewer lane first, not an excuse to invent new scope. Cleanup must remain behavior-preserving and aligned with the approved plan.
 

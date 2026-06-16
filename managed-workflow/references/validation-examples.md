@@ -30,7 +30,7 @@ Expected behavior:
 
 - Create or update `workflows/<slug>/plan.md` and `checklist.md`.
 - Research local code and relevant external primary docs.
-- Get fresh plan review, fix valid findings, ask the same reviewer for re-review.
+- Resolve user questions before review, run the selected review level, and fix valid findings.
 - Present the reviewed plan to the user.
 - Stop before implementation with `User implementation gate: pending`.
 

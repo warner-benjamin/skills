@@ -35,12 +35,8 @@ def main() -> int:
 
     slug = slugify(args.slug or args.title)
     run_dir = Path(args.root) / slug
-    slices_dir = run_dir / "slices"
-    results_dir = run_dir / "results"
-    reviews_dir = run_dir / "reviews"
-    slices_dir.mkdir(parents=True, exist_ok=True)
-    results_dir.mkdir(parents=True, exist_ok=True)
-    reviews_dir.mkdir(parents=True, exist_ok=True)
+    for dirname in ("slices", "results", "reviews"):
+        (run_dir / dirname).mkdir(parents=True, exist_ok=True)
     skipped: list[Path] = []
 
     def add_file(path: Path, content: str) -> None:
@@ -64,6 +60,12 @@ def main() -> int:
 
 ## Current Context
 
+## Observed Facts
+
+## User Requirements
+
+## Resolved Assumptions
+
 ## Constraints
 
 ## Anti-cheating Constraints
@@ -72,21 +74,19 @@ def main() -> int:
 
 ## Hard Stops
 
+## Approval Gates
+
 ## Workflow Artifact Path
 
 `{run_dir}`
 
 ## Implementation Slices
 
-For each implementation slice, include slice ID, objective, ownership, dependencies, prompt path (`slices/<id>.md`), report path (`results/<id>.md`), review path, verification, and commit boundary.
+## Orchestration Sequence
 
 ## Integration Policy
 
-Describe how worker or forked-workspace changes will be imported into the manager's current branch, how conflicts will be resolved, and which checks must pass before each slice commit.
-
 ## Verification
-
-## Final Quality Review
 
 ## Commit Policy
 
@@ -115,9 +115,11 @@ Final verification: pending
 
 - [ ] Local/code research complete
 - [ ] External research complete or not needed
+- [ ] User interview complete or not needed
 - [ ] Plan drafted
-- [ ] Fresh plan review complete or marked unavailable
+- [ ] Selected plan review complete or marked unavailable
 - [ ] User cleared implementation
+- [ ] Approval gates resolved or not needed
 - [ ] Slice prompts written before implementation
 - [ ] Slice reports collected and integrated
 - [ ] Slices complete
@@ -130,48 +132,27 @@ Final verification: pending
 
 ## Plan Review
 
-Reviewer:
-Reviewer agent/thread id:
-Model/effort: strongest available reasoning model / high
-Gate: see `Plan review` and `User implementation gate` in Phase Gates
-Initial verdict:
-Re-review verdict:
+Review level:
+Codex reviewer:
+Claude review:
+Verdicts:
 Accepted fixes:
-Blocking findings:
-Non-blocking findings:
-Missing context / verification gaps:
-Rejected findings:
-Unresolved findings:
-Unavailable caveat shown to user:
-User override after unavailable review:
+Critical findings:
+Important non-blocking findings:
+Missing context or unresolved questions:
+Required plan changes:
+Rejected or unresolved findings:
+Skipped or unavailable review caveats:
 
-## Agent Limits
+## Decision Log
 
-Max concurrent agents: 4
-Max total agents: 12
-Hard stop above limits: yes
-
-## Agent Lanes
-
-| Agent id | Role | Slice | Status | Notes |
-| --- | --- | --- | --- | --- |
-
-## Hard Stops
-
-| Status | Action | Reason | Resolution |
+| Date | Type | Decision or event | Rationale / evidence |
 | --- | --- | --- | --- |
-
-Goal exceptions mirror: none
 
 ## Slices
 
-| ID | Status | Prompt | Report | Review | Commit |
-| --- | --- | --- | --- | --- | --- |
-
-## Worker Integration
-
-| Slice | Source workspace/branch | Imported paths | Local checks | Notes |
-| --- | --- | --- | --- | --- |
+| ID | Status | Depends on | Prompt | Report | Review | Commit |
+| --- | --- | --- | --- | --- | --- | --- |
 
 ## Verification
 
@@ -180,11 +161,9 @@ Goal exceptions mirror: none
 
 ## Final Quality Review
 
-Gate: see `Final quality review` in Phase Gates
 Review path: reviews/final-quality-review.md
-Decision reason if not-required:
 Reviewer:
-Reviewer agent/thread id:
+Decision:
 Cleanup slice:
 
 ## Commits
@@ -199,23 +178,13 @@ Cleanup slice:
 
 ## Outcome
 
-## Accepted Results
-
-## Rejected Results
-
-## Conflicts Resolved
-
-## Slice Commits
-
-## Verification Evidence
-
-## Final Quality Review
+## Changes
 
 ## Completion Proof
 
 ## Remaining Risks
 
-## Reusable Follow-up
+## Follow-up
 """,
     )
 

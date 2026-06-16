@@ -44,6 +44,20 @@ Be ambitious about simplification. Look for changes that delete branches, helper
    - Block wrappers, registries, generic mechanisms, or reflection-like handling that hide simple structure without buying clarity.
    - Prefer direct, boring code when the abstraction does not pay rent.
 
+## Primary Review Questions
+
+For every meaningful change, ask:
+
+- Is there a simpler reframing that deletes concepts, branches, helpers, modes, or layers?
+- Did the diff improve or worsen the local architecture?
+- Did it add special-case branching where a clearer model or ownership boundary should exist?
+- Is the logic in the canonical file, package, service, or component?
+- Is any new abstraction earning its keep, or is it just a wrapper?
+- Did the change introduce unnecessary casts, optionality, loose object shapes, or silent fallbacks?
+- Did it duplicate an existing helper or miss a canonical helper?
+- Did it push a file past a healthy size boundary without a real ownership reason?
+- Is orchestration more sequential, partial, or brittle than it needs to be?
+
 ## What To Flag Aggressively
 
 - A complicated implementation where a simpler reframing could delete whole categories of complexity.
@@ -71,21 +85,24 @@ Be ambitious about simplification. Look for changes that delete branches, helper
 - Parallelize independent work when it also simplifies orchestration.
 - Make related updates atomic when partial state would be harder to reason about.
 
+## Review Tone
+
+Be direct, serious, and demanding about maintainability. Do not soften structural regressions into style nits, and do not flood the review with cosmetic comments when larger issues exist. Prefer a small number of high-conviction findings with concrete cleanup paths.
+
+## Approval Bar
+
+Do not approve merely because behavior works. Approve only when there is no clear structural regression, no obvious behavior-preserving simplification left on the table, no unjustified file-size growth, no avoidable branching growth, no wrong-layer logic, no unnecessary wrapper/cast/optionality churn, and no canonical-helper duplication.
+
 ## Output Shape
 
 ```text
+Reviewer identity:
+Reviewer agent/thread id:
 Verdict: blocking | non-blocking
-Files reviewed:
-Structural regressions:
-Simpler reframing opportunities:
-Spaghetti or branching risks:
-Boundary/type/abstraction issues:
-Canonical helper or ownership misses:
-File-size/decomposition concerns:
-Orchestration/atomicity concerns:
-Required cleanup slices:
-Hard-stop recommendations:
-Re-review required: yes | no
+Critical findings:
+Important non-blocking findings:
+Missing context or unresolved questions:
+Required cleanup changes:
 ```
 
 ## Completion Bar

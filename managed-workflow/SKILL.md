@@ -37,7 +37,7 @@ python3 "$SKILL_DIR/scripts/collect_results.py" workflows/<slug>
 
 Before each phase, read the phase skill's `SKILL.md` by absolute path from the sibling phase directory. Phase skills are not implicitly invoked, so the orchestrator must load their instructions explicitly.
 
-1. Plan: read `managed-plan/SKILL.md`, then run that phase to research, draft `plan.md`, get independent review, revise, re-review, and present the plan to the user.
+1. Plan: read `managed-plan/SKILL.md`, then run that phase to research, resolve user questions, draft one chosen plan, run the selected review level, revise valid findings, and present the plan to the user.
 2. Gate: do not start planned implementation until `checklist.md` shows the user implementation gate is cleared, unless the user already explicitly authorized execution after review.
 3. Implement: read `managed-implement/SKILL.md`, then run that phase to write per-slice prompts, execute approved slices, collect per-slice reports, review each implementation slice, run checks, commit focused slice changes, and integrate results.
 4. Quality: read `managed-quality/SKILL.md`, then run that phase for multi-slice code workflows after initial green verification, unless the plan/checklist explicitly marks it not required.
@@ -48,7 +48,7 @@ Before each phase, read the phase skill's `SKILL.md` by absolute path from the s
 
 Run phases in order unless the user explicitly invokes one phase skill on an existing workflow:
 
-- Use `managed-plan` for research, plan drafting, independent plan review, plan fixes, re-review, and user review handoff.
+- Use `managed-plan` for research, user-question resolution, plan drafting, selected plan review level, plan fixes, and user review handoff.
 - Use `managed-implement` only after the plan review and user implementation gate are clear.
 - Use `managed-quality` only after implementation is integrated and initial verification passes.
 
