@@ -27,6 +27,8 @@ Use `scripts/new_workflow.py` to create a run directory:
 python3 "$SKILL_DIR/scripts/new_workflow.py" "Task title"
 ```
 
+By default, keep the workflow run directory untracked by git unless the user explicitly asks to check workflow artifacts into the repository. Do not add it to commits just because slice work records status there.
+
 ## Operating Contract
 
 Before each phase, read the phase skill's `SKILL.md` by absolute path from the sibling phase directory. Phase skills are not implicitly invoked, so the orchestrator must load their instructions explicitly.
