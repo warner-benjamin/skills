@@ -4,24 +4,22 @@ Use this reference during the `managed-plan` phase.
 
 ## Plan Shape
 
-`plan.md` must contain enough detail to guide delegation and verification without becoming a substitute for execution.
+`plan.md` must read like a reviewed design document, not a status form. It should carry the full design and decisions needed for implementation while avoiding final implementation code or keystroke-level instructions.
+
+Use the headings as anchors, not boxes to fill evenly. The plan should follow the problem's shape, with domain-specific subsections and extra depth where the work is risky, subtle, or easy to get wrong. Obvious grounding can stay brief.
 
 Include:
 
-- clear goal and non-goals
-- baseline/current behavior
-- success criteria
-- primary verifier and completion proof
-- current context from local research, separated into observed facts, user requirements, and resolved assumptions
-- external source assumptions, if any
-- constraints and anti-cheating constraints
-- risks and hard stops
-- approval gates and autonomous execution boundaries
-- implementation slices with ownership, dependencies, verification, review, and commit boundaries
-- orchestration sequence and branching rules
-- integration and verification policy, including when final quality is required or skipped
+- `Goal`: objective, non-goals, success criteria, hard stops, additional user approvals, and workflow artifact path when relevant
+- `Design`: organic domain-specific narrative with observed facts, user requirements, resolved assumptions, constraints, risks, behavior/API/config/data contracts, invariants, edge cases, ownership boundaries, and decisions behind the approach
+- `Implementation Steps`: ordered technical work items; for code changes, name files, functions, tests, migrations, data/config shapes, and contract deltas when known
+- `Verification / Acceptance`: concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules
+- `Execution Slices`: structured implementation/review/verification/commit units with ownership, dependencies, referenced steps, review, targeted checks, and commit boundaries
+- `Orchestration Notes`: slice order, readiness rules, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts
 
 The plan must contain one chosen path. Do not leave unresolved decisions, options, alternate paths, TODOs, or open questions in `plan.md`. During research, interview the user until these are resolved before running plan review.
+
+For non-trivial implementation, apply the skeptical-engineer test: could a competent engineer implement the chosen design without asking a planning question or inventing a core decision? Block plans that fail this test, including plans that define execution slices without enough design and implementation-step detail for safe implementation. Slice prompts may add local execution context, but they must not invent core design decisions after the plan review gate.
 
 ## Review Level
 
@@ -43,25 +41,15 @@ Do not run a second Claude review unless the user explicitly asks.
 
 ## Reviewer Prompt
 
-Ask the reviewer for critical plan review, not implementation. Give the reviewer the plan, relevant local context, known constraints, and expected output shape.
+Ask the reviewer for critical plan review, not implementation. Give the reviewer the plan, relevant local context, known constraints, and expected report content.
 
 Tell the reviewer that user-decreed requirements are binding. Reviewer comments are suggestions that may be wrong in context; the reviewer may flag conflicts with safety, hard stops, or feasibility, but must not ask to undo user-decreed requirements merely as a preference.
 
-Require this output:
+Require the reviewer to return a verdict plus any critical findings, important non-blocking findings, missing context or unresolved questions, and required plan changes. Include reviewer identity/thread when available. Use the same content expectations for Codex reviewers, Claude CLI review, and re-review.
 
-```text
-Reviewer identity:
-Reviewer agent/thread id:
-Verdict: blocking | non-blocking
-Critical findings:
-Important non-blocking findings:
-Missing context or unresolved questions:
-Required plan changes:
-```
+For Claude, write the response to `reviews/claude-plan-review.md`; record requested model, fallback, skip reason, and related execution metadata in `checklist.md`, not in a separate review schema.
 
-Use this same review format for Codex reviewers, Claude CLI review, and re-review. For Claude, write the response to `reviews/claude-plan-review.md`; record requested model, fallback, skip reason, and related execution metadata in `checklist.md`, not in a separate review schema.
-
-The prompt should still ask reviewers to check grounding, user-decreed requirements, approval gates, slice boundaries, orchestration, verification, and commit boundaries. The reviewer should surface those only when they create an actual finding.
+The prompt should still ask reviewers to check grounding, user-decreed requirements, design adequacy under the skeptical-engineer test, implementation-step specificity, additional user approvals, execution-slice boundaries, orchestration, verification, and commit boundaries. The reviewer should surface those only when they create an actual finding.
 
 ## Responding To Findings
 
@@ -73,49 +61,23 @@ If a finding reveals an unresolved decision, option, alternate path, or missing 
 
 ## Claude CLI Review
 
-Use this only for high-level review after the fresh Codex plan review and before the manager fix/reject pass. Claude Code's `-p`/`--print` mode prints a non-interactive response and exits. The `--model` flag accepts aliases for the latest model family, including `opus` and, in current Claude Code versions, `fable`; `--fallback-model` works with `--print`.
+Use this only for high-level review after the fresh Codex plan review and before the manager fix/reject pass. Claude Code's `-p`/`--print` mode prints a non-interactive response and exits.
 
-Fable requires a recent Claude Code build. Before using Fable, check `claude --version` and `claude --help`. Prefer `--model fable --fallback-model opus` when Fable is supported; otherwise use `--model opus`. If the Fable command fails because the model or CLI version is unavailable, rerun once with `--model opus` and record the fallback.
+Inspect `claude --help` in the current environment before running the command; prefer the latest available Fable model with Opus fallback, otherwise use Opus. Run Claude in non-editing/print mode and redirect output to `reviews/claude-plan-review.md`. Do not give Claude edit tools for plan review.
 
 If Claude review cannot run because of missing auth, quota/rate limits, server 5xx errors, unavailable models, or CLI failure, skip the Claude review, record the exact reason in `checklist.md`, and tell the user in the handoff. Do not block safe planning solely on unavailable Claude quota; continue with the manager fix/reject pass and Codex re-review.
 
-Create `reviews/claude-plan-review-prompt.md` with:
-
-- the plan
-- relevant checklist state
-- observed facts, user requirements, and resolved assumptions
-- explicit user-decreed requirements
-- Codex initial review findings
-- the shared review output format above
+Create `reviews/claude-plan-review-prompt.md` with the plan, relevant checklist state, observed facts, user requirements, resolved assumptions, explicit user-decreed requirements, Codex initial review findings, and the shared review content expectations above.
 
 Run from the target repository root:
 
 ```bash
-claude -p \
-  --model fable \
-  --fallback-model opus \
-  --effort high \
-  --permission-mode plan \
-  --tools "" \
-  --no-session-persistence \
-  --output-format text \
+claude -p --model fable --fallback-model opus \
   < workflows/<slug>/reviews/claude-plan-review-prompt.md \
   > workflows/<slug>/reviews/claude-plan-review.md
 ```
 
-If Fable is unavailable:
-
-```bash
-claude -p \
-  --model opus \
-  --effort high \
-  --permission-mode plan \
-  --tools "" \
-  --no-session-persistence \
-  --output-format text \
-  < workflows/<slug>/reviews/claude-plan-review-prompt.md \
-  > workflows/<slug>/reviews/claude-plan-review.md
-```
+Adjust flags to the installed CLI if `claude --help` shows different names. If Fable or fallback flags are unavailable, retry once with Opus. Record any fallback or skip reason in `checklist.md`.
 
 ## Re-review
 

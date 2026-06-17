@@ -6,20 +6,15 @@ Read this before spawning or coordinating subagents.
 
 Spawn subagents only when the user explicitly asks for subagents, delegation, parallel agents, a swarm, or to run this managed workflow. Planning artifacts alone do not authorize spawning.
 
-A request for `$managed-workflow`, `$managed-plan`, or a reviewed managed workflow plan authorizes exactly one independent plan reviewer plus same-thread re-review when the selected plan review level requires it. It does not authorize implementation workers, slice reviewers, final quality reviewers, parallel agents, or larger workgroups until the relevant workflow phase and user gate allow them.
+A request for `$managed-workflow`, `$managed-plan`, or a reviewed managed workflow plan authorizes exactly one independent plan reviewer plus same-thread re-review when the selected plan review level requires it. It does not authorize implementation workers, slice reviewers, final quality reviewers, parallel agents, or larger workgroups until the relevant workflow phase and implementation approval allow them.
 
 Use subagents only when the current environment exposes a subagent runner. Do not claim that a local script can call subagent tools.
 
-Default limits are 4 concurrent agents and 12 total agents per workflow. Treat higher counts as a hard stop unless the plan explicitly sets a bounded limit and the user authorizes it.
+Default limits are 4 concurrent agents and 12 total agents per workflow. Treat higher counts as a user-visible escalation: proceed only when the plan sets a bounded limit and the user authorizes it.
 
 ## Runner Mapping
 
-If subagent tools are not already visible, use tool discovery for multi-agent or subagent tools before marking review unavailable. In Codex environments with `multi_agent_v1`, use:
-
-- `spawn_agent` for fresh plan reviewers, slice reviewers, final quality reviewers, explorers, and workers.
-- `send_input` for same-thread plan re-review and same-thread slice re-review.
-- `wait_agent` only when the result is needed for the next critical-path step.
-- `close_agent` after a completed agent's result is recorded and no further re-review is needed.
+If subagent tools are not already visible, use tool discovery for multi-agent or subagent tools before marking review unavailable. Use the runner's native operations for spawning fresh reviewers/workers, sending same-thread re-review input, waiting only when a result is on the critical path, and closing completed agents after their result is recorded.
 
 Record each reviewer or worker id, nickname if available, role, and assigned slice in `checklist.md`. For same-thread re-review, reuse the recorded id rather than spawning a fresh reviewer.
 
@@ -43,7 +38,7 @@ Record each reviewer or worker id, nickname if available, role, and assigned sli
 
 ## Management Style
 
-Manage agents by contract, not interruption. Give each agent a bounded objective, ownership, expected output, verification, and stop conditions, then let it run.
+Manage agents by contract, not interruption. Give each agent a bounded objective, ownership, expected output, artifact path, verification, and stop conditions, then let it run. Use the relevant phase artifact reference for persistence rules; for implementation slices, use `managed-implement/references/slice-artifacts.md`.
 
 Do not interrupt, restart, or redirect an agent merely because it is quiet or taking longer than expected. Wait for completion unless a hard stop is reached, the user redirects, the agent reports a blocker, a dependency changes, or the run exceeds an explicit timeout or budget.
 

@@ -16,43 +16,44 @@ workflows/<slug>/
 `-- final-report.md
 ```
 
-`plan.md` is the source of truth for goal, grounding, constraints, risks, approval gates, slice details, orchestration sequence, integration policy, verification strategy, and commit policy. It must describe one chosen path, not unresolved decisions, options, alternate paths, TODOs, or open questions.
+`plan.md` is the reviewed design document and source of truth for the goal, design, constraints, risks, hard stops, additional user approvals, implementation steps, verification strategy, execution slices, orchestration notes, integration policy, and commit policy. It must describe one chosen path, not unresolved decisions, options, alternate paths, TODOs, or open questions.
 
 `checklist.md` is a status ledger only. Do not duplicate the plan there. Track phase gates, reviewer identity, review notes, slice statuses, decision-log entries, commit SHAs, verification evidence, and final-quality details.
 
-`slices/<slice-id>.md` stores the prompt or work packet for a slice before delegation or local implementation. `results/<slice-id>.md` stores the coding, research, or local implementation report. These files are required for every implementation slice. `reviews/<slice-id>-review.md` stores the slice review and is required when a review lane is available.
+`slices/<slice-id>.md` stores the prompt or work packet for a delegated or substantial local slice. `results/<slice-id>.md` stores the worker or local implementation report. These files are required when work crosses an agent/workspace boundary and optional for tiny manager-owned slices where the checklist, commit, and verification evidence are enough. `reviews/<slice-id>-review.md` stores slice review findings when a review lane is available.
 
 The `## Phase Gates` block is the only authoritative home for cross-phase status. Detail sections can record reviewers, findings, notes, paths, evidence, and reasons, but must not contain a second status field for the same gate.
 
-Keep the scaffold lean. After `Phase Gates` and `Lifecycle`, prefer these checklist sections: `Plan Review`, `Decision Log`, `Slices`, `Verification`, `Final Quality Review`, and `Commits`. Use `Decision Log` for hard stops, approval-gate decisions, reviewer-unavailable caveats, worker-import notes, user overrides, and other events that do not need a permanent table.
+Keep the scaffold lean. After `Phase Gates`, prefer these checklist sections: `Plan Review`, `Decision Log`, `Slices`, `Verification`, `Final Quality Review`, and `Commits`. Use `Decision Log` for hard stops, additional-approval decisions, reviewer-unavailable caveats, worker-import notes, user overrides, and other events that do not need a permanent table.
 
-## Required Plan Headings
+## Required Plan Shape
 
-Keep the plan concise enough to guide delegation and verification without replacing execution:
+Use a small set of anchor headings and let the content be organic and domain-specific:
 
 ```text
 Goal
-Baseline
-Success Criteria
-Primary Verifier
-Completion Proof
-Current Context
-Observed Facts
-User Requirements
-Resolved Assumptions
-Constraints
-Anti-cheating Constraints
-Risks
-Hard Stops
-Approval Gates
-Workflow Artifact Path
-Implementation Slices
-Orchestration Sequence
-Integration Policy
-Verification
-Commit Policy
-Reusable Artifacts
+Design
+Implementation Steps
+Verification / Acceptance
+Execution Slices
+Orchestration Notes
 ```
+
+Write the plan in problem-solving mode, not form-filling mode. The headings are anchors for review and resume; they are not boxes that need equal weight. Spend most detail where the problem is hard, risky, or ambiguous, and keep obvious sections short.
+
+Before review, apply the skeptical-engineer test: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. If not, deepen the design, interview the user, or research more before review.
+
+`Goal` states the objective, non-goals, success criteria, hard stops, additional user approvals, and workflow artifact path when they matter.
+
+`Design` carries the full reviewed design, not final implementation code. Include observed facts, user requirements, resolved assumptions, constraints, risks, behavior/API/config/data contracts, invariants, edge cases, ownership boundaries, and the decisions behind the approach. Use domain-specific subsections when they communicate the design better than generic headings.
+
+`Implementation Steps` is the ordered technical work. For code changes, name files, functions, tests, migrations, data/config shapes, and contract deltas when known. Steps answer what must change.
+
+`Verification / Acceptance` gives concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules.
+
+`Execution Slices` defines implementation/review/verification/commit units. A slice may contain one step, part of a large step, or several small steps. Slices answer how the work is safely executed, reviewed, verified, and committed.
+
+`Orchestration Notes` records slice order, dependency readiness, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
 
 ## Phase Gates
 
@@ -60,7 +61,7 @@ Use these checklist fields as handoffs between phase skills:
 
 ```text
 Plan review: pending | blocking | non-blocking | unavailable
-User implementation gate: pending | cleared
+Implementation approval: waiting | approved
 Implementation status: pending | in-progress | complete
 Initial verification: pending | passed | failed | skipped
 Final quality review: pending | passed | failed | not-required
@@ -70,8 +71,9 @@ Final verification: pending | passed | failed | skipped
 Allowed gate meanings:
 
 - `Plan review: non-blocking`: the selected low-level or high-level review flow ran and no blocking findings remain.
-- `Plan review: unavailable`: no independent reviewer was available; report this caveat to the user. Do not proceed to implementation unless the user explicitly clears implementation after seeing this caveat.
-- `User implementation gate: cleared`: the user explicitly cleared implementation, or explicitly authorized execution after plan review in the original request. If `Plan review` is `unavailable`, this clearance must happen after the unavailable-review caveat is shown.
+- `Plan review: unavailable`: no independent reviewer was available; report this caveat to the user. Do not proceed to implementation unless implementation approval is given after this caveat is shown.
+- `Implementation approval: waiting`: planning may continue, but implementation must not start.
+- `Implementation approval: approved`: the user directly answered the required implementation-approval question, or the original request explicitly instructed Codex not to stop for implementation approval after planning/review. Invoking the workflow, giving plan feedback, approving plan content, accepting reviewer fixes, or saying a plan edit looks good does not approve implementation. Record the approval evidence as the user's own approving words (a short quote) or the exact pre-authorization instruction, not a Codex paraphrase such as "user approved".
 - `Initial verification: passed`: implementation verification matched the plan's blast radius and passed.
 - `Final quality review: not-required`: docs-only, research-only, small one-shot, or explicitly skipped with a reason.
 - `Final verification: passed`: verification was re-run after any final cleanup.
@@ -86,10 +88,10 @@ If the plan is stale against the codebase, route back to `managed-plan` for a ta
 
 ## Phase Ownership
 
-- `managed-plan` writes the plan, observed facts, user requirements, resolved assumptions, approval gates, plan review outcome, rejected findings, and user gate state.
+- `managed-plan` writes the reviewed design, implementation steps, verification/acceptance strategy, execution slices, additional user approvals, plan review outcome, rejected findings, and implementation approval state.
 - `managed-implement` writes slice statuses, review statuses, commit SHAs, integration results, initial verification, and whether final quality is required.
 - `managed-quality` writes the final quality decision, cleanup slice, re-verification evidence, and final verification.
-- `managed-workflow` owns cross-phase routing, goal mode, reusable recipes, and final-report synthesis. Phase skills append evidence and phase summaries; the orchestrator owns the final read-through and completion narrative.
+- `managed-workflow` owns cross-phase routing, reusable recipes, and final-report synthesis. `managed-implement` owns implementation goal-mode fit and activation. Phase skills append evidence and phase summaries; the orchestrator owns the final read-through and completion narrative.
 
 ## Commit Policy
 
@@ -103,34 +105,19 @@ Update review notes, targeted-check evidence, and checklist slice status before 
 
 ## Slice Artifacts
 
-Before starting a slice, write `slices/<slice-id>.md` with the objective, context, ownership, dependencies, do/do-not list, expected output, verification, review requirement, report path, and commit boundary.
-
-Each implementation, coding-agent, or research-agent report must be saved as `results/<slice-id>.md` and include:
-
-```text
-Agent identity:
-Agent id/thread:
-Workspace or branch:
-Slice ID:
-Prompt path:
-Files changed:
-Summary:
-Verification run:
-Verification result:
-Review notes needed:
-Blockers:
-Remaining risks:
-```
+Use `managed-implement/references/slice-artifacts.md` as the authoritative contract for slice prompts, reports, and reviews.
 
 If a worker returns changes from a forked workspace, inspect the worker's diff, import only intended changes into the manager's current branch, run the slice checks locally, and record the source workspace or branch in the slice report or checklist.
 
 ## Approval And Branching
 
-The plan must distinguish hard stops from approval gates. Planned implementation always waits for user feedback and implementation clearance after planning. After that gate is cleared, operate autonomously inside the approved plan until a hard stop, failed approval gate, or uncovered decision is reached.
+The plan must distinguish hard stops, additional user approvals, and implementation approval. Planned implementation always waits for a direct implementation-approval answer after planning unless the original request explicitly instructed Codex not to stop for implementation approval after planning/review. After implementation approval is recorded, operate autonomously inside the reviewed plan until a hard stop, failed additional approval, or uncovered decision is reached.
 
-Use `Approval Gates` for consequential actions that still need user approval after planning, such as irreversible local deletes, broad codemods, costly jobs, public or external mutations, or already-identified hard-stop exceptions. Do not use approval gates to leave ordinary design decisions, path choices, or implementation options unresolved.
+Plan feedback is not implementation approval. Plan edits, critiques, approving comments about plan content, and reviewer-fix discussions keep the workflow in planning unless the user directly answers the implementation-approval question.
 
-Use `Orchestration Sequence` to record slice order, dependencies, readiness rules, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, and how final-quality findings become cleanup slices.
+Record additional user approvals in the plan for consequential actions that still need user approval after implementation starts, such as irreversible local deletes, broad codemods, costly jobs, public or external mutations, or already-identified hard-stop exceptions. Do not use additional user approvals to leave ordinary design decisions, path choices, or implementation options unresolved.
+
+Use `Execution Slices` and `Orchestration Notes` to record slice order, dependencies, readiness rules, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, and how final-quality findings become cleanup slices.
 
 ## Final Report
 

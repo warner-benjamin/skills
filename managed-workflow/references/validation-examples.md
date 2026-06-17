@@ -32,7 +32,7 @@ Expected behavior:
 - Research local code and relevant external primary docs.
 - Resolve user questions before review, run the selected review level, and fix valid findings.
 - Present the reviewed plan to the user.
-- Stop before implementation with `User implementation gate: pending`.
+- Stop before implementation after asking the implementation-approval question.
 
 ## Risky Migration
 
@@ -49,8 +49,8 @@ Expected behavior:
 - Mark deletion and broad migration as hard-stop scope.
 - Create slices for discovery, implementation, tests, docs, and verification.
 - Park destructive edits unless the active goal names an exact matching user-authorized hard-stop exception.
-- Wait for user implementation gate before planned implementation.
-- If independent plan review is unavailable, require explicit user clearance after reporting that caveat.
+- Wait for direct implementation approval before planned implementation.
+- If independent plan review is unavailable, require implementation approval after reporting that caveat.
 
 ## Parallel Research And Implementation
 
@@ -63,10 +63,10 @@ Use $managed-workflow to add SSO support. Research the provider docs, implement 
 Expected behavior:
 
 - Create a workflow artifact.
-- Enter goal mode only if the user wants sustained execution and the fit gate passes.
+- Use implementation goal mode by fit; usually activate for non-small execution and skip only for a tiny one-shot.
 - Split provider research, backend, frontend, tests, and docs into disjoint slices.
-- Write `slices/<slice-id>.md` before each delegated or local implementation slice.
-- Collect `results/<slice-id>.md` from each worker or local slice before review.
+- Write `slices/<slice-id>.md` before each delegated or substantial local implementation slice.
+- Collect `results/<slice-id>.md` from each worker and from substantial local slices before review.
 - Review each implementation slice, fix valid findings, sanity-check, and commit the slice.
 - Integrate results, run green verification, run the final quality gate, route valid findings into a cleanup slice, then re-verify.
 

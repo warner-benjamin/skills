@@ -1,6 +1,6 @@
 interface:
   display_name: "Managed Plan"
-  short_description: "Research, review, and hand off workflow plans"
-  default_prompt: "Use $managed-plan to research this project and produce a reviewed managed workflow plan."
+  short_description: "Research, review, and hand off organic design plans"
+  default_prompt: "Use $managed-plan to research this project and produce a reviewed managed workflow design plan."
 policy:
   allow_implicit_invocation: false

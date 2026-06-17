@@ -23,7 +23,7 @@ Read:
 - `$PHASE_SKILL_DIR/references/quality-bar.md`
 
 Read `$WORKFLOW_SKILL_DIR/references/agents.md` if using a reviewer agent or cleanup worker.
-Read the sibling `managed-implement/references/slice-report.md` if creating a cleanup slice.
+Read the sibling `managed-implement/references/slice-artifacts.md` if creating a delegated or substantial cleanup slice.
 
 ## Preconditions
 
@@ -47,7 +47,7 @@ If the workflow is docs-only, research-only, small one-shot, or explicitly skipp
 8. Update `checklist.md` with final quality status, cleanup slice, re-verification evidence, and final verification status.
 9. Update `final-report.md` with the cleanup summary, verification evidence, completion proof, and remaining risks.
 
-This is a reviewer lane first, not an excuse to invent new scope. Cleanup must remain behavior-preserving and aligned with the approved plan.
+This is a reviewer lane first, not an excuse to invent new scope. Cleanup must remain behavior-preserving and aligned with the reviewed plan.
 
 ## Completion Bar
 

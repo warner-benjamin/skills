@@ -1,6 +1,6 @@
 ---
 name: managed-plan
-description: Research a codebase, local docs, and relevant external sources to create or update a managed workflow plan, interview the user to resolve open questions before review, run the selected low-level or high-level plan review, revise valid findings, and hand the reviewed plan to the user before implementation. Use when the user explicitly invokes $managed-plan, asks for the planning phase of a managed workflow, or wants a reviewed plan/checklist artifact for later execution. Do not use for ordinary informal planning or small one-shot tasks.
+description: Research a codebase, local docs, and relevant external sources to create or update an organic managed workflow design plan, interview the user to resolve open questions before review, run the selected low-level or high-level plan review, revise valid findings, and hand the reviewed plan to the user before implementation. Use when the user explicitly invokes $managed-plan, asks for the planning phase of a managed workflow, or wants a reviewed plan/checklist artifact for later execution. Do not use for ordinary informal planning or small one-shot tasks.
 ---
 
 # Managed Plan
@@ -20,7 +20,7 @@ Read:
 - `$WORKFLOW_SKILL_DIR/references/workflow-contract.md`
 - `$WORKFLOW_SKILL_DIR/references/agents.md` before spawning reviewers
 - `$WORKFLOW_SKILL_DIR/references/hard-stops.md` before risky or ambiguous operations
-- `$PHASE_SKILL_DIR/references/plan-review.md` for review levels, reviewer prompts, Claude CLI review, and output shape
+- `$PHASE_SKILL_DIR/references/plan-review.md` for review levels, reviewer prompts, Claude CLI review, and report content
 
 If no workflow directory exists, create one with:
 
@@ -34,14 +34,18 @@ python3 "$WORKFLOW_SKILL_DIR/scripts/new_workflow.py" "Task title"
 2. Research web or external primary sources only when current facts, third-party docs, APIs, regulations, pricing, or referenced pages affect the plan.
 3. Separate grounding into observed facts, user requirements, resolved assumptions, and evidence gaps.
 4. Identify any unresolved decisions, options, alternate paths, missing preferences, or approval questions. Interview the user during research until these are resolved before drafting the reviewed plan.
-5. Draft or update `workflows/<slug>/plan.md` using the contract headings. The plan must state one chosen path and must not contain unresolved decisions, options, alternate paths, TODOs, or open questions.
-6. Define implementation slices with objectives, ownership, dependencies, verification, review, and commit boundaries.
-7. Define approval gates only for post-planning consequential actions that still require user approval; otherwise keep implementation autonomous after the user implementation gate.
-8. Define orchestration sequence, including slice order, dependency readiness, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, and final-quality cleanup routing.
-9. Update `checklist.md` for research status, user-interview status, plan draft status, review level, reviewer identity/thread id, and final-quality gate details.
-10. Run the selected review level from `plan-review.md`.
-11. Fix valid findings with the smallest change that resolves them. Treat reviewer comments as suggestions: accept only findings that are correct in context and do not undo user-decreed requirements.
-12. Present the reviewed plan to the user with the review level, review verdicts, accepted fixes, rejected findings, and a direct request for plan feedback. Leave `User implementation gate` as `pending` until the user clears execution.
+5. Draft or update `workflows/<slug>/plan.md` in problem-solving mode, as if writing a standalone design doc for a skeptical engineer. Use the organic plan shape from the workflow contract as anchors, not as boxes to fill evenly: `Goal`, `Design`, `Implementation Steps`, `Verification / Acceptance`, `Execution Slices`, and `Orchestration Notes`. The plan must state one chosen path and must not contain unresolved decisions, options, alternate paths, TODOs, or open questions.
+6. Put the full design in `Design`, not in later slice prompts. For non-trivial implementation, include the behavior/API/config/data contracts, invariants, ownership boundaries, edge cases, concrete files/functions/tests when known, and the decisions behind the approach. Spend depth where implementation risk or ambiguity is highest; keep obvious grounding concise. Do not paste final implementation code.
+7. Apply the skeptical-engineer test before review: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. If not, deepen the plan, interview the user, or research more.
+8. Define ordered `Implementation Steps` for what must change. Steps can be larger or smaller than execution slices.
+9. Define `Verification / Acceptance` with concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules.
+10. Define `Execution Slices` with objectives, referenced implementation steps, ownership, dependencies, verification, review, and commit boundaries. A slice may cover one step, part of a step, or multiple small steps.
+11. Define additional user approvals only for consequential actions that still require user approval after implementation starts; otherwise keep implementation autonomous after implementation approval.
+12. Define orchestration notes, including slice order, dependency readiness, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, and final-quality cleanup routing.
+13. Update `checklist.md` for research status, user-interview status, plan draft status, review level, reviewer identity/thread id, and final-quality gate details.
+14. Run the selected review level from `plan-review.md`.
+15. Fix valid findings with the smallest change that resolves them. Treat reviewer comments as suggestions: accept only findings that are correct in context and do not undo user-decreed requirements.
+16. Present the reviewed plan to the user with the review level, review verdicts, accepted fixes, rejected findings, and a distinct implementation-approval question. Ask whether to start implementation now or revise the plan, then stop and wait for that direct answer. Leave `Implementation approval` as `waiting` until the user directly answers the implementation-approval question.
 
 Do not start implementation during this phase. Safe research, scaffolding, plan review, local drafts, and non-destructive checks can proceed autonomously.
 
@@ -49,16 +53,20 @@ Do not start implementation during this phase. Safe research, scaffolding, plan 
 
 The plan review is complete only after the selected review level in `plan-review.md` runs. Do not write a local self-review and present it as independent review.
 
-If no separate reviewer is available, mark `Plan review: unavailable` in `checklist.md` and tell the user that independent review did not run. Implementation may start only if the user explicitly clears execution after seeing that caveat.
+If no separate reviewer is available, mark `Plan review: unavailable` in `checklist.md` and tell the user that independent review did not run. Implementation may start only if the user gives implementation approval after seeing that caveat.
 
 If the user edits or critiques the plan after review, apply the user's fixes. For high-level review, send material changed areas back to the same Codex reviewer/thread; do not run a second Claude review unless the user asks. For low-level review, do not add an automatic re-review loop; upgrade to high-level review only when the user requests it or the change introduces material new risk.
+
+Plan feedback is not implementation approval. Plan edits, critiques, approving comments about plan content, and reviewer-fix discussions keep the workflow in planning. After applying plan feedback, re-present the relevant plan changes and ask the implementation-approval question again.
+
+Only an affirmative choice to start counts as approval. Treat praise, an ambiguous reply, or a new question as still `waiting`, and ask the implementation-approval question again rather than inferring a yes.
 
 ## Handoff
 
 Before stopping, ensure:
 
-- `plan.md` is the source of truth for goal, observed facts, user requirements, resolved assumptions, constraints, risks, approval gates, slices, orchestration sequence, and verification.
-- `checklist.md` records plan review status, reviewer identity/status, rejected findings, and user gate state.
-- The user sees the reviewed plan, review level, reviewer verdicts, material fixes, rejected findings, and any skipped-review caveat.
+- `plan.md` is the source of truth for the goal, reviewed design, implementation steps, verification/acceptance strategy, execution slices, orchestration notes, additional user approvals, and hard stops.
+- `checklist.md` records plan review status, reviewer identity/status, rejected findings, implementation approval state, and implementation approval evidence when present.
+- The user sees the reviewed plan, review level, reviewer verdicts, material fixes, rejected findings, any skipped-review caveat, and the implementation-approval question.
 
-Only mark `User implementation gate: cleared` when the user explicitly clears implementation or had already authorized implementation after plan review. If plan review is unavailable, the clearance must happen after the skipped-review caveat is shown.
+Only mark `Implementation approval: approved` when the user directly answers the implementation-approval question, or when the original request explicitly instructed Codex not to stop for implementation approval after planning/review. If plan review is unavailable, approval must happen after the skipped-review caveat is shown.

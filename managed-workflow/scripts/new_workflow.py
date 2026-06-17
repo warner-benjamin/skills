@@ -50,47 +50,29 @@ def main() -> int:
 
 ## Goal
 
-## Baseline
-
-## Success Criteria
-
-## Primary Verifier
-
-## Completion Proof
-
-## Current Context
-
-## Observed Facts
-
-## User Requirements
-
-## Resolved Assumptions
-
-## Constraints
-
-## Anti-cheating Constraints
-
-## Risks
-
-## Hard Stops
-
-## Approval Gates
-
-## Workflow Artifact Path
+Include the objective, non-goals, success criteria, hard stops, additional user approvals, and workflow artifact path when they matter.
 
 `{run_dir}`
 
-## Implementation Slices
+## Design
 
-## Orchestration Sequence
+Write this as a standalone, domain-specific design a skeptical engineer could implement without asking a planning question. Include observed facts, user requirements, resolved assumptions, constraints, risks, behavior/API/config/data contracts, invariants, edge cases, ownership boundaries, and decisions behind the approach. Spend depth where the problem is hard; keep obvious grounding concise.
 
-## Integration Policy
+## Implementation Steps
 
-## Verification
+List ordered technical steps. For code work, name concrete files, functions, tests, migrations, and contract deltas when known. Steps answer what must change; they are not review or commit units.
 
-## Commit Policy
+## Verification / Acceptance
 
-## Reusable Artifacts
+Define concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest skip/fallback rules.
+
+## Execution Slices
+
+Define structured implementation/review/verification/commit units. Each slice should reference one or more implementation steps and include ownership, dependencies, review, targeted checks, and commit boundary.
+
+## Orchestration Notes
+
+Record slice order, dependency readiness, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
 """,
     )
     add_file(
@@ -105,44 +87,21 @@ Keep this as a status ledger only. Do not duplicate `plan.md`; update the plan f
 ## Phase Gates
 
 Plan review: pending
-User implementation gate: pending
+Implementation approval: waiting
 Implementation status: pending
 Initial verification: pending
 Final quality review: pending
 Final verification: pending
 
-## Lifecycle
-
-- [ ] Local/code research complete
-- [ ] External research complete or not needed
-- [ ] User interview complete or not needed
-- [ ] Plan drafted
-- [ ] Selected plan review complete or marked unavailable
-- [ ] User cleared implementation
-- [ ] Approval gates resolved or not needed
-- [ ] Slice prompts written before implementation
-- [ ] Slice reports collected and integrated
-- [ ] Slices complete
-- [ ] Slice reviews complete
-- [ ] Integration complete
-- [ ] Initial verification passed
-- [ ] Final quality review complete or explicitly skipped
-- [ ] Final verification passed or explicitly skipped
-- [ ] Final report complete
-
 ## Plan Review
 
 Review level:
-Codex reviewer:
-Claude review:
-Verdicts:
+Reviewer(s):
+Verdicts / caveats:
 Accepted fixes:
-Critical findings:
-Important non-blocking findings:
-Missing context or unresolved questions:
-Required plan changes:
 Rejected or unresolved findings:
-Skipped or unavailable review caveats:
+Implementation approval request:
+Implementation approval evidence:
 
 ## Decision Log
 
@@ -151,8 +110,8 @@ Skipped or unavailable review caveats:
 
 ## Slices
 
-| ID | Status | Depends on | Prompt | Report | Review | Commit |
-| --- | --- | --- | --- | --- | --- | --- |
+| ID | Status | Depends on | Artifacts / evidence | Review | Commit |
+| --- | --- | --- | --- | --- | --- |
 
 ## Verification
 

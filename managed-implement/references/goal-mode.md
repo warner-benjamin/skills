@@ -1,6 +1,6 @@
 # Goal Mode
 
-Use goal mode by default for approved managed implementation. Skip it only when the implementation is genuinely small, can finish in the current turn, has no waiting/recovery or parallel-worker needs, and has little restart risk.
+Use goal mode by fit after implementation approval. In practice, activate it for most non-trivial implementations and skip it only when the implementation is genuinely small, can finish in the current turn, has no waiting/recovery or parallel-worker needs, and has little restart risk.
 
 ## Fit Gate
 
@@ -33,7 +33,7 @@ Before activating goal mode, write or report a concise packet:
 ```text
 Fit: goal mode | ordinary managed workflow
 Grounding: observed facts, user requirements, resolved assumptions, evidence gaps
-Goal brief: outcome, baseline, constraints, non-goals, verifier, loop, approval gates, blocker standard, completion proof
+Goal brief: outcome, baseline, constraints, non-goals, verifier, loop, additional user approvals, blocker standard, completion proof
 Delegation map: lanes, ownership, verifier, stop condition, or not needed
 Exact objective: text suitable for create_goal
 Activation state: drafted | active | not recommended
@@ -53,7 +53,7 @@ Before activating a goal, check the draft against these:
 
 - Can success be faked by weakening the verifier or a test?
 - Could the literal goal text be satisfied while missing the user's real outcome?
-- Are approval gates and hard stops explicit?
+- Are additional user approvals and hard stops explicit?
 - Does the loop say what to do after a failed attempt or a wait?
 - Is completion observable from outside the running agent?
 
