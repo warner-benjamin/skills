@@ -39,9 +39,9 @@ python3 "$WORKFLOW_SKILL_DIR/scripts/new_workflow.py" "Task title"
 7. Apply the skeptical-engineer test before review: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. If not, deepen the plan, interview the user, or research more.
 8. Define ordered `Implementation Steps` for what must change. Steps can be larger or smaller than execution slices.
 9. Define `Verification / Acceptance` with concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules.
-10. Define `Execution Slices` with objectives, referenced implementation steps, ownership, dependencies, verification, review, and commit boundaries. A slice may cover one step, part of a step, or multiple small steps.
+10. Define `Execution Slices` with the execution mode, main agent role, objectives, referenced implementation steps, ownership, dependencies, verification, review gate, artifact expectations, and commit boundaries. Use `Execution mode: single-agent local` and `Main agent role: coding` when this thread should implement directly. Use `Execution mode: multi-agent delegated` and `Main agent role: manager` when worker lanes own implementation. Use `Execution mode: hybrid` and `Main agent role: hybrid` only when this thread both codes and manages delegated slices; each slice should then state whether the main agent is acting as coding agent or manager/integrator. For single-agent local work, do not pre-authorize worker prompts, reports, or slice-review artifacts; checklist evidence plus commit/test evidence is enough unless the risk-gated review policy requires a reviewer. A slice may cover one step, part of a step, or multiple small steps.
 11. Define additional user approvals only for consequential actions that still require user approval after implementation starts; otherwise keep implementation autonomous after implementation approval.
-12. Define orchestration notes, including slice order, dependency readiness, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, and final-quality cleanup routing.
+12. Define orchestration notes, including slice order, dependency readiness, artifact creation mode, delegated worker/reviewer agent levels from `agents.md` when agents are planned, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, and final-quality cleanup routing.
 13. Update `checklist.md` for research status, user-interview status, plan draft status, review level, reviewer identity/thread id, and final-quality gate details.
 14. Run the selected review level from `plan-review.md`.
 15. Fix valid findings with the smallest change that resolves them. Treat reviewer comments as suggestions: accept only findings that are correct in context and do not undo user-decreed requirements.
@@ -65,7 +65,7 @@ Only an affirmative choice to start counts as approval. Treat praise, an ambiguo
 
 Before stopping, ensure:
 
-- `plan.md` is the source of truth for the goal, reviewed design, implementation steps, verification/acceptance strategy, execution slices, orchestration notes, additional user approvals, and hard stops.
+- `plan.md` is the source of truth for the goal, reviewed design, implementation steps, verification/acceptance strategy, execution mode, main agent role, slices, orchestration notes, additional user approvals, and hard stops.
 - `checklist.md` records plan review status, reviewer identity/status, rejected findings, implementation approval state, and implementation approval evidence when present.
 - The user sees the reviewed plan, review level, reviewer verdicts, material fixes, rejected findings, any skipped-review caveat, and the implementation-approval question.
 

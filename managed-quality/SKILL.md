@@ -38,7 +38,7 @@ If the workflow is docs-only, research-only, small one-shot, or explicitly skipp
 ## Quality Loop
 
 1. Review the final diff against the plan, accepted slice results, and quality bar.
-2. Ask a fresh reviewer lane for strict maintainability and simplification findings when reviewer agents are available.
+2. Ask a fresh reviewer lane for strict maintainability and simplification findings when reviewer agents are available, then wait for the reviewer result without performing a parallel main-agent quality review.
 3. Save findings to `reviews/final-quality-review.md`.
 4. Treat valid blocking findings as a behavior-preserving cleanup slice with `slices/final-quality-cleanup.md` and `results/final-quality-cleanup.md`.
 5. Implement the smallest cleanup that materially reduces complexity and preserves behavior.

@@ -35,8 +35,7 @@ def main() -> int:
 
     slug = slugify(args.slug or args.title)
     run_dir = Path(args.root) / slug
-    for dirname in ("slices", "results", "reviews"):
-        (run_dir / dirname).mkdir(parents=True, exist_ok=True)
+    run_dir.mkdir(parents=True, exist_ok=True)
     skipped: list[Path] = []
 
     def add_file(path: Path, content: str) -> None:
@@ -68,11 +67,25 @@ Define concrete commands, expected artifacts, acceptance criteria, primary verif
 
 ## Execution Slices
 
-Define structured implementation/review/verification/commit units. Each slice should reference one or more implementation steps and include ownership, dependencies, review, targeted checks, and commit boundary.
+Define the execution mode, main agent role, and structured implementation/review/verification/commit units.
+
+Use one of:
+
+- `Execution mode: single-agent local`
+- `Execution mode: multi-agent delegated`
+- `Execution mode: hybrid`
+
+Use one of:
+
+- `Main agent role: coding`
+- `Main agent role: manager`
+- `Main agent role: hybrid`
+
+For single-agent local work, each slice should say `Owner: main agent as coding agent` and should not pre-create delegated slice artifacts. For multi-agent delegated work, each slice should state worker ownership and the main agent's manager/integrator responsibility. For hybrid work, each slice should state whether the main agent is acting as coding agent or manager/integrator. Each slice should reference one or more implementation steps and include ownership, dependencies, review gate, artifact expectations, targeted checks, and commit boundary.
 
 ## Orchestration Notes
 
-Record slice order, dependency readiness, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
+Record slice order, dependency readiness, artifact creation mode, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
 """,
     )
     add_file(
@@ -120,7 +133,7 @@ Implementation approval evidence:
 
 ## Final Quality Review
 
-Review path: reviews/final-quality-review.md
+Review path: create reviews/final-quality-review.md only when a final quality reviewer runs
 Reviewer:
 Decision:
 Cleanup slice:

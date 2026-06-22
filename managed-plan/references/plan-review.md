@@ -14,7 +14,7 @@ Include:
 - `Design`: organic domain-specific narrative with observed facts, user requirements, resolved assumptions, constraints, risks, behavior/API/config/data contracts, invariants, edge cases, ownership boundaries, and decisions behind the approach
 - `Implementation Steps`: ordered technical work items; for code changes, name files, functions, tests, migrations, data/config shapes, and contract deltas when known
 - `Verification / Acceptance`: concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules
-- `Execution Slices`: structured implementation/review/verification/commit units with ownership, dependencies, referenced steps, review, targeted checks, and commit boundaries
+- `Execution Slices`: execution mode, main agent role, and structured implementation/review/verification/commit units with ownership, dependencies, referenced steps, review, targeted checks, and commit boundaries
 - `Orchestration Notes`: slice order, readiness rules, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts
 
 The plan must contain one chosen path. Do not leave unresolved decisions, options, alternate paths, TODOs, or open questions in `plan.md`. During research, interview the user until these are resolved before running plan review.
@@ -28,16 +28,19 @@ Choose and record a review level in `checklist.md`:
 - `low`: default for narrow, low-risk, single-lane, or familiar work.
 - `high`: use when the user requests high assurance, the task is broad/risky, the plan spans multiple agents or subsystems, destructive-risk work is possible, or review failure would be costly.
 
-Low-level review is one fresh Codex review agent pass followed by one manager fix/reject pass. Do not run a low-level re-review loop. If blocking findings remain after the fix/reject pass, mark the review blocking and ask the user whether to revise the goal, choose high-level review, or stop.
+Low-level review is one fresh Codex review agent pass followed by one main-agent fix/reject pass. Do not run a low-level re-review loop. If blocking findings remain after the fix/reject pass, mark the review blocking and ask the user whether to revise the goal, choose high-level review, or stop.
 
 High-level review is:
 
-1. Fresh Codex plan review.
-2. One Claude CLI review with `claude -p`.
-3. Manager fix/reject pass for valid Codex and Claude findings.
-4. Same Codex reviewer/thread re-review of the revised plan, including the Claude findings and manager decisions.
+1. Fresh Codex plan review and one Claude CLI review with `claude -p`, launched in parallel when both reviewer paths are available.
+2. Main-agent fix/reject pass for valid Codex and Claude findings after both reviewer results return, or after one path is recorded as unavailable.
+3. Same Codex reviewer/thread re-review of the revised plan, including the Claude findings and main-agent decisions.
 
 Do not run a second Claude review unless the user explicitly asks.
+
+## Reviewer Wait Discipline
+
+For high-level review, launch the fresh Codex reviewer and Claude CLI review in parallel when both are available, then stop reviewing the plan in the main thread and wait for those reviewer results. For low-level review or same-thread re-review, stop after launching the required reviewer and wait. Do not write a parallel self-review, pre-classify likely findings, re-read the plan for extra critique, or draft fix/reject notes before the required reviewer result exists. The main-agent fix/reject pass starts only after the required reviewer output is available or a reviewer path is formally unavailable.
 
 ## Reviewer Prompt
 
@@ -61,13 +64,13 @@ If a finding reveals an unresolved decision, option, alternate path, or missing 
 
 ## Claude CLI Review
 
-Use this only for high-level review after the fresh Codex plan review and before the manager fix/reject pass. Claude Code's `-p`/`--print` mode prints a non-interactive response and exits.
+Use this only for high-level review in parallel with the fresh Codex plan review and before the main-agent fix/reject pass. Claude Code's `-p`/`--print` mode prints a non-interactive response and exits.
 
 Inspect `claude --help` in the current environment before running the command; prefer the latest available Fable model with Opus fallback, otherwise use Opus. Run Claude in non-editing/print mode and redirect output to `reviews/claude-plan-review.md`. Do not give Claude edit tools for plan review.
 
-If Claude review cannot run because of missing auth, quota/rate limits, server 5xx errors, unavailable models, or CLI failure, skip the Claude review, record the exact reason in `checklist.md`, and tell the user in the handoff. Do not block safe planning solely on unavailable Claude quota; continue with the manager fix/reject pass and Codex re-review.
+If Claude review cannot run because of missing auth, quota/rate limits, server 5xx errors, unavailable models, or CLI failure, skip the Claude review, record the exact reason in `checklist.md`, and tell the user in the handoff. Do not block safe planning solely on unavailable Claude quota; continue with the main-agent fix/reject pass and Codex re-review.
 
-Create `reviews/claude-plan-review-prompt.md` with the plan, relevant checklist state, observed facts, user requirements, resolved assumptions, explicit user-decreed requirements, Codex initial review findings, and the shared review content expectations above.
+Create `reviews/claude-plan-review-prompt.md` with the plan, relevant checklist state, observed facts, user requirements, resolved assumptions, explicit user-decreed requirements, and the shared review content expectations above. Do not wait for or include Codex initial review findings in the Claude prompt; high-level Codex and Claude reviews are independent parallel passes.
 
 Run from the target repository root:
 

@@ -39,4 +39,4 @@ Do not block on cosmetic nits when larger structural issues are absent. Prefer a
 
 ## Report Content
 
-When a reviewer agent runs, save `reviews/final-quality-review.md` with a verdict, critical findings, important non-blocking findings, missing context or unresolved questions, and required cleanup changes. Exact field names are not important; the report must be actionable enough for the manager to accept, reject, or turn valid findings into a cleanup slice.
+When a reviewer agent runs, save `reviews/final-quality-review.md` with a verdict, critical findings, important non-blocking findings, missing context or unresolved questions, and required cleanup changes. Exact field names are not important; the report must be actionable enough for the main agent to accept, reject, or turn valid findings into a cleanup slice.

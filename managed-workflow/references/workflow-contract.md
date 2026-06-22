@@ -10,9 +10,9 @@ Use one run directory:
 workflows/<slug>/
 |-- plan.md
 |-- checklist.md
-|-- slices/
-|-- results/
-|-- reviews/
+|-- slices/       # created on demand for delegated or substantial slice packets
+|-- results/      # created on demand for worker or substantial local reports
+|-- reviews/      # created on demand when a review artifact is produced
 `-- final-report.md
 ```
 
@@ -20,7 +20,9 @@ workflows/<slug>/
 
 `checklist.md` is a status ledger only. Do not duplicate the plan there. Track phase gates, reviewer identity, review notes, slice statuses, decision-log entries, commit SHAs, verification evidence, and final-quality details.
 
-`slices/<slice-id>.md` stores the prompt or work packet for a delegated or substantial local slice. `results/<slice-id>.md` stores the worker or local implementation report. These files are required when work crosses an agent/workspace boundary and optional for tiny manager-owned slices where the checklist, commit, and verification evidence are enough. `reviews/<slice-id>-review.md` stores slice review findings when a review lane is available.
+`slices/<slice-id>.md` stores the prompt or work packet for a delegated or substantial local slice. `results/<slice-id>.md` stores the worker or local implementation report. These files are required when work crosses an agent/workspace boundary and optional for main-agent coding slices where the checklist, commit, and verification evidence are enough. `reviews/<slice-id>-review.md` stores slice review findings when a review lane runs or findings affect commit readiness.
+
+Do not create or require slice artifact directories merely because a workflow exists. For direct local implementation, the plan should say `Execution mode: single-agent local` and `Main agent role: coding`, then record that no delegated slice prompts, worker reports, or slice-review artifacts are expected unless the risk-gated review policy escalates.
 
 The `## Phase Gates` block is the only authoritative home for cross-phase status. Detail sections can record reviewers, findings, notes, paths, evidence, and reasons, but must not contain a second status field for the same gate.
 
@@ -51,9 +53,23 @@ Before review, apply the skeptical-engineer test: a competent engineer should be
 
 `Verification / Acceptance` gives concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules.
 
-`Execution Slices` defines implementation/review/verification/commit units. A slice may contain one step, part of a large step, or several small steps. Slices answer how the work is safely executed, reviewed, verified, and committed.
+`Execution Slices` defines the execution mode, main agent role, and implementation/review/verification/commit units. A slice may contain one step, part of a large step, or several small steps. Slices answer how the work is safely executed, reviewed, verified, and committed.
 
-`Orchestration Notes` records slice order, dependency readiness, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
+Use one execution mode:
+
+- `single-agent local`: the main agent directly implements slices in the current workspace.
+- `multi-agent delegated`: worker lanes own implementation slices and the main agent coordinates, imports, verifies, and commits.
+- `hybrid`: some slices are implemented directly by the main agent and others are delegated.
+
+Use one main agent role:
+
+- `coding`: the main agent edits, tests, stages, commits, and reports directly.
+- `manager`: the main agent coordinates workers/reviewers, imports delegated work, verifies, stages, commits, and reports.
+- `hybrid`: the main agent acts as coding agent for some slices and manager/integrator for others.
+
+For a simple single-agent implementation, use one slice with `Owner: main agent as coding agent` and explicitly avoid delegated artifact requirements. For delegated or hybrid work, each slice should state whether the main agent is acting as coding agent or manager/integrator for that slice.
+
+`Orchestration Notes` records slice order, dependency readiness, artifact creation mode, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
 
 ## Phase Gates
 
@@ -95,7 +111,7 @@ If the plan is stale against the codebase, route back to `managed-plan` for a ta
 
 ## Commit Policy
 
-The manager owns staging and committing on the current branch. Worker agents may edit their assigned workspace when that is the active runner model, but they must not make final commits unless the plan explicitly assigns that authority.
+The main agent owns staging and committing on the current branch unless the plan explicitly assigns commit authority elsewhere. Worker agents may edit their assigned workspace when that is the active runner model, but they must not make final commits to the integration branch unless the plan explicitly assigns that authority.
 
 For each implementation slice, commit only that slice's intended code, tests, docs, and workflow artifact updates that exist before the commit. Do not include unrelated user or concurrent-agent changes.
 
@@ -107,7 +123,7 @@ Update review notes, targeted-check evidence, and checklist slice status before 
 
 Use `managed-implement/references/slice-artifacts.md` as the authoritative contract for slice prompts, reports, and reviews.
 
-If a worker returns changes from a forked workspace, inspect the worker's diff, import only intended changes into the manager's current branch, run the slice checks locally, and record the source workspace or branch in the slice report or checklist.
+If a worker returns changes from a forked workspace, inspect the worker's diff, import only intended changes into the main agent's current branch, run the slice checks locally, and record the source workspace or branch in the slice report or checklist.
 
 ## Approval And Branching
 
@@ -117,7 +133,7 @@ Plan feedback is not implementation approval. Plan edits, critiques, approving c
 
 Record additional user approvals in the plan for consequential actions that still need user approval after implementation starts, such as irreversible local deletes, broad codemods, costly jobs, public or external mutations, or already-identified hard-stop exceptions. Do not use additional user approvals to leave ordinary design decisions, path choices, or implementation options unresolved.
 
-Use `Execution Slices` and `Orchestration Notes` to record slice order, dependencies, readiness rules, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, and how final-quality findings become cleanup slices.
+Use `Execution Slices` and `Orchestration Notes` to record execution mode, main agent role, slice order, dependencies, artifact creation mode, readiness rules, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, and how final-quality findings become cleanup slices.
 
 ## Final Report
 

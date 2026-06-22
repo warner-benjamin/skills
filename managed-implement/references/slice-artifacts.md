@@ -1,8 +1,8 @@
 # Slice Artifacts
 
-Use durable slice artifacts when work is delegated, crosses a workspace boundary, needs independent review context, or is substantial enough that resume would otherwise lose important state. For a tiny manager-owned slice, the checklist row, diff, commit, and verification evidence can be enough.
+Use durable slice artifacts when work is delegated, crosses a workspace boundary, needs independent review context, or is substantial enough that resume would otherwise lose important state. For a tiny main-agent coding slice, the checklist row, diff, commit, and verification evidence can be enough.
 
-When a worker or reviewer has workspace write access, instruct it to write its report or review artifact directly to the named path. When the runner cannot write to the workflow workspace, the agent should return concise text and the manager should persist it.
+When a worker or reviewer has workspace write access, instruct it to write its report or review artifact directly to the named path. When the runner cannot write to the workflow workspace, the agent should return concise text and the main agent should persist it.
 
 ## Slice Prompts
 
@@ -14,9 +14,9 @@ Slice prompts may add local execution context, but must not change the reviewed 
 
 ## Reports
 
-Every worker lane must produce a report saved as `results/<slice-id>.md`. Local reports are useful for substantial slices and optional for tiny manager-owned slices.
+Every worker lane must produce a report saved as `results/<slice-id>.md`. Local reports are useful for substantial slices and optional for tiny main-agent coding slices.
 
-Reports must be actionable, not ceremonial. Include changed paths, workspace or branch when applicable, what changed, verification run and result, blockers, remaining risks, and anything the manager or reviewer must inspect. Exact field names are not important. Do not accept a vague "done" report as integration-ready.
+Reports must be actionable, not ceremonial. Include changed paths, workspace or branch when applicable, what changed, verification run and result, blockers, remaining risks, and anything the main agent or reviewer must inspect. Exact field names are not important. Do not accept a vague "done" report as integration-ready.
 
 ## Reviews
 
