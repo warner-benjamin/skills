@@ -34,17 +34,15 @@ It must describe one chosen path, not unresolved decisions, options, alternate p
 - decision-log entries
 - verification evidence and final-quality details
 
-`slices/<slice-id>.md` stores the prompt or work packet for a delegated or substantial local slice. `results/<slice-id>.md` stores the worker or local implementation report. These files are required when work crosses an agent/workspace boundary and optional for main-agent coding slices where the checklist, commit, and verification evidence are enough. `reviews/<slice-id>-review.md` stores slice review findings when a review lane runs or findings affect commit readiness.
+`slices/<id>.md` (work packet) and `results/<id>.md` (worker/local report) are required when work crosses an agent/workspace boundary; optional for local coding slices where the checklist, commit, and checks suffice. `reviews/<id>-review.md` is required when a review lane runs or findings affect commit readiness. Do not create these directories just because a workflow exists: for direct local work, set `Execution mode: single-agent local` / `Main agent role: coding` and record that no slice prompts or reports are expected unless review/resume context makes them useful.
 
-Do not create or require slice artifact directories merely because a workflow exists. For direct local implementation, the plan should say `Execution mode: single-agent local` and `Main agent role: coding`, then record that no delegated slice prompts, worker reports, or slice-review artifacts are expected unless the risk-gated review policy escalates.
+The `## Phase Gates` block is the only authoritative home for cross-phase status. Detail sections may record reviewers, findings, paths, evidence, and reasons, but never a second status field for the same gate.
 
-The `## Phase Gates` block is the only authoritative home for cross-phase status. Detail sections can record reviewers, findings, notes, paths, evidence, and reasons, but must not contain a second status field for the same gate.
-
-Keep the scaffold lean. After `Phase Gates`, prefer these checklist sections: `Plan Review`, `Decision Log`, `Slices`, `Verification`, `Final Quality Review`, and `Commits`. Use `Decision Log` for hard stops, additional-approval decisions, reviewer-unavailable caveats, worker-import notes, user overrides, and other events that do not need a permanent table.
+Keep the scaffold lean. After `Phase Gates`, prefer these sections: `Plan Review`, `Decision Log`, `Slices`, `Verification`, `Final Quality Review`, `Commits`. Use `Decision Log` for one-off events that don't need a permanent table (hard stops, approvals, reviewer-unavailable caveats, overrides).
 
 ## Required Plan Shape
 
-Use a small set of anchor headings and let the content be organic and domain-specific:
+Use these anchor headings; keep content organic and domain-specific:
 
 ```text
 Goal
@@ -55,39 +53,34 @@ Execution Slices
 Orchestration Notes
 ```
 
-Write the plan in problem-solving mode, not form-filling mode. The headings are anchors for review and resume; they are not boxes that need equal weight. Spend most detail where the problem is hard, risky, or ambiguous, and keep obvious sections short.
+Write in problem-solving mode, not form-filling mode. Headings are anchors, not boxes that need equal weight — spend detail where the problem is hard or ambiguous and keep obvious sections short.
 
-Before review, apply the skeptical-engineer test: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. If not, deepen the design, interview the user, or research more before review.
+Before review, apply the skeptical-engineer test: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. If not, deepen the design, interview the user, or research more.
 
-`Goal` states the objective, non-goals, success criteria, hard stops, additional user approvals, and workflow artifact path when they matter.
+- `Goal`: objective, non-goals, success criteria, hard stops, additional user approvals, and workflow artifact path when they matter.
+- `Design`: the full reviewed design (not final code) — observed facts, user requirements, resolved assumptions, constraints, risks, behavior/API/config/data contracts, invariants, edge cases, ownership boundaries, and the decisions behind the approach. Use domain-specific subsections when they communicate better than generic headings.
+- `Implementation Steps`: the ordered technical work — what must change. For code, name files, functions, tests, migrations, data/config shapes, and contract deltas when known.
+- `Verification / Acceptance`: concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback/skip rules.
+- `Execution Slices`: the execution mode, main agent role, and implementation/review/verification/commit units — how the work is safely executed. A slice may be one step, part of a step, or several small steps.
+- `Orchestration Notes`: slice order, dependency readiness, artifact creation mode, retry/re-slice rules, reviewer-unavailable and failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
 
-`Design` carries the full reviewed design, not final implementation code. Include observed facts, user requirements, resolved assumptions, constraints, risks, behavior/API/config/data contracts, invariants, edge cases, ownership boundaries, and the decisions behind the approach. Use domain-specific subsections when they communicate the design better than generic headings.
+Execution mode (pick one):
 
-`Implementation Steps` is the ordered technical work. For code changes, name files, functions, tests, migrations, data/config shapes, and contract deltas when known. Steps answer what must change.
+- `single-agent local`: the main agent implements slices directly in the current workspace.
+- `multi-agent delegated`: worker lanes own implementation slices; the main agent coordinates, imports, verifies, and commits.
+- `hybrid`: some slices direct, others delegated.
 
-`Verification / Acceptance` gives concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules.
+Main agent role (pick one):
 
-`Execution Slices` defines the execution mode, main agent role, and implementation/review/verification/commit units. A slice may contain one step, part of a large step, or several small steps. Slices answer how the work is safely executed, reviewed, verified, and committed.
+- `coding`: edits, tests, stages, commits, and reports directly.
+- `manager`: coordinates workers/reviewers, imports delegated work, verifies, stages, commits, and reports.
+- `hybrid`: coding for some slices, manager/integrator for others.
 
-Use one execution mode:
-
-- `single-agent local`: the main agent directly implements slices in the current workspace.
-- `multi-agent delegated`: worker lanes own implementation slices and the main agent coordinates, imports, verifies, and commits.
-- `hybrid`: some slices are implemented directly by the main agent and others are delegated.
-
-Use one main agent role:
-
-- `coding`: the main agent edits, tests, stages, commits, and reports directly.
-- `manager`: the main agent coordinates workers/reviewers, imports delegated work, verifies, stages, commits, and reports.
-- `hybrid`: the main agent acts as coding agent for some slices and manager/integrator for others.
-
-For a simple single-agent implementation, use one slice with `Owner: main agent as coding agent` and explicitly avoid delegated artifact requirements. For delegated or hybrid work, each slice should state whether the main agent is acting as coding agent or manager/integrator for that slice.
-
-`Orchestration Notes` records slice order, dependency readiness, artifact creation mode, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
+For simple single-agent work, use one slice with `Owner: main agent as coding agent` and no delegated artifacts. For delegated or hybrid work, each slice states whether the main agent codes or manages it.
 
 ### Example: a single-agent local plan (abridged)
 
-This shows the lean common case. Most managed work looks like this, not like a multi-agent swarm. Sections stay short where the work is obvious.
+The lean common case — most managed work looks like this, not a multi-agent swarm.
 
 ```text
 ## Goal
@@ -134,54 +127,54 @@ Final verification: pending | passed | failed | skipped
 
 Allowed gate meanings:
 
-- `Plan review: non-blocking`: the selected low-level or high-level review flow ran and no blocking findings remain.
-- `Plan review: unavailable`: no independent reviewer was available; report this caveat to the user. Do not proceed to implementation unless implementation approval is given after this caveat is shown.
-- `Implementation approval: waiting`: planning may continue, but implementation must not start.
-- `Implementation approval: approved`: the user directly answered the required implementation-approval question, or the original request explicitly instructed Codex not to stop for implementation approval after planning/review. Invoking the workflow, giving plan feedback, approving plan content, accepting reviewer fixes, or saying a plan edit looks good does not approve implementation. Record the approval evidence as the user's own approving words (a short quote) or the exact pre-authorization instruction, not a Codex paraphrase such as "user approved".
-- `Initial verification: passed`: implementation verification matched the plan's blast radius and passed.
+- `Plan review: non-blocking`: the selected review flow ran and no blocking findings remain.
+- `Plan review: unavailable`: no independent reviewer was available; report the caveat. Do not implement unless approval is given after the caveat is shown.
+- `Implementation approval: waiting`: planning may continue; implementation must not start.
+- `Implementation approval: approved`: the user directly answered the approval question, or the original request explicitly pre-authorized skipping it. Invoking the workflow, giving plan feedback, approving plan content, or accepting reviewer fixes does not approve implementation. Record evidence as the user's own approving words (a short quote) or the exact pre-authorization, never a paraphrase like "user approved".
+- `Initial verification: passed`: verification matched the plan's blast radius and passed.
 - `Final quality review: not-required`: docs-only, research-only, a single low-risk slice, or explicitly skipped with a reason.
 - `Final verification: passed`: verification was re-run after any final cleanup.
 
-If a phase cannot satisfy its precondition, update `checklist.md` with the exact blocker and stop the blocked action.
+If a phase cannot satisfy its precondition, record the exact blocker in `checklist.md` and stop the blocked action.
 
 ## Resume From Existing Plan
 
-When resuming or restarting implementation from an existing workflow, do not create a duplicate run directory unless the user asks for a new plan. Re-read `plan.md`, `checklist.md`, recent commits, and the working tree. Continue from the first incomplete or failed phase gate, preserving recorded approvals, skipped-review caveats, slice reports, and commit SHAs.
+When resuming, do not create a duplicate run directory unless the user asks for a new plan. Re-read `plan.md`, `checklist.md`, recent commits, and the working tree, then continue from the first incomplete or failed gate, preserving recorded approvals, skipped-review caveats, slice reports, and commit SHAs.
 
-If the plan is stale against the codebase, route back to `managed-plan` for a targeted plan update and same-reviewer re-review before implementation continues.
+If the plan is stale against the codebase, route back to `managed-plan` for a targeted update and same-reviewer re-review before continuing.
 
 ## Phase Ownership
 
-- `managed-plan` writes the reviewed design, implementation steps, verification/acceptance strategy, execution slices, additional user approvals, plan review outcome, rejected findings, and implementation approval state.
-- `managed-implement` writes slice statuses, review statuses, commit SHAs, integration results, initial verification, and whether final quality is required.
-- `managed-quality` writes the final quality decision, cleanup slice, re-verification evidence, and final verification.
-- `managed-workflow` owns cross-phase routing, reusable recipes, and final-report synthesis. `managed-implement` owns implementation goal-mode fit and activation. Phase skills append evidence and phase summaries; the orchestrator owns the final read-through and completion narrative.
+- `managed-plan`: reviewed design, implementation steps, verification/acceptance, execution slices, additional user approvals, plan-review outcome, rejected findings, implementation-approval state.
+- `managed-implement`: slice statuses, review statuses, commit SHAs, integration results, initial verification, and whether final quality is required.
+- `managed-quality`: final quality decision, cleanup slice, re-verification evidence, final verification.
+- `managed-workflow`: cross-phase routing, reusable recipes, final-report synthesis, and the final read-through and completion narrative. `managed-implement` owns implementation goal-mode fit and activation. Phase skills append evidence and summaries.
 
 ## Commit Policy
 
-The main agent owns staging and committing on the current branch unless the plan explicitly assigns commit authority elsewhere. Worker agents may edit their assigned workspace when that is the active runner model, but they must not make final commits to the integration branch unless the plan explicitly assigns that authority.
+The main agent owns staging and committing on the current branch unless the plan assigns commit authority elsewhere. Workers may edit their assigned workspace under the active runner model but must not commit to the integration branch unless the plan explicitly grants it.
 
-For each implementation slice, commit only that slice's intended code, tests, docs, and workflow artifact updates that exist before the commit. Do not include unrelated user or concurrent-agent changes.
+Commit only the slice's intended code, tests, docs, and pre-existing workflow-artifact updates — never unrelated user or concurrent-agent changes.
 
-Aim for one focused, independently green commit per slice: each commit should build and pass its checks on its own so history stays bisectable. Split a slice into multiple commits when that keeps each commit coherent, and keep a change in one commit when it genuinely cannot be split. Prefer smaller self-contained commits, but never split a change into commits that individually break the build.
+Aim for one focused, independently green commit per slice so history stays bisectable. Split into multiple commits when that keeps each coherent, and keep a change whole when it genuinely can't be split, but never split into commits that individually break the build.
 
-Update review notes, targeted-check evidence, and checklist slice status before committing when those artifacts are part of the repo. Record the resulting commit SHA in `checklist.md` after the commit; that SHA ledger update can be included in the next workflow-artifact commit, a final metadata commit, or left uncommitted when the workflow directory is intentionally local-only.
+Update review notes, check evidence, and checklist slice status before committing when those artifacts are in the repo. Record the commit SHA in `checklist.md` after; that ledger update can ride the next artifact commit, a final metadata commit, or stay uncommitted when the workflow directory is local-only.
 
 ## Slice Artifacts
 
-Use `managed-implement/references/slice-artifacts.md` as the authoritative contract for slice prompts, reports, and reviews.
+`managed-implement/references/slice-artifacts.md` is the authoritative contract for slice prompts, reports, and reviews.
 
-If a worker returns changes from a forked workspace, inspect the worker's diff, import only intended changes into the main agent's current branch, run the slice checks locally, and record the source workspace or branch in the slice report or checklist.
+If a worker returns changes from a forked workspace, inspect its diff, import only intended changes into the current branch, run the slice checks locally, and record the source workspace or branch.
 
 ## Approval And Branching
 
-The plan must distinguish hard stops, additional user approvals, and implementation approval. Planned implementation always waits for a direct implementation-approval answer after planning unless the original request explicitly instructed Codex not to stop for implementation approval after planning/review. After implementation approval is recorded, operate autonomously inside the reviewed plan until a hard stop, failed additional approval, or uncovered decision is reached.
+The plan must distinguish hard stops, additional user approvals, and implementation approval. Planned implementation always waits for a direct approval answer unless the original request explicitly pre-authorized skipping it. Once approval is recorded, operate autonomously inside the reviewed plan until a hard stop, failed additional approval, or uncovered decision.
 
-Plan feedback is not implementation approval. Plan edits, critiques, approving comments about plan content, and reviewer-fix discussions keep the workflow in planning unless the user directly answers the implementation-approval question.
+Plan feedback is not implementation approval: edits, critiques, approving comments on plan content, and reviewer-fix discussions keep the workflow in planning until the user directly answers the approval question.
 
-Record additional user approvals in the plan for consequential actions that still need user approval after implementation starts, such as irreversible local deletes, broad codemods, costly jobs, public or external mutations, or already-identified hard-stop exceptions. Do not use additional user approvals to leave ordinary design decisions, path choices, or implementation options unresolved.
+Record additional user approvals for consequential actions that still need sign-off after implementation starts (irreversible local deletes, broad codemods, costly jobs, public/external mutations, or named hard-stop exceptions). Don't use them to leave ordinary design or path decisions unresolved.
 
-Use `Execution Slices` and `Orchestration Notes` to record execution mode, main agent role, slice order, dependencies, artifact creation mode, readiness rules, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, and how final-quality findings become cleanup slices.
+Use `Execution Slices` and `Orchestration Notes` to record execution mode, main agent role, slice order, dependencies, artifact creation mode, readiness rules, retry/re-slice rules, reviewer-unavailable and failed-check behavior, and how final-quality findings become cleanup slices.
 
 ## Final Report
 

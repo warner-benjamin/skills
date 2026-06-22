@@ -47,45 +47,35 @@ def main() -> int:
         run_dir / "plan.md",
         f"""# {args.title}
 
+Workflow artifacts: `{run_dir}`
+Fill each section per `managed-workflow/references/workflow-contract.md` ("Required Plan Shape"). State one chosen path — no options, TODOs, or open questions.
+
 ## Goal
 
-Include the objective, non-goals, success criteria, hard stops, additional user approvals, and workflow artifact path when they matter.
-
-`{run_dir}`
+<Objective, non-goals, success criteria, hard stops, additional user approvals.>
 
 ## Design
 
-Write this as a standalone, domain-specific design a skeptical engineer could implement without asking a planning question. Include observed facts, user requirements, resolved assumptions, constraints, risks, behavior/API/config/data contracts, invariants, edge cases, ownership boundaries, and decisions behind the approach. Spend depth where the problem is hard; keep obvious grounding concise.
+<Standalone design a skeptical engineer could build without inventing a decision: facts, requirements, resolved assumptions, constraints, risks, contracts, invariants, edge cases, ownership boundaries, and the decisions behind the approach.>
 
 ## Implementation Steps
 
-List ordered technical steps. For code work, name concrete files, functions, tests, migrations, and contract deltas when known. Steps answer what must change; they are not review or commit units.
+<Ordered technical steps — what must change. For code, name files, functions, tests, migrations, and contract deltas.>
 
 ## Verification / Acceptance
 
-Define concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest skip/fallback rules.
+<Concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, honest skip/fallback rules.>
 
 ## Execution Slices
 
-Define the execution mode, main agent role, and structured implementation/review/verification/commit units.
+Execution mode: <single-agent local | multi-agent delegated | hybrid>
+Main agent role: <coding | manager | hybrid>
 
-Use one of:
-
-- `Execution mode: single-agent local`
-- `Execution mode: multi-agent delegated`
-- `Execution mode: hybrid`
-
-Use one of:
-
-- `Main agent role: coding`
-- `Main agent role: manager`
-- `Main agent role: hybrid`
-
-For single-agent local work, each slice should say `Owner: main agent as coding agent` and should not pre-create delegated slice artifacts. For multi-agent delegated work, each slice should state worker ownership and the main agent's manager/integrator responsibility. For hybrid work, each slice should state whether the main agent is acting as coding agent or manager/integrator. Each slice should reference one or more implementation steps and include ownership, dependencies, review gate, artifact expectations, targeted checks, and commit boundary.
+<One or more slices. Each references implementation step(s) and states ownership, dependencies, review gate, artifact expectations, targeted checks, and commit boundary. For single-agent local, use `Owner: main agent as coding agent` and no delegated artifacts.>
 
 ## Orchestration Notes
 
-Record slice order, dependency readiness, artifact creation mode, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
+<Slice order, dependency readiness, artifact creation mode, retry/re-slice rules, reviewer-unavailable and failed-check behavior, integration policy, final-quality routing, reusable artifacts.>
 """,
     )
     add_file(
