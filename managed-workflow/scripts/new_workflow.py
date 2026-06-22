@@ -93,7 +93,6 @@ Record slice order, dependency readiness, artifact creation mode, retry/re-slice
         f"""# Workflow Checklist: {args.title}
 
 Created: {now}
-Status: scaffolded
 
 Keep this as a status ledger only. Do not duplicate `plan.md`; update the plan for goal, constraints, risks, slice details, and verification strategy.
 

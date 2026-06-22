@@ -30,22 +30,33 @@ python3 "$WORKFLOW_SKILL_DIR/scripts/new_workflow.py" "Task title"
 
 ## Planning Loop
 
+### Research
+
 1. Research code, local instructions, existing plans, tests, and ownership boundaries.
 2. Research web or external primary sources only when current facts, third-party docs, APIs, regulations, pricing, or referenced pages affect the plan.
 3. Separate grounding into observed facts, user requirements, resolved assumptions, and evidence gaps.
-4. Identify any unresolved decisions, options, alternate paths, missing preferences, or approval questions. Interview the user during research until these are resolved before drafting the reviewed plan.
-5. Draft or update `workflows/<slug>/plan.md` in problem-solving mode, as if writing a standalone design doc for a skeptical engineer. Use the organic plan shape from the workflow contract as anchors, not as boxes to fill evenly: `Goal`, `Design`, `Implementation Steps`, `Verification / Acceptance`, `Execution Slices`, and `Orchestration Notes`. The plan must state one chosen path and must not contain unresolved decisions, options, alternate paths, TODOs, or open questions.
-6. Put the full design in `Design`, not in later slice prompts. For non-trivial implementation, include the behavior/API/config/data contracts, invariants, ownership boundaries, edge cases, concrete files/functions/tests when known, and the decisions behind the approach. Spend depth where implementation risk or ambiguity is highest; keep obvious grounding concise. Do not paste final implementation code.
-7. Apply the skeptical-engineer test before review: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. If not, deepen the plan, interview the user, or research more.
-8. Define ordered `Implementation Steps` for what must change. Steps can be larger or smaller than execution slices.
-9. Define `Verification / Acceptance` with concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules.
-10. Define `Execution Slices` with the execution mode, main agent role, objectives, referenced implementation steps, ownership, dependencies, verification, review gate, artifact expectations, and commit boundaries. Use `Execution mode: single-agent local` and `Main agent role: coding` when this thread should implement directly. Use `Execution mode: multi-agent delegated` and `Main agent role: manager` when worker lanes own implementation. Use `Execution mode: hybrid` and `Main agent role: hybrid` only when this thread both codes and manages delegated slices; each slice should then state whether the main agent is acting as coding agent or manager/integrator. For single-agent local work, do not pre-authorize worker prompts, reports, or slice-review artifacts; checklist evidence plus commit/test evidence is enough unless the risk-gated review policy requires a reviewer. A slice may cover one step, part of a step, or multiple small steps.
-11. Define additional user approvals only for consequential actions that still require user approval after implementation starts; otherwise keep implementation autonomous after implementation approval.
-12. Define orchestration notes, including slice order, dependency readiness, artifact creation mode, delegated worker/reviewer agent levels from `agents.md` when agents are planned, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, and final-quality cleanup routing.
-13. Update `checklist.md` for research status, user-interview status, plan draft status, review level, reviewer identity/thread id, and final-quality gate details.
-14. Run the selected review level from `plan-review.md`.
-15. Fix valid findings with the smallest change that resolves them. Treat reviewer comments as suggestions: accept only findings that are correct in context and do not undo user-decreed requirements.
-16. Present the reviewed plan to the user with the review level, review verdicts, accepted fixes, rejected findings, and a distinct implementation-approval question. Ask whether to start implementation now or revise the plan, then stop and wait for that direct answer. Leave `Implementation approval` as `waiting` until the user directly answers the implementation-approval question.
+4. Identify unresolved decisions, options, alternate paths, missing preferences, or approval questions. Interview the user until these are resolved before drafting the reviewed plan.
+
+### Draft
+
+1. Draft or update `workflows/<slug>/plan.md` in problem-solving mode, as if writing a standalone design doc for a skeptical engineer. Use the organic plan shape from the workflow contract as anchors, not as boxes to fill evenly: `Goal`, `Design`, `Implementation Steps`, `Verification / Acceptance`, `Execution Slices`, and `Orchestration Notes`. The plan must state one chosen path and must not contain unresolved decisions, options, alternate paths, TODOs, or open questions.
+2. Put the full design in `Design`, not in later slice prompts. For non-trivial implementation, include the behavior/API/config/data contracts, invariants, ownership boundaries, edge cases, concrete files/functions/tests when known, and the decisions behind the approach. Spend depth where implementation risk or ambiguity is highest, keep obvious grounding concise, and do not paste final implementation code.
+3. Before review, apply the skeptical-engineer test: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. If the plan fails it, deepen the plan, interview the user, or research more.
+4. Define ordered `Implementation Steps` for what must change. Steps can be larger or smaller than execution slices.
+5. Define `Verification / Acceptance` with concrete commands, expected artifacts, acceptance criteria, primary verifier, completion proof, and honest fallback or skip rules.
+6. Define `Execution Slices`, picking one execution mode and one main agent role per the contract's `Execution Slices` rules. Give each slice objectives, referenced steps, ownership, dependencies, verification, review gate, artifact expectations, and commit boundaries. For single-agent local work, do not pre-authorize worker prompts, reports, or slice-review artifacts; checklist plus commit/test evidence is enough unless risk-gated review requires a reviewer.
+7. Define additional user approvals only for consequential actions that still require user approval after implementation starts; otherwise keep implementation autonomous after implementation approval.
+8. Define orchestration notes, including slice order, dependency readiness, artifact creation mode, delegated worker/reviewer agent levels from `agents.md` when agents are planned, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, and final-quality cleanup routing.
+
+### Review
+
+1. Update `checklist.md` for research status, user-interview status, plan draft status, review level, reviewer identity/thread id, and final-quality gate details.
+2. Run the selected review level from `plan-review.md`.
+3. Fix valid findings with the smallest change that resolves them. Treat reviewer comments as suggestions: accept only findings that are correct in context and do not undo user-decreed requirements.
+
+### Handoff
+
+Present the reviewed plan to the user with the review level, review verdicts, accepted fixes, rejected findings, and a distinct implementation-approval question. Ask whether to start implementation now or revise the plan, then stop and wait for that direct answer. Leave `Implementation approval` as `waiting` until the user directly answers the implementation-approval question.
 
 Do not start implementation during this phase. Safe research, scaffolding, plan review, local drafts, and non-destructive checks can proceed autonomously.
 
@@ -57,9 +68,7 @@ If no separate reviewer is available, mark `Plan review: unavailable` in `checkl
 
 If the user edits or critiques the plan after review, apply the user's fixes. For high-level review, send material changed areas back to the same Codex reviewer/thread; do not run a second Claude review unless the user asks. For low-level review, do not add an automatic re-review loop; upgrade to high-level review only when the user requests it or the change introduces material new risk.
 
-Plan feedback is not implementation approval. Plan edits, critiques, approving comments about plan content, and reviewer-fix discussions keep the workflow in planning. After applying plan feedback, re-present the relevant plan changes and ask the implementation-approval question again.
-
-Only an affirmative choice to start counts as approval. Treat praise, an ambiguous reply, or a new question as still `waiting`, and ask the implementation-approval question again rather than inferring a yes.
+Plan feedback is not implementation approval. Plan edits, critiques, approving comments about plan content, and reviewer-fix discussions keep the workflow in planning. After applying plan feedback, re-present the changed areas and ask the implementation-approval question again. Only an affirmative choice to start counts as approval; treat praise, an ambiguous reply, or a new question as still `waiting` rather than inferring a yes.
 
 ## Handoff
 
@@ -69,4 +78,4 @@ Before stopping, ensure:
 - `checklist.md` records plan review status, reviewer identity/status, rejected findings, implementation approval state, and implementation approval evidence when present.
 - The user sees the reviewed plan, review level, reviewer verdicts, material fixes, rejected findings, any skipped-review caveat, and the implementation-approval question.
 
-Only mark `Implementation approval: approved` when the user directly answers the implementation-approval question, or when the original request explicitly instructed Codex not to stop for implementation approval after planning/review. If plan review is unavailable, approval must happen after the skipped-review caveat is shown.
+Only mark `Implementation approval: approved` when the user directly answers the implementation-approval question, or when the original request explicitly instructed Codex not to stop for implementation approval after planning/review. If plan review is unavailable, approval must come after the skipped-review caveat is shown.

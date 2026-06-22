@@ -1,6 +1,6 @@
 ---
 name: managed-implement
-description: Implement a reviewed managed workflow design plan after explicit implementation approval, through the plan's execution mode and main agent role, self-contained execution slices, mode-appropriate artifacts, optional bounded subagents, targeted checks, risk-gated slice review, focused commits, integration, and initial verification. Use when the user explicitly invokes $managed-implement or asks to execute an existing reviewed workflow plan. Do not use before plan review is complete and implementation approval is approved.
+description: Implement a reviewed managed workflow plan after explicit implementation approval, executing the plan's slices through its execution mode and main agent role with risk-gated review, focused per-slice commits, and initial verification. Use when the user explicitly invokes $managed-implement or asks to execute an existing reviewed workflow plan. Do not use before plan review is complete and implementation approval is approved.
 ---
 
 # Managed Implement
@@ -22,7 +22,7 @@ Read:
 - `$WORKFLOW_SKILL_DIR/references/hard-stops.md` before risky or ambiguous operations
 - `$WORKFLOW_SKILL_DIR/references/verification.md` before initial verification
 - `$PHASE_SKILL_DIR/references/goal-mode.md` before activating, skipping, or resuming goal mode
-- `$PHASE_SKILL_DIR/references/slice-artifacts.md`
+- `$PHASE_SKILL_DIR/references/slice-artifacts.md` before writing slice prompts, reports, or reviews
 
 ## Preconditions
 
@@ -50,40 +50,46 @@ For goal-backed child agents, use one bounded local finish line with its own ver
 
 Read the plan's `Execution Slices` and `Orchestration Notes` for the execution mode, main agent role, artifact policy, and slice ownership before slice work.
 
-- `single-agent local` with `Main agent role: coding`: the main agent implements sequentially in the current workspace. Keep artifacts lean: checklist status/evidence, diff, commit, verification evidence, and `final-report.md` are the default. Write `slices/<slice-id>.md`, `results/<slice-id>.md`, or review artifacts only when high-risk review, resume safety, or the plan's artifact policy makes them useful.
-- `multi-agent delegated` with `Main agent role: manager`: worker lanes, parallel lanes, or workspace boundaries are part of the plan. Use durable slice prompts, worker reports, reviewer artifacts, worker identity/workspace records, import notes, and main-agent verification before commit.
-- `hybrid` with `Main agent role: hybrid`: apply the local coding rules to slices owned by the main agent as coding agent, and the delegated rules to slices owned by workers.
+The default and most common shape is `single-agent local` with `Main agent role: coding`: the main agent implements slices sequentially in the current workspace with lean artifacts. The Slice Loop below is written for that path. `multi-agent delegated` with `Main agent role: manager` means worker lanes own implementation slices while the main agent coordinates, imports, verifies, and commits. `hybrid` means the main agent acts as coding agent for some slices and manager/integrator for others.
 
 If the plan's labels are absent or informal, use the slice ownership and artifact policy already in the reviewed plan instead of blocking on terminology. If ownership, delegation, artifact expectations, or integration authority are genuinely ambiguous, pause and route back to `managed-plan` for a targeted update.
 
-When spawning workers or reviewers, use `$WORKFLOW_SKILL_DIR/references/agents.md` Agent Level Routing. Do not override model/effort for main-agent local coding work.
-
 ## Slice Loop
 
-For each ready execution slice:
+For each ready execution slice, the main-agent local path is:
 
-1. Confirm the current working tree state and unrelated changes.
-2. Follow the plan's artifact policy. For delegated or substantial work that needs durable handoff/review context, write or update `slices/<slice-id>.md`, citing the relevant `Design`, `Implementation Steps`, verification, and execution-slice details from `plan.md`; for delegated work, name the exact result path. For main-agent coding slices, prefer checklist evidence unless high-risk review needs extra context, resume would otherwise lose important state, or the plan explicitly asks for a slice artifact.
-3. Implement only the assigned slice locally, or delegate it to a worker only when ownership is disjoint and useful.
-4. Ensure a concise implementation report exists under `results/<slice-id>.md` for every delegated worker lane, following `slice-artifacts.md`. For main-agent coding slices, use checklist evidence instead of a separate report unless the slice is substantial enough that review or resume would otherwise lose important state.
-5. Import worker changes into the main agent's current branch when needed, inspecting the worker diff and applying only intended changes.
-6. Run the slice's targeted checks in the main agent workspace.
-7. Decide the review gate by risk. Use reviewer agents for high-risk slices such as schema or data migrations, auth or permissions, generated API/client contracts, cross-layer user behavior, concurrency or background jobs, and destructive cleanup. Use the same implementation reviewer for adjacent sequential slices when continuity reduces repeated context, and use a fresh reviewer when independence matters, the risk boundary changes, a prior reviewer missed a material issue, or the plan/checklist explicitly requires it. Main-agent review is acceptable for docs, env examples, tiny CLI or test-only additions, and mechanical follow-up slices after green checks. Record the decision in `checklist.md`.
-8. Ensure reviewer findings exist under `reviews/<slice-id>-review.md` when a reviewer ran or when findings affect commit readiness, following `slice-artifacts.md`.
-9. Fix every valid review issue; record rejected findings with reasons.
-10. Re-run targeted checks and ask the same reviewer to re-review if material fixes were made.
-11. The main agent sanity-checks the diff against the plan, ownership boundary, user constraints, and unrelated working tree changes.
-12. Update `checklist.md` with slice status, artifacts or evidence, review status, and targeted check evidence before committing.
-13. Commit only the slice's intended changes with a focused message that mentions the slice ID.
-14. Record the resulting commit SHA in `checklist.md` after the commit.
+1. Confirm the current working-tree state and any unrelated changes.
+2. Implement only the assigned slice locally.
+3. Run the slice's targeted checks.
+4. Decide the review gate by risk (see "Review Gate"). Fix every valid finding, record rejected findings with reasons, then re-run checks and ask the same reviewer to re-review after material fixes.
+5. Sanity-check the diff against the plan, ownership boundary, user constraints, and unrelated working-tree changes.
+6. Update `checklist.md` with slice status, evidence, and review status before committing.
+7. Commit only the slice's intended changes with a focused message that names the slice ID, then record the commit SHA in `checklist.md`.
 
 Do not include unrelated user or concurrent-agent changes in a slice commit. If unrelated changes share files with the slice, inspect carefully and stage only intended hunks.
+
+Default artifacts for a local slice are the checklist row, diff, commit, and verification evidence. Write `slices/<slice-id>.md`, `results/<slice-id>.md`, or review artifacts only when high-risk review, resume safety, or the plan's artifact policy makes them useful.
+
+### Review Gate
+
+Use reviewer agents for high-risk slices: schema or data migrations, auth or permissions, generated API/client contracts, cross-layer user behavior, concurrency or background jobs, and destructive cleanup. Reuse the same implementation reviewer for adjacent sequential slices when continuity reduces repeated context; use a fresh reviewer when independence matters, the risk boundary changes, a prior reviewer missed a material issue, or the plan/checklist requires it. Main-agent review is acceptable for docs, env examples, tiny CLI or test-only additions, and mechanical follow-up slices after green checks. Record the decision in `checklist.md`. When a reviewer runs, save findings to `reviews/<slice-id>-review.md` per `slice-artifacts.md`.
+
+### Delegated Slices
+
+When a slice is delegated to a worker (mode `multi-agent delegated`, or the delegated half of `hybrid`), add to the loop before the commit:
+
+1. Before delegating, write `slices/<slice-id>.md` citing the relevant `Design`, `Implementation Steps`, verification, and execution-slice details from `plan.md`, and name the exact result path.
+2. Require the worker to return `results/<slice-id>.md` per `slice-artifacts.md`; do not accept a vague "done".
+3. Import the worker diff into the main agent's current branch, inspecting it and applying only intended changes, then run the slice's targeted checks locally.
+4. Record the source workspace or branch in `checklist.md`.
+
+When spawning workers or reviewers, use `agents.md` Agent Level Routing; do not override model/effort for main-agent local coding work. See "Worker Integration" for isolation models.
 
 ## Review Budget and Freeze
 
 Default to no more than one fresh implementation reviewer per major subsystem or risk boundary, plus same-thread re-reviews. Exceed that only when the plan sets a higher review bar, the user asks for stricter review, a slice crosses a new high-risk boundary, or the checklist records why independence is worth the added cost.
 
-Before spawning a reviewer, freeze the slice diff: the main agent should believe the code change is complete, workflow artifacts are current, targeted checks have run, and no known local cleanup remains. After a reviewer starts, wait patiently for the reviewer result. Do not keep implementing the slice, perform a parallel main-agent review, draft findings, or re-audit the same diff while the reviewer is active. If a material issue is discovered before the first verdict through an external event or tool result, fix it locally and send one consolidated same-thread update or restart the review; repeated pre-verdict updates are a process failure and should be recorded in `checklist.md`.
+Before spawning a reviewer, freeze the slice diff: the main agent should believe the code change is complete, workflow artifacts are current, targeted checks have run, and no known local cleanup remains. After a reviewer starts, wait patiently for the reviewer result. Do not keep implementing the slice, perform a parallel main-agent review, draft findings, or re-audit the same diff while the reviewer is active. If a material issue surfaces before the first verdict through an external event or tool result, fix it locally and send one consolidated same-thread update or restart the review; repeated pre-verdict updates are a process failure to record in `checklist.md`.
 
 ## Worker Integration
 

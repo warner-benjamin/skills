@@ -1,6 +1,6 @@
 ---
 name: managed-workflow
-description: Run managed Codex workflows with saved plan/checklist artifacts, independent review of an organic design plan, explicit implementation approval, execution slices, mode-appropriate artifacts, risk-gated review, focused commits, integration, final simplification review, and verification. Use when the user explicitly invokes $managed-workflow, asks for a managed workflow, swarm, subagents, parallel agents, multi-agent implementation, large migration or audit, or a plan-review-execute workflow. Do not use for ordinary planning, advice, or small one-shot implementation tasks.
+description: Orchestrate a full managed Codex workflow through the managed-plan, managed-implement, and managed-quality phases, with durable plan/checklist artifacts, independent plan review, explicit implementation approval, risk-gated execution, focused commits, and verification. Use when the user explicitly invokes $managed-workflow, or asks for a managed workflow, swarm, subagents, parallel agents, multi-agent implementation, a large migration or audit, or a plan-review-execute workflow. Do not use for ordinary planning, advice, or small one-shot implementation tasks.
 ---
 
 # Managed Workflow
@@ -28,6 +28,17 @@ python3 "$SKILL_DIR/scripts/new_workflow.py" "Task title"
 ```
 
 By default, keep the workflow run directory untracked by git unless the user explicitly asks to check workflow artifacts into the repository. Do not add it to commits just because slice work records status there.
+
+## Common Path
+
+For the usual code workflow:
+
+1. Create or resume one `workflows/<slug>/` run directory.
+2. Run `managed-plan` until the reviewed plan is non-blocking and the user gives implementation approval.
+3. Run `managed-implement`; activate goal mode for non-trivial implementation so compaction/resume keeps the workflow on track.
+4. Execute slices according to the plan, using lean local artifacts for single-agent work and durable slice artifacts for delegated work.
+5. Run initial verification, then `managed-quality` for multi-slice or higher-risk code workflows.
+6. Re-verify after cleanup and synthesize `final-report.md`.
 
 ## Operating Contract
 
@@ -64,4 +75,4 @@ For implementation, `managed-implement` owns goal-mode fit and activation. The o
 
 ## Reusable Recipes
 
-When a run produces a useful pattern, save a concise recipe in `workflows/recipes/<name>.md` or a repo docs folder. Include trigger, plan shape, slice list, verification checklist, and known risks. Do not save transcripts, secrets, bulky logs, credentials, or sensitive personal details.
+When a run produces a useful pattern, save a concise recipe in a tracked repo docs folder; the default `workflows/` directory is untracked, so recipes saved there are local-only and easily lost. Include trigger, plan shape, slice list, verification checklist, and known risks. Do not save transcripts, secrets, bulky logs, credentials, or sensitive personal details.

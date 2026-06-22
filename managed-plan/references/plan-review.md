@@ -19,7 +19,7 @@ Include:
 
 The plan must contain one chosen path. Do not leave unresolved decisions, options, alternate paths, TODOs, or open questions in `plan.md`. During research, interview the user until these are resolved before running plan review.
 
-For non-trivial implementation, apply the skeptical-engineer test: could a competent engineer implement the chosen design without asking a planning question or inventing a core decision? Block plans that fail this test, including plans that define execution slices without enough design and implementation-step detail for safe implementation. Slice prompts may add local execution context, but they must not invent core design decisions after the plan review gate.
+As the review gate, hold the plan to the skeptical-engineer test: a competent engineer should be able to implement the chosen design without asking a planning question or inventing a core decision. Block plans that fail it, including plans that define execution slices without enough design or implementation-step detail for safe implementation. Slice prompts may add local execution context, but must not invent core design decisions after this gate.
 
 ## Review Level
 
@@ -40,7 +40,7 @@ Do not run a second Claude review unless the user explicitly asks.
 
 ## Reviewer Wait Discipline
 
-For high-level review, launch the fresh Codex reviewer and Claude CLI review in parallel when both are available, then stop reviewing the plan in the main thread and wait for those reviewer results. For low-level review or same-thread re-review, stop after launching the required reviewer and wait. Do not write a parallel self-review, pre-classify likely findings, re-read the plan for extra critique, or draft fix/reject notes before the required reviewer result exists. The main-agent fix/reject pass starts only after the required reviewer output is available or a reviewer path is formally unavailable.
+Apply the reviewer wait discipline from `agents.md` ("Management Style"). For high-level review, launch the fresh Codex reviewer and Claude CLI review in parallel when both are available, then stop and wait. For low-level review or same-thread re-review, stop after launching the required reviewer and wait. Do not write a parallel self-review, pre-classify likely findings, re-read the plan for extra critique, or draft fix/reject notes before the required reviewer result exists. The main-agent fix/reject pass starts only after the required reviewer output is available or a reviewer path is formally unavailable.
 
 ## Reviewer Prompt
 

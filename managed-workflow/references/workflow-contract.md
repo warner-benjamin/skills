@@ -16,9 +16,23 @@ workflows/<slug>/
 `-- final-report.md
 ```
 
-`plan.md` is the reviewed design document and source of truth for the goal, design, constraints, risks, hard stops, additional user approvals, implementation steps, verification strategy, execution slices, orchestration notes, integration policy, and commit policy. It must describe one chosen path, not unresolved decisions, options, alternate paths, TODOs, or open questions.
+`plan.md` is the reviewed design document and single source of truth. It carries:
 
-`checklist.md` is a status ledger only. Do not duplicate the plan there. Track phase gates, reviewer identity, review notes, slice statuses, decision-log entries, commit SHAs, verification evidence, and final-quality details.
+- the goal, design, constraints, risks, and hard stops
+- additional user approvals
+- implementation steps and verification strategy
+- execution slices and orchestration notes
+- integration policy and commit policy
+
+It must describe one chosen path, not unresolved decisions, options, alternate paths, TODOs, or open questions.
+
+`checklist.md` is a status ledger only; do not duplicate the plan there. Track:
+
+- phase gates
+- reviewer identity and review notes
+- slice statuses and commit SHAs
+- decision-log entries
+- verification evidence and final-quality details
 
 `slices/<slice-id>.md` stores the prompt or work packet for a delegated or substantial local slice. `results/<slice-id>.md` stores the worker or local implementation report. These files are required when work crosses an agent/workspace boundary and optional for main-agent coding slices where the checklist, commit, and verification evidence are enough. `reviews/<slice-id>-review.md` stores slice review findings when a review lane runs or findings affect commit readiness.
 
@@ -71,6 +85,40 @@ For a simple single-agent implementation, use one slice with `Owner: main agent 
 
 `Orchestration Notes` records slice order, dependency readiness, artifact creation mode, retry/re-slice rules, reviewer-unavailable behavior, failed-check behavior, integration policy, final-quality routing, and reusable artifacts.
 
+### Example: a single-agent local plan (abridged)
+
+This shows the lean common case. Most managed work looks like this, not like a multi-agent swarm. Sections stay short where the work is obvious.
+
+```text
+## Goal
+Add rate limiting to the public `/search` endpoint. Non-goal: limiting authed routes.
+Success: anonymous callers over 60 req/min get HTTP 429; existing tests stay green.
+
+## Design
+`SearchController.handle` calls `SearchService` directly today. Add a `RateLimiter`
+(token bucket, 60/min/IP) in `middleware/rate_limit.py`, wired in `app.py` before the
+search route. Counters live in the existing Redis client (`cache.redis`); key
+`rl:search:<ip>`, TTL 60s. On limit, return 429 with `Retry-After`. Edge case:
+missing/forwarded IP -> fall back to the socket peer address.
+
+## Implementation Steps
+1. Add `middleware/rate_limit.py` with `RateLimiter` and a `limit()` decorator.
+2. Wire it onto the `/search` route in `app.py`.
+3. Tests in `tests/test_rate_limit.py`: under-limit passes, over-limit 429, TTL reset.
+
+## Verification / Acceptance
+`pytest tests/test_rate_limit.py` green, then full `pytest` green. Primary verifier: pytest.
+
+## Execution Slices
+Execution mode: single-agent local. Main agent role: coding.
+- Slice rl-1 (steps 1-3): owner main agent as coding agent; checks = pytest;
+  review = main-agent (test-backed, low risk); commit = one focused commit.
+
+## Orchestration Notes
+Single slice, no dependencies, no workers or slice artifacts.
+Final quality review: not-required (single low-risk slice).
+```
+
 ## Phase Gates
 
 Use these checklist fields as handoffs between phase skills:
@@ -91,7 +139,7 @@ Allowed gate meanings:
 - `Implementation approval: waiting`: planning may continue, but implementation must not start.
 - `Implementation approval: approved`: the user directly answered the required implementation-approval question, or the original request explicitly instructed Codex not to stop for implementation approval after planning/review. Invoking the workflow, giving plan feedback, approving plan content, accepting reviewer fixes, or saying a plan edit looks good does not approve implementation. Record the approval evidence as the user's own approving words (a short quote) or the exact pre-authorization instruction, not a Codex paraphrase such as "user approved".
 - `Initial verification: passed`: implementation verification matched the plan's blast radius and passed.
-- `Final quality review: not-required`: docs-only, research-only, small one-shot, or explicitly skipped with a reason.
+- `Final quality review: not-required`: docs-only, research-only, a single low-risk slice, or explicitly skipped with a reason.
 - `Final verification: passed`: verification was re-run after any final cleanup.
 
 If a phase cannot satisfy its precondition, update `checklist.md` with the exact blocker and stop the blocked action.

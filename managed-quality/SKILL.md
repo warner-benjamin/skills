@@ -33,19 +33,20 @@ Before starting, inspect `plan.md`, `checklist.md`, `final-report.md`, and the f
 - `Initial verification` is `passed`.
 - `Final quality review` is `pending` or explicitly requested by the user.
 
-If the workflow is docs-only, research-only, small one-shot, or explicitly skipped, mark `Final quality review: not-required` with the reason and stop.
+If the workflow is docs-only, research-only, a single low-risk slice, or explicitly skipped, mark `Final quality review: not-required` with the reason and stop.
 
 ## Quality Loop
 
-1. Review the final diff against the plan, accepted slice results, and quality bar.
-2. Ask a fresh reviewer lane for strict maintainability and simplification findings when reviewer agents are available, then wait for the reviewer result without performing a parallel main-agent quality review.
-3. Save findings to `reviews/final-quality-review.md`.
-4. Treat valid blocking findings as a behavior-preserving cleanup slice with `slices/final-quality-cleanup.md` and `results/final-quality-cleanup.md`.
-5. Implement the smallest cleanup that materially reduces complexity and preserves behavior.
-6. Re-run relevant targeted checks and broad verification.
-7. Ask the same reviewer/thread for re-review when material cleanup changes were made.
-8. Update `checklist.md` with final quality status, cleanup slice, re-verification evidence, and final verification status.
-9. Update `final-report.md` with the cleanup summary, verification evidence, completion proof, and remaining risks.
+1. Prepare the final-quality context: final diff, plan, accepted slice results, verification evidence, and quality bar. Do not treat this preparation as an independent main-agent review when a reviewer lane will run.
+2. Ask a fresh reviewer lane for strict maintainability and simplification findings when reviewer agents are available, then wait for the reviewer result. Do not perform a parallel main-agent quality review, draft findings, or re-audit the same diff while the reviewer is active.
+3. If reviewer agents are unavailable, perform the final quality review locally, record `Reviewer: unavailable; local final-quality review used` in `checklist.md`, and save the local verdict to `reviews/final-quality-review.md`.
+4. Save reviewer findings to `reviews/final-quality-review.md` when a reviewer lane ran.
+5. Treat valid blocking findings as a behavior-preserving cleanup slice with `slices/final-quality-cleanup.md` and `results/final-quality-cleanup.md`.
+6. Implement the smallest cleanup that materially reduces complexity and preserves behavior.
+7. Re-run relevant targeted checks and broad verification.
+8. Ask the same reviewer/thread for re-review when a reviewer lane ran and material cleanup changes were made.
+9. Update `checklist.md` with final quality status, cleanup slice, re-verification evidence, and final verification status.
+10. Update `final-report.md` with the cleanup summary, verification evidence, completion proof, and remaining risks.
 
 This is a reviewer lane first, not an excuse to invent new scope. Cleanup must remain behavior-preserving and aligned with the reviewed plan.
 

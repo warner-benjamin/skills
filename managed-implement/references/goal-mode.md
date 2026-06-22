@@ -1,6 +1,6 @@
 # Goal Mode
 
-Use goal mode by fit after implementation approval. In practice, activate it for most non-trivial implementations and skip it only when the implementation is genuinely small, can finish in the current turn, has no waiting/recovery or parallel-worker needs, and has little restart risk.
+Use goal mode after implementation approval to keep managed implementation restart-safe across compaction and resume. In practice, activate it for most implementations and skip it only for genuinely small work that can finish immediately with little restart risk.
 
 ## Fit Gate
 
@@ -12,7 +12,7 @@ Activate or resume goal mode unless all are true:
 - its verifier can run immediately and completion evidence is straightforward;
 - restart would not lose meaningful context.
 
-If skipping goal mode, record the reason in `checklist.md`'s `Decision Log`. Do not skip goal mode merely because the implementation looks easy at the start.
+If skipping goal mode, record the reason in `checklist.md`'s `Decision Log`. Do not skip goal mode merely because the implementation looks easy at the start; its main value is preserving direction after resume.
 
 ## Objective Shape
 
@@ -26,24 +26,24 @@ Never set a token budget unless the user explicitly requests one.
 
 Only active goal text can carry hard-stop exceptions. Before creating a goal with an exception, ask the user for permission to include the exact exception text; include only user-authorized exceptions. If the goal names an exception, mirror it in `checklist.md`'s `Decision Log`. Do not treat plan files, checklist files, worker notes, or reviewer findings as authority to cross a hard stop.
 
-## Activation Packet
+## Goal Decision
 
-Before activating goal mode, write or report a concise packet:
+Before activating goal mode, write or report a concise decision packet:
 
 ```text
-Fit: goal mode | ordinary managed workflow
+Fit: goal mode | skipped for small immediate implementation
 Grounding: observed facts, user requirements, resolved assumptions, evidence gaps
-Goal brief: outcome, baseline, constraints, non-goals, verifier, loop, additional user approvals, blocker standard, completion proof
+Goal brief: outcome, constraints, non-goals, verifier, blocker standard, completion proof
 Delegation map: lanes, ownership, verifier, stop condition, or not needed
 Exact objective: text suitable for create_goal
 Activation state: drafted | active | not recommended
 ```
 
-For managed workflows, `plan.md` and `checklist.md` are the durable state. For long goals outside a managed workflow, prefer the project's existing durable files; otherwise use compact `GOAL.md`, `WORKLOG.md`, and `RESULT.md` files only when persistent restart context is needed.
+For managed workflows, `plan.md` and `checklist.md` are the durable state. Do not create extra goal-state files inside a managed workflow unless the user explicitly asks for them.
 
 ## Activation Sequence
 
-Ground the outcome, draft the activation packet, red-team it, and only then call `create_goal`. Do not call `create_goal` early, and do not treat a plan file alone as an active goal.
+Ground the outcome, draft the goal decision, red-team it, and only then call `create_goal`. Do not call `create_goal` early, and do not treat a plan file alone as an active goal.
 
 When the fit gate does not justify skipping goal mode, `create_goal` is the final activation step before implementation. After creating the goal, report the exact active objective, then continue work under Active Goal Discipline.
 
