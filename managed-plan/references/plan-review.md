@@ -40,7 +40,7 @@ Do not run a second Claude review unless the user explicitly asks.
 
 ## Reviewer Wait Discipline
 
-Apply the reviewer wait discipline from `agents.md` ("Management Style"). For high-level review, launch the fresh Codex reviewer and Claude CLI review in parallel when both are available, then stop and wait. For low-level review or same-thread re-review, stop after launching the required reviewer and wait. Do not write a parallel self-review, pre-classify likely findings, re-read the plan for extra critique, or draft fix/reject notes before the required reviewer result exists. The main-agent fix/reject pass starts only after the required reviewer output is available or a reviewer path is formally unavailable.
+For high-level review, launch the fresh Codex reviewer and Claude CLI review in parallel when both are available, then stop and wait. For low-level review or same-thread re-review, stop after launching the required reviewer and wait. Do not write a parallel self-review, pre-classify likely findings, re-read the plan for extra critique, or draft fix/reject notes before the required reviewer result exists. The main-agent fix/reject pass starts only after the required reviewer output is available or a reviewer path is formally unavailable.
 
 ## Reviewer Prompt
 
