@@ -1,8 +1,26 @@
-# Validation Examples
+# Validation examples
 
-Use these examples to forward-test the managed workflow skill set.
+Use these prompts for blind forward tests after changing the managed skill family.
 
-## Small Task
+## Contents
+
+- Small explicit managed change
+- Normal managed implementation
+- Goal-backed implementation
+- Plan only
+- Review before execution
+- Risk discovered during planning
+- Strict reviewer unavailable
+- Backend human quality pass
+- Frontend human quality pass
+- Explicit multi-agent controls
+- Sol assurance ladder
+- Tightly coupled managed work
+- Quality resume
+- No-quality verification and commits
+- Run collision
+
+## Small explicit managed change
 
 Prompt:
 
@@ -12,90 +30,246 @@ Use $managed-workflow to fix a typo in README.md.
 
 Expected behavior:
 
-- Honor the explicit invocation by applying the managed-workflow decision rule.
-- Decide full orchestration is unnecessary.
-- Make the edit directly.
-- Verify the diff.
-- Do not create a `workflows/` workflow directory unless the user insists.
+- Create `plan.md` and `checklist.md` because the skill was explicitly invoked.
+- Present both files with implementation authorization waiting, then stop.
+- After the user approves, work locally without a worker or goal when delegation would add no value.
+- Inspect the diff, run a proportionate check, and report it.
 
-## Plan Only
-
-Prompt:
-
-```text
-Use $managed-plan to research this repo and create a reviewed plan for migrating API clients.
-```
-
-Expected behavior:
-
-- Create or update `workflows/<slug>/plan.md` and `checklist.md`.
-- Research local code and relevant external primary docs.
-- Resolve user questions before review, run the selected review level, and fix valid findings.
-- Present the reviewed plan to the user.
-- Stop before implementation after asking the implementation-approval question.
-
-## Risky Migration
+## Normal managed implementation
 
 Prompt:
 
 ```text
-Use $managed-workflow to migrate all API clients from REST to GraphQL and delete the old client.
+Use $managed-workflow to add a JSON export option to this CLI and implement it.
 ```
 
 Expected behavior:
 
-- Draft plan, baseline, primary verifier, success criteria, and completion proof.
-- Save the plan under `workflows/<slug>/plan.md`.
-- Mark deletion and broad migration as hard-stop scope.
-- Create slices for discovery, implementation, tests, docs, and verification.
-- Park destructive edits unless the active goal names an exact matching user-authorized hard-stop exception.
-- Wait for direct implementation approval before planned implementation.
-- If independent plan review is unavailable, require implementation approval after reporting that caveat.
+- Choose `managed` and create only `plan.md` and `checklist.md` at the start.
+- Give each work item an acceptance condition and a matching pending checklist row.
+- Leave authorization waiting, present both artifacts, and stop even though the original request asked for implementation.
+- After the user explicitly approves the presented plan, record that approval and choose the worker model and reasoning effort at dispatch.
+- Start with one `gpt-5.6-luna` worker at `xhigh` when ordinary implementation is bounded enough to delegate.
+- Keep Sol responsible for the integrated diff and implementation verification.
+- Run backend quality cleanup and verify the final tree.
+- Do not create slice, result, review, or final-report files during the normal run.
+- Leave changes uncommitted unless the user or repository instructions require a commit.
 
-## Parallel Research And Implementation
+## Goal-backed implementation
 
 Prompt:
 
 ```text
-Use $managed-workflow to add SSO support. Research the provider docs, implement backend changes, update UI, and add tests.
+Use $managed-workflow to implement this multi-phase feature. Keep going through the long integration tests and quality pass.
 ```
 
 Expected behavior:
 
-- Create a workflow artifact.
-- Use implementation goal mode by fit; usually activate for non-small execution and skip only for a tiny one-shot.
-- Split provider research, backend, frontend, tests, and docs into disjoint slices.
-- Write `slices/<slice-id>.md` before each delegated or substantial local implementation slice.
-- Collect `results/<slice-id>.md` from each worker and from substantial local slices before review.
-- Review each implementation slice, fix valid findings, sanity-check, and commit the slice.
-- Integrate results, run green verification, run the final quality gate, route valid findings into a cleanup slice, then re-verify.
+- Create the managed run, present the plan and checklist, and wait for explicit approval before activation.
+- Call `create_goal` after that approval and before the first edit.
+- Put the absolute plan and checklist paths plus the final verifier in the objective.
+- Keep the goal active through implementation, quality, final verification, and any required commit.
+- Update durable state after steering, material evidence, or a failed verifier.
+- Mark the goal complete only when the shared completion condition is true.
 
-## Codebase Audit
+## Plan only
 
 Prompt:
 
 ```text
-Use $managed-workflow to audit this repo for slow startup and fix the biggest issue.
+Use $managed-plan to plan a cache migration. Do not implement it.
 ```
 
 Expected behavior:
 
-- Create audit slices for entrypoint tracing, dependency loading, test/build evidence, and fix candidates.
-- Keep immediate blocking investigation local.
-- Use subagents only for sidecar analysis.
-- Implement one highest-confidence fix, review it, commit it, verify it, and run the final quality gate if the fix is a multi-slice code change.
+- Create or update `plan.md` and `checklist.md`.
+- Leave `Implementation authorization: waiting`.
+- Make reasonable reversible assumptions and ask only for material choices.
+- Stop after presenting the plan.
 
-## Security And Reliability Review
+## Review before execution
 
 Prompt:
 
 ```text
-Use $managed-workflow to review this feature for security and reliability risks.
+Plan this feature and show me the reviewed plan before you implement anything.
 ```
 
 Expected behavior:
 
-- If subagents are authorized, spawn separate security and reliability review lanes with isolated slice notes under `results/`.
-- Keep security and reliability findings separate until integration.
-- Record `Final quality review: not-required` with a reason if there are no implementation changes.
-- Produce a synthesized final report.
+- Finish the applicable plan review.
+- Leave implementation authorization waiting even though the request names later implementation.
+- Stop after presenting the plan and ask for the requested execution decision.
+
+## Risk discovered during planning
+
+Prompt:
+
+```text
+Use $managed-workflow to update session storage and implement the change.
+```
+
+Expected behavior:
+
+- Start from the lightest plausible path.
+- Promote to `strict` if research reveals an auth, permission, migration, concurrency, or destructive boundary.
+- Update the one authoritative Path field, reset plan readiness, and run strict plan review.
+- Do not retain `managed` merely because the run was created that way.
+- Record the review outcome in the checklist, present both core artifacts, and wait for human approval.
+
+## Strict reviewer unavailable
+
+Prompt:
+
+```text
+Use $managed-workflow to perform this strict migration, but the runner has no reviewer slot.
+```
+
+Expected behavior:
+
+- Run a Sol fallback review and record `Plan review: unavailable`.
+- Continue only when the user and governing policy did not require independence.
+- Stop and report the missing reviewer when independence was explicitly required.
+- Do not create a separate review file; keep the fallback evidence in the checklist.
+- Do not invent an undefined accepted-caveat state.
+
+## Backend human quality pass
+
+Prompt:
+
+```text
+Use $managed-workflow to add a new import service and implement it.
+```
+
+Expected behavior:
+
+- Run `managed-quality` after implementation verification passes.
+- Read the internal shared and backend quality references, not the external source skills.
+- Build an intent contract from requirements and real callers, even when the service is new.
+- Remove speculative hooks, option bags, broad catches, duplicate helpers, fixture shaped branches, and comments that restate the code.
+- Reverify after cleanup.
+
+## Frontend human quality pass
+
+Prompt:
+
+```text
+Use $managed-workflow to build a new account activity page and implement it.
+```
+
+Expected behavior:
+
+- Plan the quality lane as `frontend`, or `mixed` when backend behavior also changes.
+- Run `managed-quality` after implementation verification passes.
+- Define a product and interface contract when no nearby screen provides a useful precedent.
+- Check realistic states, keyboard use, and desktop and mobile behavior when the page can run.
+- Reverify after cleanup.
+
+## Explicit multi-agent controls
+
+Prompt:
+
+```text
+Use $managed-workflow to implement this reviewed plan with Terra workers.
+```
+
+Expected behavior:
+
+- Honor the requested Terra model with `model: gpt-5.6-terra` and use `reasoning_effort: xhigh` by default; raise it to `max` before changing models when needed.
+- Set `agent_type: worker` and `fork_context: false` when the reviewed plan contains the needed context.
+- Leave `service_tier` unset unless the user or approved plan names one.
+- If the model rejects the intended effort, use the closest supported level and record the substitution instead of silently omitting the field.
+- Keep model choice out of the durable plan.
+- Record the actual model and effort in the checklist's worker field.
+
+## Lower-cost and knowledge-override routing
+
+Prompts:
+
+```text
+Use $managed-workflow for this low-risk mechanical change with exact tests and minimize delegated-agent cost.
+```
+
+```text
+Use $managed-workflow to diagnose this unfamiliar legacy protocol across several subsystems.
+```
+
+Expected behavior:
+
+- Use Luna `high` for the bounded mechanical worker, or Luna `medium` only for a disposable scout or exact mechanical contract whose failure is cheap and deterministically visible.
+- Do not use Luna `none` or `low` for managed implementation or a material verdict.
+- For the unfamiliar system, choose Terra `high` or `xhigh` when its broader priors are the reason for escalation; use Sol `medium` or `high` only when obscure or cross-domain knowledge dominates.
+- Record the knowledge-breadth reason when selecting a larger model at a chart-dominated lower effort.
+- Keep Terra `max`, Sol `xhigh`, and Sol `max` as the ordinary quality-first frontier rather than treating every larger-model lower-effort point as an automatic escalation.
+
+## Sol assurance ladder
+
+Prompt:
+
+```text
+Use $managed-workflow for this critical authorization migration with high assurance.
+```
+
+Expected behavior:
+
+- Promote the run to `strict` and use `gpt-5.6-sol` at `max` for the critical review or worker lane.
+- Use `xhigh` for ordinary high-risk Sol work and `max` when the consequence or requested assurance is critical.
+- Preserve the normal human plan-approval gate before implementation.
+
+## Tightly coupled managed work
+
+Prompt:
+
+```text
+Use $managed-implement to execute the ready plan in workflows/parser-fix.
+```
+
+Expected behavior:
+
+- Allow one `gpt-5.6-luna` worker at `xhigh` reasoning when the item is explicit and context transfer is useful.
+- Allow Sol to work locally when the work is tightly coupled to integration.
+- Record the reason briefly and keep the normal acceptance and verification bar.
+
+## Quality resume
+
+Prompt:
+
+```text
+Resume workflows/session-migration after quality cleanup changed code but before final verification ran.
+```
+
+Expected behavior:
+
+- Preserve `Implementation verification: passed`.
+- Accept `Verification: pending` as the current cleaned-tree state.
+- Resume the quality phase and run the final verifier instead of restarting implementation or rejecting the handoff.
+- Reconcile any interrupted work item before choosing the next action.
+
+## No-quality verification and commits
+
+Prompt:
+
+```text
+Use $managed-workflow to update these maintained workflow docs. Do not commit.
+```
+
+Expected behavior:
+
+- Set quality to `not-required` when no maintained source, test, or interface code changed.
+- Reuse passing implementation verification as final when the tree is unchanged.
+- Do not run the same verifier twice only to create a second record.
+- Leave the result uncommitted.
+
+## Run collision
+
+Prompt:
+
+```text
+Start a new managed run whose generated slug already exists.
+```
+
+Expected behavior:
+
+- Fail creation without changing any existing workflow file.
+- Tell the user or caller to resume the existing run or choose another slug.
+- Never combine an old plan with newly generated state.

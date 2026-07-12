@@ -1,52 +1,68 @@
 ---
 name: managed-quality
-description: Run the final managed workflow quality phase after implementation passes initial verification, with a strict maintainability and simplification review, behavior-preserving cleanup slices, and re-verification. Use when the user explicitly invokes $managed-quality, asks for final simplification/refactoring after a managed workflow, or a multi-slice managed code workflow reaches the final quality gate. Do not use for ordinary lightweight code review.
+description: Run the final managed code cleanup after implementation to remove AI shaped residue, make each design choice traceable to a real requirement, simplify structure, and reverify behavior. Use when the user explicitly invokes $managed-quality, any managed workflow changes source or test code, a strict workflow reaches its quality phase, or integrated worker changes need a final human quality pass.
 ---
 
-# Managed Quality
+# Managed quality
 
-Perform the final quality gate for a managed workflow. This phase catches structural drift from multi-agent or multi-slice implementation and drives behavior-preserving simplification before final completion.
+Run this as the final code phase after implementation checks pass. Aim for deliberate code whose abstractions, boundaries, branches, and fallbacks follow from the requested behavior rather than generic model habits.
 
-## Shared Setup
+Treat AI shaped code as a quality smell, not a claim about authorship. Base every finding on the requirements, plan, diff, callers, tests, repository constraints, or observed UI behavior.
 
-`PHASE_SKILL_DIR` is the absolute directory of this `SKILL.md`. Resolve `WORKFLOW_SKILL_DIR` before reading shared references: a user-provided `managed-workflow` path if given, else the sibling `managed-workflow` directory next to `PHASE_SKILL_DIR`. Always use an absolute path, never `../managed-workflow/...` relative to the shell cwd.
+## Setup
 
-Read:
+`PHASE_SKILL_DIR` is the absolute directory containing this file. Resolve `WORKFLOW_SKILL_DIR` from a user provided path or the sibling `managed-workflow` directory. Resolve `IMPLEMENT_SKILL_DIR` as the sibling `managed-implement` directory when cleanup files are needed.
+
+Always read:
 
 - `$WORKFLOW_SKILL_DIR/references/workflow-contract.md`
-- `$WORKFLOW_SKILL_DIR/references/hard-stops.md` before risky or ambiguous operations
-- `$WORKFLOW_SKILL_DIR/references/verification.md` before re-verification
-- `$PHASE_SKILL_DIR/references/quality-bar.md`
-- `$WORKFLOW_SKILL_DIR/references/agents.md` if using a reviewer agent or cleanup worker
-- `managed-implement/references/slice-artifacts.md` if creating a delegated or substantial cleanup slice
+- `$WORKFLOW_SKILL_DIR/references/verification.md`
+- `references/quality-bar.md`
+
+Then load the relevant internal reference:
+
+- Read `references/backend-quality.md` for backend, CLI, library, data, service, script, test, and other general code.
+- Read `references/frontend-quality.md` for components, pages, styles, browser behavior, and user interface code.
+- Read both for a mixed change.
+
+Do not load the external source skills at runtime. These internal references contain the distilled rules needed for this phase.
+
+Read `$WORKFLOW_SKILL_DIR/references/agents.md` only when using a fresh reviewer or cleanup worker. Read `$IMPLEMENT_SKILL_DIR/references/slice-artifacts.md` only when durable cleanup files are needed.
 
 ## Preconditions
 
-Before starting, inspect `plan.md`, `checklist.md`, `final-report.md`, and the final implementation diff. Do not run this phase until:
+Inspect the plan, checklist, full integrated diff, and verification evidence. Require `Implementation: complete` and `Verification: passed`.
 
-- `Implementation status` is `complete`.
-- `Initial verification` is `passed`.
-- `Final quality review` is `pending` or explicitly requested by the user.
+Run this phase for every managed change to source, test, or user interface code. Set `Quality: not-required` only when no maintained code changed, the changed output is generated from an unchanged source, or the user explicitly skips this phase.
 
-If the workflow is docs-only, research-only, a single low-risk slice, or explicitly skipped, mark `Final quality review: not-required` with the reason and stop.
+## Audit and cleanup
 
-## Quality Loop
+1. Establish the intent contract. Start with the requested behavior, plan, real callers, data, states, failure rules, and non goals. Use nearby code and repository conventions when they provide relevant constraints.
+2. When the code is new and has no useful precedent, write a short greenfield contract before judging it. State the owner, data model, supported states, error behavior, required extension points, and choices that are intentionally out of scope.
+3. Review the whole integrated diff. Do not review each worker change in isolation because the combined result may duplicate concepts or contradict the intent contract.
+4. Apply the shared quality bar first. Look for a simpler framing that deletes branches, wrappers, flags, modes, duplicate helpers, or layers.
+5. Apply the backend or frontend reference. Group repeated symptoms under their common cause.
+6. Let Sol perform the normal final audit. Use one fresh reviewer when the path is strict, several independent worker changes interact, or the user asks for independent review.
+7. Fix high confidence findings directly. Keep behavior and public contracts stable unless the reviewed plan authorizes a change.
+8. Inspect the final diff again. Confirm that cleanup removed complexity instead of moving it into a new abstraction.
+9. Set `Verification: pending`, rerun the affected checks, and run the broad verifier when integration could regress.
+10. Ask the same reviewer to confirm only material fixes to blocking findings.
+11. Set `Quality: passed` and `Verification: passed` only after the cleanup and checks succeed.
 
-1. Prepare the final-quality context: final diff, plan, accepted slice results, verification evidence, and quality bar. This prep is not an independent main-agent review when a reviewer lane will run.
-2. Ask a fresh reviewer lane for strict maintainability and simplification findings when reviewer agents are available, then wait. Don't run a parallel main-agent quality review, draft findings, or re-audit the diff while the reviewer is active.
-3. If reviewer agents are unavailable, do the review locally, record `Reviewer: unavailable; local final-quality review used` in `checklist.md`, and save the verdict to `reviews/final-quality-review.md`.
-4. Save reviewer findings to `reviews/final-quality-review.md` when a reviewer lane ran.
-5. Treat valid blocking findings as a behavior-preserving cleanup slice (`slices/final-quality-cleanup.md`, `results/final-quality-cleanup.md`).
-6. Implement the smallest cleanup that materially reduces complexity and preserves behavior.
-7. Re-run relevant targeted checks and broad verification.
-8. Ask the same reviewer/thread for re-review when a reviewer lane ran and material cleanup changed.
-9. Update `checklist.md` with final quality status, cleanup slice, re-verification evidence, and final verification.
-10. Update `final-report.md` with the cleanup summary, verification evidence, completion proof, and remaining risks.
+Apply small cleanup locally. Delegate a substantial cleanup only when it has a clear ownership boundary. Create packets, results, or review files only when strict evidence, workspace transfer, or resume safety needs them.
 
-This is a reviewer lane first, not an excuse to invent new scope. Cleanup must stay behavior-preserving and aligned with the reviewed plan.
+## Completion bar
 
-## Completion Bar
+Do not pass code that merely works while leaving a clear local quality regression. Block completion when the diff still contains a high confidence example of:
 
-Don't approve final completion when there's a clear structural regression, avoidable branching growth, wrong-layer logic, duplicate canonical helper, needless wrapper/cast/optionality churn, unjustified file-size growth, brittle orchestration, or an obvious simpler behavior-preserving design.
+- a simpler design that would remove meaningful complexity
+- generated looking scaffolding with no concrete need
+- duplicated or shadow APIs instead of a canonical helper
+- special cases, fallback branches, flags, or option bags that obscure the real rule
+- code placed in the wrong owner, or a generic design choice with no support from requirements, callers, or repository constraints
+- tests or fixtures that make production code handle fake cases
+- frontend code that bypasses local components or uses generic visual defaults without product intent
 
-Don't block on cosmetic nits when larger structural issues are absent. Prefer a small number of high-conviction findings over a long list of style comments.
+Do not block on personal taste, cosmetic naming, or a theoretical abstraction with no current use.
+
+Report the main cleanup decisions, checks run, and any remaining risk. Update `final-report.md` only when it exists.

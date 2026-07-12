@@ -1,64 +1,95 @@
-# Agent Management
+# Agent routing
 
 Read this before spawning or coordinating subagents.
 
-## Authorization
+## Authorization and cost
 
-Spawn subagents only when the user explicitly asks for subagents, delegation, parallel agents, a swarm, or this managed workflow. Planning artifacts alone don't authorize spawning.
+Spawn agents only when the user requests this managed workflow, delegation, parallel work, or another instruction authorizes them. A request only for a plan authorizes a strict plan reviewer but not implementation workers.
 
-A `$managed-workflow`/`$managed-plan` request authorizes the plan-review lanes the selected review level needs, plus same-thread re-review — not implementation workers, slice reviewers, final-quality reviewers, or larger workgroups until the relevant phase and implementation approval allow them.
+Start one implementation worker by default. Add a second only for independent work. Respect the runner's concurrency limit and avoid creating agents merely because slots are available.
 
-Spawn only when the environment exposes a subagent runner; never claim a local script can call subagent tools.
+Use the legacy `multi_agent_v1` tools for workers and reviewers. On every spawn, set `model` and `reasoning_effort` explicitly. Also set:
 
-Default limits: 4 concurrent, 12 total per workflow. Higher counts are a user-visible escalation — proceed only with a bounded plan limit and user authorization.
+- `agent_type: worker` for implementation and focused fixes
+- `agent_type: explorer` for read-only research and independent review
+- `agent_type: default` only for a deliberately mixed task that cannot be cleanly resliced
+- `fork_context: false` by default, and always for independent reviewers
 
-## Runner Mapping
+The plan and work item should contain the needed context. Use `fork_context: true` only when the task materially depends on current conversation that cannot reasonably be added to the plan. Pass an absolute plan path only when the agent can read it; otherwise include the complete item contract. Do not repeat the full conversation.
 
-If subagent tools aren't visible, use tool discovery before marking review unavailable. Use the runner's native operations to spawn reviewers/workers, send same-thread re-review input, wait only when a result is on the critical path, and close agents after recording their result.
+Leave `service_tier` unset unless the user explicitly requests a tier or the approved plan contains a concrete latency requirement. Do not infer a paid or accelerated tier merely because the tool exposes the field.
 
-Record each reviewer/worker id, nickname, role, and assigned slice in `checklist.md`. For same-thread re-review, reuse the recorded id rather than spawning fresh.
+## Model routing
 
-## Delegation Rules
+Choose on two axes:
 
-- Keep immediate blocking work local; delegate bounded sidecar work.
-- Use explorer/research lanes for specific codebase or external-source questions.
-- Use worker lanes only for disjoint ownership with explicit files or modules.
-- Choose the isolation model deliberately: runner-provided workspaces when available, git worktrees when local branch isolation is needed, shared-tree edits only for sequential or strictly non-overlapping work. Workers never commit to the integration branch — the main agent imports and commits (see `managed-implement/references/delegated-work.md`).
-- Require each worker lane to return a `results/<slice-id>.md` report: changed paths, verification evidence, blockers, remaining risks.
-- Tell workers they aren't alone in the codebase: don't revert others' edits, adapt to concurrent changes.
-- Omit model overrides for main-agent local coding; when spawning a worker/reviewer, pick the lowest level that fits the slice risk (see Agent Level Routing).
-- Reuse the same reviewer/thread for re-review when continuity is required.
+- **reasoning depth**: how much task-specific inference, ambiguity resolution, and verification the item needs
+- **knowledge breadth**: how much the item depends on unfamiliar frameworks, protocols, legacy systems, or cross-domain priors
 
-## Agent Level Routing
+Use the chart-efficient core ladder by default. Use a larger-model knowledge override only when breadth is the reason; a larger model at lower effort is not an automatic assurance promotion.
 
-Use agent levels to control cost when a worker or reviewer lane is actually spawned. Do not spawn an agent just because a level exists.
+Cost basis, checked 2026-07-12 against the [Codex rate card](https://learn.chatgpt.com/docs/pricing#what-are-tokens-and-credits) and [API pricing](https://developers.openai.com/api/docs/pricing): Luna costs 1x, Terra 2.5x, and Sol 5x across input, cached input, and output credits. Codex credits preserve the same ratios as API dollars, so converting the chart's cost axis does not change its ordering. Current [GPT-5.6 model guidance](https://developers.openai.com/api/docs/guides/latest-model#update-api-and-model-parameters) names `none`, `low`, `medium`, `high`, `xhigh`, and `max` as the reasoning levels.
 
-| Level | Use for | Avoid for |
-| --- | --- | --- |
-| `gpt-5.4 mini` | Easy bounded tasks with explicit files, obvious tests, and little judgment: mechanical edits, tiny fixtures, simple config, narrow bug fixes, straightforward UI copy or prop wiring. | Documentation synthesis, unclear contracts, cross-layer behavior, migrations, auth, concurrency, or any task needing much internal planning. |
-| `gpt-5.5 low` | Easy-medium work, documentation, UI implementation, and multi-file changes when the plan is explicit and little internal planning is required. Good for focused refactors, predictable generated-output follow-up, small route/component changes, and low-risk reviewer passes. | Ambiguous architecture, high-risk data/auth/API work, hard debugging, or final quality. |
-| `gpt-5.5 medium` | Default for implementation workers and ordinary slice reviewers when code judgment, tests, integration, or moderate planning is needed. | Very small mechanical tasks where mini/low is clearly enough, or complex/high-risk work needing deeper reasoning. |
-| `gpt-5.5 high` | Complex or high-risk work: plan review, final quality review, schema/data migrations, auth/permissions, concurrency/background jobs, generated API/client contracts, cross-layer product behavior, security-sensitive changes, or a slice that failed once and needs deeper reasoning. | Routine implementation where medium or low is enough. |
+The user-supplied Artificial Analysis Coding Agent Index v1.1 chart shows a steep intelligence drop below Luna `high`, then useful gains through Luna `xhigh` and `max`. It makes Luna `max` the strongest bounded-work value, Terra `max` the next substantial capability step, and Sol `xhigh` and `max` the final quality-first steps. It also shows that Luna `max` beats Terra `high` and `xhigh` on aggregate score and cost, while Luna `max` and Terra `max` approximately match Sol `medium` and `high` at lower cost. Treat these as routing evidence, not guaranteed task scores, and use the larger-model lower-effort points only for knowledge breadth.
 
-If an exact model is unavailable, use the closest at the same tier and record the substitution in `checklist.md`. Escalate a lane's level only after a concrete blocker, failed review/checks, or newly discovered risk justifies the cost.
+Do not recheck pricing during ordinary dispatch. Revisit this table when the Codex rate card, available model family, or representative coding evaluations materially change.
 
-## Review Lanes
+### Core ladder
 
-- Plan reviewer: fresh independent reviewer, `gpt-5.5 high` tier when model selection is available.
-- Plan re-review: same reviewer/thread, prior review notes included.
-- Slice reviewer: risk-gated by subsystem boundary, medium effort unless risk warrants more. Reuse the same reviewer for adjacent sequential slices when continuity helps; use a fresh reviewer when independence matters, the risk boundary changes, a prior reviewer missed a material issue, or the plan/checklist requires it.
-- Final quality reviewer: fresh `gpt-5.5 high` lane focused on maintainability and simplification, not execution.
+| Lane | `model` | `reasoning_effort` | `agent_type` | Use it for |
+| --- | --- | --- | --- | --- |
+| Cheap scout | `gpt-5.6-luna` | `medium` | `explorer`, or `worker` for an exact mechanical contract | Disposable research, file mapping, or mechanical work with deterministic verification and a cheap retry. Never delegate a material design decision here. |
+| Economy worker | `gpt-5.6-luna` | `high` | `worker` | Low-risk bounded implementation with an explicit design and strong checks. This is the normal lane below Luna `xhigh`. |
+| Default worker or bounded reviewer | `gpt-5.6-luna` | `xhigh` | `worker` or `explorer` | Ordinary implementation, tests, focused refactors, moderate debugging, and bounded review. |
+| Demanding bounded worker or reviewer | `gpt-5.6-luna` | `max` | `worker` or `explorer` | Difficult but bounded work that needs more depth while Luna's knowledge remains sufficient. |
+| Complex quality-first worker or reviewer | `gpt-5.6-terra` | `max` | `worker` or `explorer` | Difficult cross-layer work where Terra's breadth and maximum reasoning are both justified. |
+| High-risk worker or reviewer | `gpt-5.6-sol` | `xhigh` | `worker` or `explorer` | Security, permissions, migrations, difficult architecture, or hard debugging. |
+| Critical worker or reviewer | `gpt-5.6-sol` | `max` | `worker` or `explorer` | Critical destructive or externally consequential work, explicit high assurance, or a high-risk task still unresolved after `xhigh`. |
 
-## Reviewer Budget
+Do not use `none` or `low` for managed implementation or a material verdict. Their charted intelligence loss is too large for the small savings. Luna `medium` is the managed floor and only for work whose failure is cheap and easy to detect.
 
-Default: at most one fresh implementation reviewer per major subsystem or risk boundary, plus same-thread re-reviews. Main-agent review is fine for docs, env examples, tiny CLI/test-only additions, and mechanical follow-up after green checks. Exceed the default only when the plan sets a higher bar, the user asks for stricter review, or the checklist records why independence is worth the cost.
+### Knowledge overrides
 
-## Management Style
+Use these lanes when a larger base model's breadth is more important than its charted aggregate efficiency:
 
-Manage agents by contract, not interruption. Give each a bounded objective, ownership, expected output, artifact path, verification, and stop conditions, then let it run. For persistence rules, use the relevant phase reference (implementation slices: `managed-implement/references/slice-artifacts.md`).
+| Lane | `model` | `reasoning_effort` | `agent_type` | Use it for |
+| --- | --- | --- | --- | --- |
+| Knowledge-heavy bounded worker or scout | `gpt-5.6-terra` | `high` | `worker` or `explorer` | An unfamiliar language, framework, protocol, or repository where the reasoning contract is still bounded. |
+| Complex worker or strict reviewer | `gpt-5.6-terra` | `xhigh` | `worker` or `explorer` | Cross-layer design, migration planning, ambiguous implementation, or strict review that benefits from Terra's broader priors. This remains the default when Terra is selected. |
+| Frontier-knowledge scout or bounded worker | `gpt-5.6-sol` | `medium` | `explorer`, or `worker` with an explicit contract | Obscure, legacy, or cross-domain knowledge dominates and the required synthesis is bounded. Do not use it for a final high-risk verdict. |
+| Knowledge-heavy worker or reviewer | `gpt-5.6-sol` | `high` | `worker` or `explorer` | Broad unfamiliar systems, cross-domain diagnosis, or architecture where Sol's priors matter but `xhigh` reasoning is not justified. |
 
-Don't interrupt a running agent for being slow or quiet. Wait for completion unless: a hard stop, user redirect, reported blocker, changed dependency, or an exceeded timeout/budget.
+When the user selects Luna, Terra, or Sol without naming effort, use `xhigh`. Move to `max` when the selected model still fits but the task needs its hardest quality-first setting. Move to a larger model below `max` only under a knowledge override and record the breadth reason in the checklist. Treat `max` as the highest reasoning level in this routing policy.
 
-When a gate calls for multiple independent reviewers, start all required lanes first (e.g. Codex and Claude plan reviews), then stop reviewing in the main thread and wait. While reviewers run, don't self-review, draft findings, re-audit the diff/plan, or spend tokens anticipating comments — use the wait only for orchestration (recording ids, required tool calls, an actual blocker/redirect).
+Use `gpt-5.5` or `gpt-5.4` only when the user explicitly requests that model or a compatibility constraint requires it. Reasoning levels vary by model. If a selected model rejects the intended effort, retry with the closest supported level that preserves the lane's intent; do not silently omit `reasoning_effort`. Record any model or effort substitution in the checklist.
 
-Use status checks sparingly: ask only for current status and blockers, never add scope mid-slice. In delegated work, the main agent as manager owns sequencing, integration, final verification, and user communication.
+## Worker contract
+
+Give each worker:
+
+- one work item and a clear ownership boundary
+- an accessible plan path and relevant work item ID, or the complete work item contract
+- expected behavior, acceptance condition, and checks
+- a request to preserve unrelated changes and avoid commits
+- a stop before external mutations, destructive actions, secret access, or other authority not present in the item
+- a clear stop condition
+
+Require a concise final response with changed paths, checks and results, blockers, and remaining risks. The response is enough for normal managed work. Persist it under `results/` only when a workspace transfer cannot preserve the exchange or the user explicitly requests a separate artifact.
+
+## Isolation and parallel work
+
+Prefer the runner's isolated workspace when available. Use a worktree only when local isolation is needed. Use a shared tree for one coding worker at a time, or for parallel workers with strictly disjoint files and behavior.
+
+Sol owns integration. Inspect worker changes before staging or committing. Rerun checks when importing from another workspace, when changes interact, or when evidence is uncertain.
+
+Do not interrupt a quiet worker without a concrete reason.
+
+## Review routing
+
+Use Sol's integration review for normal managed work. Use a fresh implementation reviewer only at a boundary with high risk. Start bounded reviewers with Luna at `xhigh` and raise Luna to `max` when its knowledge is sufficient. Start strict or cross-layer reviewers with Terra at `xhigh` and raise Terra to `max` when needed. Terra `high` and Sol `medium` or `high` are knowledge overrides, not generic review escalations; do not use Sol `medium` for a final high-risk verdict. Use Sol at `xhigh` for high-risk review and Sol at `max` for critical review. The `managed-quality` phase owns final quality reviewer routing.
+
+Freeze the artifact under review and record reviewer identity when material fixes may need confirmation. If the artifact changes materially before the verdict arrives, treat the verdict as stale. Reuse the same reviewer only when material fixes need confirmation.
+
+Record the review verdict and material evidence in `checklist.md`. Do not create a separate review file unless the user explicitly requests it or an external handoff cannot use the checklist and final response.
+
+If a required reviewer is unavailable, let Sol perform the review and record the caveat. Stop only when the user or governing policy requires independence.

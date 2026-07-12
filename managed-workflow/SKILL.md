@@ -1,65 +1,51 @@
 ---
 name: managed-workflow
-description: Orchestrate a full managed Codex workflow through the managed-plan, managed-implement, and managed-quality phases, with durable plan/checklist artifacts, independent plan review, explicit implementation approval, risk-gated execution, focused commits, and verification. Use when the user explicitly invokes $managed-workflow, or asks for a managed workflow, swarm, subagents, parallel agents, multi-agent implementation, a large migration or audit, or a plan-review-execute workflow. Do not use for ordinary planning, advice, or small one-shot implementation tasks.
+description: Orchestrate human-reviewed planning, delegated implementation, final human code cleanup, verification, and review based on risk with a durable plan and checklist. Use when the user explicitly invokes $managed-workflow, asks for a managed plan-and-execute process, requests subagent implementation, or needs controlled work across several subsystems. Present the plan and checklist and wait for approval before implementation.
 ---
 
-# Managed Workflow
+# Managed workflow
 
-Orchestrate a full managed workflow by routing through `managed-plan`, `managed-implement`, and `managed-quality` while keeping one durable artifact contract.
+Route work through `managed-plan`, `managed-implement`, and `managed-quality` while keeping one concise contract.
 
-`SKILL_DIR` is the absolute directory of this `SKILL.md`. The phase skills `managed-plan`, `managed-implement`, and `managed-quality` are siblings of it.
+`SKILL_DIR` is the absolute directory containing this file. Resolve the three phase skills as sibling directories.
 
-## Decision Rule
+## Start
 
-Use workflow artifacts when the user explicitly asks for this skill/workflow, asks for subagents or parallel agents, or requests a managed plan-review-execute workflow. Also create them when the task needs separate research, implementation, review, and verification tracks — repo-wide migrations, audits, destructive-risk work, or work that benefits from independent verification.
+Read `references/workflow-contract.md` and choose `managed` or `strict`.
 
-Don't create workflow artifacts for ordinary planning, advice, or small one-shot tasks, even when this skill is explicitly invoked — do the small task directly and say full orchestration was unnecessary. If the user invokes this skill but asks only for a plan, run only `managed-plan` and stop before implementation.
+- For `managed`, create the core artifacts, obtain human approval, use one `multi_agent_v1` implementation worker by default when delegation is worthwhile, set its model and reasoning effort explicitly, keep Sol on integration, run final human code cleanup, and verify.
+- For `strict`, also run the independent review required by the shared contract and phase skills. Record its outcome in the checklist.
 
-## Shared Contract
+Every explicit managed-workflow invocation creates `plan.md` and `checklist.md`, even when the implementation is small. Small immediate tasks that do not need this process should not invoke the skill. If the user requests planning only, run `managed-plan` and stop before implementation.
 
-Read `references/workflow-contract.md` before creating or resuming a workflow; it defines the artifact layout, status ledger, phase gates, and handoff rules.
+You may find risk during planning that was not visible at the start. Promote the run to `strict` when the contract requires it. Do not preserve the original path merely because files already exist.
 
-Create a run directory with:
+## Create or resume
+
+For a new managed run, execute:
 
 ```bash
 python3 "$SKILL_DIR/scripts/new_workflow.py" "Task title"
 ```
 
-Keep the run directory untracked by git unless the user asks to check workflow artifacts in. Don't add it to commits just because slice work records status there.
+Add `--strict` for a known strict path. The command fails if the run directory already exists. Resume an existing run by reusing its directory and reconciling its state under the shared contract.
 
-## Operating Path
+## Run the phases
 
-Create or resume one `workflows/<slug>/` run directory, then run the phases in order. Before each phase, read that phase's `SKILL.md` by absolute path from its sibling directory — phase skills aren't implicitly invoked, so the orchestrator must load them.
+Before each phase, read that phase's `SKILL.md`.
 
-1. **Plan** (`managed-plan`): research, resolve user questions, draft one chosen design, run the selected review level, revise valid findings, present the plan.
-2. **Approve**: don't start planned implementation until `checklist.md` shows `Implementation approval: approved` — a direct answer to the approval question, unless the original request pre-authorized skipping it.
-3. **Implement** (`managed-implement`): run per the plan's execution mode and main agent role, activating goal mode for non-trivial work; execute slices, apply risk-gated review, run checks, commit focused changes, integrate. Create slice artifacts only when required.
-4. **Quality** (`managed-quality`): for multi-slice or higher-risk code workflows after initial green verification, unless the plan/checklist marks it not-required.
-5. **Verify**: run checks matched to blast radius; record skipped checks honestly.
-6. **Report**: synthesize `final-report.md` — accepted/rejected results, conflicts, commits, verification evidence, final quality outcome, completion proof, remaining risks.
+1. Run `managed-plan` to research, choose an approach, and define work items with acceptance checks.
+2. Present `plan.md` and `checklist.md`, ask for implementation approval, and stop.
+3. On a later user turn, record explicit approval in the checklist. Run `managed-implement` only when the plan is still ready and authorization is approved.
+4. Run `managed-quality` for every managed source, test, or user interface code change. Skip it only under that phase's `not-required` rules or when the user explicitly skips it.
+5. When quality is not required and the tree has not changed since implementation verification, use that verification as the final result. Do not rerun it only to relabel the same evidence.
+6. Apply the shared commit policy after final verification.
+7. If goal mode is active, keep it active through quality, final verification, and any required final commit or explicitly requested artifact. Mark it complete only when the shared completion condition is true.
+8. Report the result to the user. Create an extra report file only under the shared contract's exception.
 
-## Phase Routing
+Operate autonomously inside the approved plan. Return to planning when code or new evidence invalidates a material design choice, changes the requested outcome, or promotes the path to `strict`.
 
-Run phases in order unless the user explicitly invokes one phase skill on an existing workflow:
+## Load references only when needed
 
-- `managed-plan`: research, user-question resolution, plan drafting, the selected review level, fixes, and user handoff.
-- `managed-implement`: only after plan review is non-blocking or properly caveated and implementation approval is approved.
-- `managed-quality`: only after implementation is integrated and initial verification passes.
-
-Each phase updates `checklist.md` — treat it as the status ledger, not a second plan.
-
-## Shared References
-
-- Read `references/workflow-contract.md` before creating, resuming, or handing off a workflow.
-- Read `references/agents.md` before spawning or coordinating subagents.
-- Read `references/hard-stops.md` before risky or ambiguous operations.
-- Read `references/verification.md` before final or broad verification.
-- Read `references/validation-examples.md` when forward-testing or improving this skill set.
-
-## Goal Mode
-
-For implementation, `managed-implement` owns goal-mode fit and activation. The orchestrator should not create a separate workflow-level goal unless the user explicitly asks for a goal outside the implementation phase.
-
-## Reusable Recipes
-
-When a run produces a useful pattern, save a concise recipe in a tracked repo docs folder; the default `workflows/` directory is untracked, so recipes saved there are local-only and easily lost. Include trigger, plan shape, slice list, verification checklist, and known risks. Do not save transcripts, secrets, bulky logs, credentials, or sensitive personal details.
+- Read `references/hard-stops.md` before consequential or ambiguous actions.
+- Read `references/validation-examples.md` only when testing or revising this skill family.

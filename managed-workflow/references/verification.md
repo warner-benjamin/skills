@@ -1,22 +1,24 @@
 # Verification
 
-Run the narrowest reliable checks first, then broaden as risk warrants.
+Match checks to the requested behavior and the size of the change. Run narrow checks first, then broaden when integration risk warrants it.
 
-Common checks:
+Workers should run the targeted checks for their work item. Sol should inspect the resulting diff and run implementation verification from the integration workspace before quality cleanup.
 
-- unit tests for touched code
-- typecheck or lint
-- build
-- browser or UI smoke test
-- script dry run
-- source citation check
-- migration dry run
-- manual checklist for non-code work
+Record that result as `Implementation verification`. Keep it as evidence from before quality. `Verification` describes the current tree and becomes pending after any maintained code change.
 
-Match verification to the plan's success criteria, primary verifier, and blast radius. Do not weaken tests, narrow scope, hide failures, swap in mocks, or change benchmarks without approval.
+Do not rerun every worker check automatically. Rerun it when:
 
-Record each required check in `checklist.md` with status and evidence. Report skipped checks honestly with the reason.
+- the change came from another workspace or patch stream
+- later work could affect the result
+- the worker evidence is incomplete or uncertain
+- the check is part of the final acceptance criteria
 
-For flaky or stateful checks, prefer clean-state reproduction and enough consecutive passes to rule out luck.
+After quality cleanup, rerun the affected checks and the final verifier that proves the cleaned result still meets the request.
 
-Do not treat a workflow or active goal as complete until the success criteria and completion proof are satisfied.
+When quality is not required and the tree has not changed since implementation verification, reuse that result as final verification. Do not rerun the same check only to create a second status entry.
+
+For a flaky or stateful verifier, reproduce from a clean state and require enough repeated success to rule out a lucky pass. Do not add repetition to stable checks.
+
+If implementation verification fails, set both verification fields to `failed` and keep implementation incomplete. After a code fix, set both to `pending` before rerunning the checks. If final verification after quality fails, set `Verification: failed`, keep the preserved implementation result, and keep quality pending during repair. Set `Quality: failed` only when the phase ends without a successful repair.
+
+Do not weaken tests, narrow acceptance criteria, hide failures, or replace real verification with easier evidence. Record required checks and concise results in `checklist.md`. Report skipped checks with the reason.
