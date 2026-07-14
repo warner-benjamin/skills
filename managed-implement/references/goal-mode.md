@@ -25,6 +25,8 @@ Complete the requested outcome by executing and maintaining <plan path> and <che
 
 Continue implementation after activation. The parent goal owns scope, integration, conflicts, quality, final verification, and completion. Create child goals only when the user explicitly requests goals for subagents.
 
+Goal persistence does not require one turn to remain alive while a worker runs. Follow the shared worker-liveness protocol: avoid polling, rely on final notifications, and resume from durable state when the worker result arrives.
+
 ## Maintain and resume
 
 At the start of each resumed turn, read the active goal, plan, checklist, working tree, and relevant commits. Reconcile interrupted work before selecting the next item whose dependencies are ready.

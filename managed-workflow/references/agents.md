@@ -80,16 +80,39 @@ Require a concise final response with changed paths, checks and results, blocker
 
 Prefer the runner's isolated workspace when available. Use a worktree only when local isolation is needed. Use a shared tree for one coding worker at a time, or for parallel workers with strictly disjoint files and behavior.
 
-Sol owns integration. Inspect worker changes before staging or committing. Rerun checks when importing from another workspace, when changes interact, or when evidence is uncertain.
+The main agent owns integration. Inspect worker changes before staging or committing. Rerun checks when importing from another workspace, when changes interact, or when evidence is uncertain.
 
-Do not interrupt a quiet worker without a concrete reason.
+## Worker continuity
+
+Before closing a completed coding worker, inspect the next ready item.
+
+- Reuse the same worker when the next item directly depends on its accepted work and overlaps the same files, behavior, or subsystem. Inspect and accept the prior item first, then send the next item as a separate bounded contract.
+- If that worker was closed and the runner supports resume, resume it instead of spawning a fresh worker. Do not switch workers merely to select a cheaper lane; include rediscovery cost in the routing decision.
+- Start a fresh worker when independence matters, the prior worker failed or worked outside scope, the ownership boundary is unrelated, or a material risk change requires a different model. Record the reason when the overlap would otherwise favor reuse.
+- Keep tightly coupled edits to the same hot files local when the main agent already holds the integration context or worker handoff would cost more than implementation. Do not make a fresh worker rediscover an accepted adjacent slice.
+
+Keep the worker open until this continuity decision is made. Close it when no related ready item remains or a fresh/local lane is justified.
+
+## Worker liveness and waits
+
+Give coding workers an action-oriented start: inspect the named boundary, perform at most one bounded discovery pass, then edit and run the stated checks. If the contract still does not identify an implementation path, require a blocker report instead of open-ended exploration.
+
+After dispatch:
+
+1. Treat runner status, worker messages, and the final notification as the liveness evidence. Never infer progress or a stall from file modification times, diff size, process listings, or repeated repository probes.
+2. Pause parent work while the coding worker runs. Do not reread its context, inspect its owned files, research later items, map the next slice, or invent other work to fill the wait. Handle only user steering, a hard stop, or a material external event until the worker returns.
+3. Wait in increasing intervals: 2 minutes, then 5 minutes, then 8 minutes, increasing later intervals by about 3 minutes up to the runner or platform maximum. Prefer the final notification over status polling. If an outer executor yields before the inner wait completes, resume that same wait without analysis, commentary, or repository probes. Do not publish an update merely because a wait interval elapsed.
+4. Treat the lane as stalled only after a runner error or `not_found`, an explicit worker blocker, a user or dependency change, or an explicit task timeout/budget. Quiet output and unchanged files are not stall evidence.
+5. On a concrete stall, make one recovery attempt: reuse the addressable worker with a narrower action-first contract when its work is salvageable, otherwise close it. If that attempt does not converge, reslice or let the main agent implement locally. Do not run repeated interrupt-and-poll cycles.
+
+Goal mode preserves the workflow across waits; it does not authorize busy waiting or filesystem surveillance.
 
 ## Review routing
 
-Use Sol's integration review for normal managed work. Use a fresh implementation reviewer only at a boundary with high risk. Start bounded reviewers with Luna at `xhigh` and raise Luna to `max` when its knowledge is sufficient. Start strict or cross-layer reviewers with Terra at `xhigh` and raise Terra to `max` when needed. Terra `high` and Sol `medium` or `high` are knowledge overrides, not generic review escalations; do not use Sol `medium` for a final high-risk verdict. Use Sol at `xhigh` for high-risk review and Sol at `max` for critical review. The `managed-quality` phase owns final quality reviewer routing.
+Use the main agent's integration review for normal managed work. Use a fresh implementation reviewer only at a boundary with high risk. Start bounded reviewers with Luna at `xhigh` and raise Luna to `max` when its knowledge is sufficient. Start strict or cross-layer reviewers with Terra at `xhigh` and raise Terra to `max` when needed. Terra `high` and Sol `medium` or `high` are knowledge overrides, not generic review escalations; do not use Sol `medium` for a final high-risk verdict. Use Sol at `xhigh` for high-risk review and Sol at `max` for critical review. The `managed-quality` phase owns final quality reviewer routing.
 
 Freeze the artifact under review and record reviewer identity when material fixes may need confirmation. If the artifact changes materially before the verdict arrives, treat the verdict as stale. Reuse the same reviewer only when material fixes need confirmation.
 
 Record the review verdict and material evidence in `checklist.md`. Do not create a separate review file unless the user explicitly requests it or an external handoff cannot use the checklist and final response.
 
-If a required reviewer is unavailable, let Sol perform the review and record the caveat. Stop only when the user or governing policy requires independence.
+If a required reviewer is unavailable, let the main agent perform the review and record the caveat. Stop only when the user or governing policy requires independence.

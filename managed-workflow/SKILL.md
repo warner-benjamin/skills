@@ -13,7 +13,7 @@ Route work through `managed-plan`, `managed-implement`, and `managed-quality` wh
 
 Read `references/workflow-contract.md` and choose `managed` or `strict`.
 
-- For `managed`, create the core artifacts, obtain human approval, use one `multi_agent_v1` implementation worker by default when delegation is worthwhile, set its model and reasoning effort explicitly, keep Sol on integration, run final human code cleanup, and verify.
+- For `managed`, create the core artifacts, obtain human approval, use one `multi_agent_v1` implementation worker by default when delegation is worthwhile, set its model and reasoning effort explicitly, keep the main agent on integration, run final human code cleanup, and verify.
 - For `strict`, also run the independent review required by the shared contract and phase skills. Record its outcome in the checklist.
 
 Every explicit managed-workflow invocation creates `plan.md` and `checklist.md`, even when the implementation is small. Small immediate tasks that do not need this process should not invoke the skill. If the user requests planning only, run `managed-plan` and stop before implementation.
@@ -39,7 +39,7 @@ Before each phase, read that phase's `SKILL.md`.
 3. On a later user turn, record explicit approval in the checklist. Run `managed-implement` only when the plan is still ready and authorization is approved.
 4. Run `managed-quality` for every managed source, test, or user interface code change. Skip it only under that phase's `not-required` rules or when the user explicitly skips it.
 5. When quality is not required and the tree has not changed since implementation verification, use that verification as the final result. Do not rerun it only to relabel the same evidence.
-6. Apply the shared commit policy after final verification.
+6. Apply the shared commit policy throughout implementation and finish any remaining required commit after final verification.
 7. If goal mode is active, keep it active through quality, final verification, and any required final commit or explicitly requested artifact. Mark it complete only when the shared completion condition is true.
 8. Report the result to the user. Create an extra report file only under the shared contract's exception.
 

@@ -2,7 +2,7 @@
 
 Match checks to the requested behavior and the size of the change. Run narrow checks first, then broaden when integration risk warrants it.
 
-Workers should run the targeted checks for their work item. Sol should inspect the resulting diff and run implementation verification from the integration workspace before quality cleanup.
+Workers should run the targeted checks for their work item. The main agent should inspect the resulting diff and run implementation verification from the integration workspace before quality cleanup.
 
 Record that result as `Implementation verification`. Keep it as evidence from before quality. `Verification` describes the current tree and becomes pending after any maintained code change.
 

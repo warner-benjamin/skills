@@ -14,6 +14,8 @@ Use these prompts for blind forward tests after changing the managed skill famil
 - Backend human quality pass
 - Frontend human quality pass
 - Explicit multi-agent controls
+- Long-running worker liveness
+- Adjacent worker continuity
 - Sol assurance ladder
 - Tightly coupled managed work
 - Quality resume
@@ -50,10 +52,10 @@ Expected behavior:
 - Leave authorization waiting, present both artifacts, and stop even though the original request asked for implementation.
 - After the user explicitly approves the presented plan, record that approval and choose the worker model and reasoning effort at dispatch.
 - Start with one `gpt-5.6-luna` worker at `xhigh` when ordinary implementation is bounded enough to delegate.
-- Keep Sol responsible for the integrated diff and implementation verification.
+- Keep the main agent responsible for the integrated diff and implementation verification.
 - Run backend quality cleanup and verify the final tree.
 - Do not create slice, result, review, or final-report files during the normal run.
-- Leave changes uncommitted unless the user or repository instructions require a commit.
+- Commit each completed slice or work item after its targeted checks pass unless the user asks to leave changes uncommitted or repository instructions prohibit an intermediate commit.
 
 ## Goal-backed implementation
 
@@ -127,7 +129,7 @@ Use $managed-workflow to perform this strict migration, but the runner has no re
 
 Expected behavior:
 
-- Run a Sol fallback review and record `Plan review: unavailable`.
+- Run a main-agent fallback review and record `Plan review: unavailable`.
 - Continue only when the user and governing policy did not require independence.
 - Stop and report the missing reviewer when independence was explicitly required.
 - Do not create a separate review file; keep the fallback evidence in the checklist.
@@ -202,6 +204,43 @@ Expected behavior:
 - Record the knowledge-breadth reason when selecting a larger model at a chart-dominated lower effort.
 - Keep Terra `max`, Sol `xhigh`, and Sol `max` as the ordinary quality-first frontier rather than treating every larger-model lower-effort point as an automatic escalation.
 
+## Long-running worker liveness
+
+Prompt:
+
+```text
+Use $managed-implement to execute this ready plan. The delegated worker may need a long discovery and test cycle before it returns.
+```
+
+Expected behavior:
+
+- Give the worker one bounded discovery pass followed by an action-oriented implementation and check sequence.
+- Pause parent work instead of rereading the worker's context, inspecting its files, or researching later items.
+- Wait for 2 minutes, then 5 minutes, then 8 minutes, continuing to increase the interval by about 3 minutes within runner limits.
+- Prefer the completion notification over status polling, and resume an executor-yielded wait without analysis or commentary.
+- Never poll file timestamps, diff sizes, processes, or repository state to guess whether the worker is progressing.
+- Do not publish an update merely because a wait interval elapsed. Treat the timeout as “no final result yet,” not as a stall.
+- Interrupt only for a runner error, explicit blocker, changed dependency/user direction, or an explicit exceeded timeout or budget.
+- Make at most one narrow recovery attempt after a concrete stall, then reslice or take the work local.
+- Do not let goal mode turn worker coordination into a busy-wait loop.
+
+## Adjacent worker continuity
+
+Prompt:
+
+```text
+Use $managed-implement for this ready parser plan. Item P2 directly follows P1 and edits the same parser and tests.
+```
+
+Expected behavior:
+
+- Inspect and accept P1 before dispatching P2.
+- Keep the P1 worker open until the next-item decision is made.
+- Reuse that worker for P2 when it remains suitable, sending P2 as a separate bounded contract.
+- Resume the same worker when it was closed but remains available; do not spawn a fresh worker merely to choose a cheaper lane.
+- Take P2 local when the main agent's integration context makes another handoff wasteful.
+- Start a fresh worker only for a recorded reason such as failed/off-scope prior work, required independence, unrelated ownership, or a material risk/model change.
+
 ## Sol assurance ladder
 
 Prompt:
@@ -227,7 +266,7 @@ Use $managed-implement to execute the ready plan in workflows/parser-fix.
 Expected behavior:
 
 - Allow one `gpt-5.6-luna` worker at `xhigh` reasoning when the item is explicit and context transfer is useful.
-- Allow Sol to work locally when the work is tightly coupled to integration.
+- Allow the main agent to work locally when the work is tightly coupled to integration.
 - Record the reason briefly and keep the normal acceptance and verification bar.
 
 ## Quality resume

@@ -83,13 +83,13 @@ Once approved, operate autonomously inside the plan. Ask again only when the wor
 
 Normal managed plans need no independent review. Strict plans require one fresh plan review attempt.
 
-If a reviewer is unavailable, perform a Sol review and set `Plan review: unavailable`. Continue only when independent review was not explicitly required by the user or governing policy. Otherwise stop and report the missing reviewer.
+If a reviewer is unavailable, perform a main-agent review and set `Plan review: unavailable`. Continue only when independent review was not explicitly required by the user or governing policy. Otherwise stop and report the missing reviewer.
 
 ## Commit policy
 
-Workers never commit to the integration branch. By default, Sol leaves the final change uncommitted. Commit only when the user asks, repository instructions require it, or the existing plan already records that requirement.
+Workers never commit to the integration branch; the main agent owns commits. By default, commit every completed slice or work item after its acceptance condition and targeted checks pass. Record the commit in `checklist.md` before starting the next item.
 
-When a commit is required, prefer one coherent green commit after quality and final verification. Use intermediate commits only when the user or repository workflow needs them. Never include unrelated changes.
+Skip an intermediate commit only when the user asks to leave changes uncommitted, repository instructions prohibit it, or the item cannot form a coherent verified change on its own. Record the reason and commit at the next safe boundary. Never include unrelated changes.
 
 ## Resume
 

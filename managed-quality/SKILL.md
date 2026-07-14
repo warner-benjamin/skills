@@ -42,7 +42,7 @@ Run this phase for every managed change to source, test, or user interface code.
 3. Review the whole integrated diff. Do not review each worker change in isolation because the combined result may duplicate concepts or contradict the intent contract.
 4. Apply the shared quality bar first. Look for a simpler framing that deletes branches, wrappers, flags, modes, duplicate helpers, or layers.
 5. Apply the backend or frontend reference. Group repeated symptoms under their common cause.
-6. Let Sol perform the normal final audit. Use one fresh reviewer when the path is strict, several independent worker changes interact, or the user asks for independent review.
+6. Let the main agent perform the normal final audit. Use one fresh reviewer when the path is strict, several independent worker changes interact, or the user asks for independent review.
 7. Fix high confidence findings directly. Keep behavior and public contracts stable unless the reviewed plan authorizes a change.
 8. Inspect the final diff again. Confirm that cleanup removed complexity instead of moving it into a new abstraction.
 9. Set `Verification: pending`, rerun the affected checks, and run the broad verifier when integration could regress.
