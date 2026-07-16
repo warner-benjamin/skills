@@ -8,7 +8,7 @@ Spawn agents only when the user requests this managed workflow, delegation, para
 
 Start one implementation worker by default. Add a second only for independent work. Respect the runner's concurrency limit and avoid creating agents merely because slots are available.
 
-Use the legacy `multi_agent_v1` tools for workers and reviewers. On every spawn, set `model` and `reasoning_effort` explicitly. Also set:
+Use the legacy `multi_agent_v1` tools for workers and reviewers. Immediately before every spawn, tell the user in commentary which `model` and `reasoning_effort` will be used, for example: `Spawning gpt-5.6-luna at xhigh for P1.` Then set both fields explicitly in the tool call. If a rejected combination requires a substitution, announce the replacement model and effort before retrying. Do not rely on the checklist as the only disclosure. Also set:
 
 - `agent_type: worker` for implementation and focused fixes
 - `agent_type: explorer` for read-only research and independent review

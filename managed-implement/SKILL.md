@@ -34,6 +34,8 @@ Return to planning when the plan is stale, the path must become strict, or a wor
 
 Delegate implementation through `multi_agent_v1` when the context transfer is worthwhile. Choose the lane at dispatch under the shared agent routing, and set `model`, `reasoning_effort`, `agent_type`, and `fork_context` explicitly. Use its chart-efficient core ladder for ordinary work and its knowledge overrides only when unfamiliar or cross-domain subject matter justifies a larger model below its maximum reasoning tier.
 
+Immediately before every new worker or reviewer spawn, name the selected model and reasoning level in commentary. Announce any replacement combination before retrying a rejected spawn; recording it in the checklist is not a substitute for telling the user.
+
 Allow the main agent to implement locally when no runner is available, the work is too small to justify transferring context, the work is tightly coupled to active integration, or one focused worker retry failed. Record the reason briefly when a checklist exists.
 
 Before spawning or closing a worker, apply the worker continuity and liveness rules in `agents.md`. Reuse an accepted worker for a directly dependent adjacent item with overlapping files or behavior; use local main-agent integration when that overlap makes a new handoff wasteful.
@@ -46,7 +48,7 @@ For each work item whose dependencies are ready:
 
 1. Reconcile its checklist status with the current tree. Confirm its ownership boundary, acceptance condition, and dependencies.
 2. Mark it `in-progress`. Build the worker prompt from the plan item and the worker contract in `agents.md`. Pass an absolute accessible plan path, or include the complete item contract when an isolated worker cannot read the run directory. Record the dispatched model and effort in the checklist's worker field.
-3. Let the worker implement and run targeted checks. Coordinate it under the liveness protocol in `agents.md`; pause parent analysis during the wait, do not research later items or reread the worker's context, and do not treat a wait timeout as evidence of a stall.
+3. Let the worker implement and run targeted checks. Do not babysit it: pause parent work and use the increasing 2-, 5-, then 8-minute waits in `agents.md` without progress commentary, status polling, repository probes, context rereading, or side work. Resume a tool-yielded wait silently. A wait timeout alone is not evidence of a stall.
 4. Inspect the changed paths and diff. Import only intended work when the worker used another workspace.
 5. Use an independent implementation reviewer only at a boundary with high risk. A strict path alone does not require a reviewer for every item.
 6. Rerun checks when import, later integration, or uncertain evidence warrants it.

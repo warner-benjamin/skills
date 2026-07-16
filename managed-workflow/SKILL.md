@@ -20,6 +20,8 @@ Every explicit managed-workflow invocation creates `plan.md` and `checklist.md`,
 
 You may find risk during planning that was not visible at the start. Promote the run to `strict` when the contract requires it. Do not preserve the original path merely because files already exist.
 
+Immediately before every new worker or reviewer spawn, name the selected model and reasoning level in commentary. Announce any replacement combination before retrying a rejected spawn.
+
 ## Create or resume
 
 For a new managed run, execute:
@@ -33,6 +35,8 @@ Add `--strict` for a known strict path. The command fails if the run directory a
 ## Run the phases
 
 Before each phase, read that phase's `SKILL.md`.
+
+During delegated work, do not babysit a running worker. Pause parent work and use the increasing 2-, 5-, then 8-minute wait sequence without progress commentary, status polling, repository probes, context rereading, or side work. Resume a tool-yielded wait silently; act only on completion, an explicit worker message, user steering, a hard stop, or a material external event.
 
 1. Run `managed-plan` to research, choose an approach, and define work items with acceptance checks.
 2. Present `plan.md` and `checklist.md`, ask for implementation approval, and stop.

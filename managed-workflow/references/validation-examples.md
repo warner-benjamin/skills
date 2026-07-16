@@ -51,6 +51,7 @@ Expected behavior:
 - Give each work item an acceptance condition and a matching pending checklist row.
 - Leave authorization waiting, present both artifacts, and stop even though the original request asked for implementation.
 - After the user explicitly approves the presented plan, record that approval and choose the worker model and reasoning effort at dispatch.
+- Immediately before spawning that worker, name the selected model and reasoning level in commentary.
 - Start with one `gpt-5.6-luna` worker at `xhigh` when ordinary implementation is bounded enough to delegate.
 - Keep the main agent responsible for the integrated diff and implementation verification.
 - Run backend quality cleanup and verify the final tree.
@@ -178,6 +179,7 @@ Use $managed-workflow to implement this reviewed plan with Terra workers.
 Expected behavior:
 
 - Honor the requested Terra model with `model: gpt-5.6-terra` and use `reasoning_effort: xhigh` by default; raise it to `max` before changing models when needed.
+- Immediately before spawning, tell the user in commentary that the worker will use `gpt-5.6-terra` at `xhigh`; announce a replacement combination before any retry.
 - Set `agent_type: worker` and `fork_context: false` when the reviewed plan contains the needed context.
 - Leave `service_tier` unset unless the user or approved plan names one.
 - If the model rejects the intended effort, use the closest supported level and record the substitution instead of silently omitting the field.
