@@ -32,13 +32,13 @@ Return to planning when the plan is stale, the path must become strict, or a wor
 
 ## Dispatch
 
-Delegate implementation through `multi_agent_v1` when the context transfer is worthwhile. Choose the lane at dispatch under the shared agent routing, and set `model`, `reasoning_effort`, `agent_type`, and `fork_context` explicitly. Use its chart-efficient core ladder for ordinary work and its knowledge overrides only when unfamiliar or cross-domain subject matter justifies a larger model below its maximum reasoning tier.
+Delegate implementation through `multi_agent_v1` when the context transfer is worthwhile. Choose the lane at dispatch under the shared agent routing, and set `model`, `reasoning_effort`, and `fork_context` explicitly. Require an execution-ready packet before ordinary implementation: chosen design, ownership and integration points, important behavior and invariants, acceptance, and checks. Return to planning when available detail is missing instead of buying a higher-effort worker. Start most reviewed, bounded items with Luna `high`. Use Luna `xhigh` only when discovery or coupled reasoning is inherent after good planning; use knowledge overrides only when unfamiliar or cross-domain subject matter justifies a larger model.
 
-Immediately before every new worker or reviewer spawn, name the selected model and reasoning level in commentary. Announce any replacement combination before retrying a rejected spawn; recording it in the checklist is not a substitute for telling the user.
+Immediately before every new worker or reviewer spawn, name the selected model and reasoning level in commentary. Announce any replacement combination before retrying a rejected spawn. Recording it in the checklist is not a substitute for telling the user.
 
 Allow the main agent to implement locally when no runner is available, the work is too small to justify transferring context, the work is tightly coupled to active integration, or one focused worker retry failed. Record the reason briefly when a checklist exists.
 
-Before spawning or closing a worker, apply the worker continuity and liveness rules in `agents.md`. Reuse an accepted worker for a directly dependent adjacent item with overlapping files or behavior; use local main-agent integration when that overlap makes a new handoff wasteful.
+Before spawning or closing a worker or reviewer, apply the agent continuity and liveness rules in `agents.md`. Keep an accepted agent open for foreseeable dependent work or focused confirmation and reuse it through `send_input`; use local main-agent integration when another handoff would be wasteful. Do not resume a closed agent, because its original model and reasoning effort may not be preserved.
 
 Set `Implementation: in-progress` before starting the first item. Apply `references/goal-mode.md` before the first edit and continue immediately after activation.
 
@@ -48,12 +48,12 @@ For each work item whose dependencies are ready:
 
 1. Reconcile its checklist status with the current tree. Confirm its ownership boundary, acceptance condition, and dependencies.
 2. Mark it `in-progress`. Build the worker prompt from the plan item and the worker contract in `agents.md`. Pass an absolute accessible plan path, or include the complete item contract when an isolated worker cannot read the run directory. Record the dispatched model and effort in the checklist's worker field.
-3. Let the worker implement and run targeted checks. Do not babysit it: pause parent work and use the increasing 2-, 5-, then 8-minute waits in `agents.md` without progress commentary, status polling, repository probes, context rereading, or side work. Resume a tool-yielded wait silently. A wait timeout alone is not evidence of a stall.
+3. Let the worker implement and run targeted checks. Do not babysit it. Call `wait_agent` with the active worker ID in `targets` and `timeout_ms: 1500000`. `wait_agent` returns as soon as the worker finishes, so the 25-minute timeout is only an upper bound and does not delay completed work. Await the call and do nothing else while it is pending: no progress commentary, status polling, repository probes, context rereading, or side work. If it times out while the worker is still running, repeat the same call with `timeout_ms: 1500000`; never omit the timeout or use an escalating sequence. Resume a tool-yielded wait silently and do not treat a wait timeout alone as evidence of a stall.
 4. Inspect the changed paths and diff. Import only intended work when the worker used another workspace.
 5. Use an independent implementation reviewer only at a boundary with high risk. A strict path alone does not require a reviewer for every item.
 6. Rerun checks when import, later integration, or uncertain evidence warrants it.
 7. Mark the item `complete` only when its acceptance condition and targeted checks pass. Record concise evidence, commit the accepted item before starting more work, and record the commit. Skip only under the shared commit-policy exceptions.
-8. Inspect the next ready item before closing the worker. Reuse, resume, close, or take the next item local under the continuity rules.
+8. Inspect all remaining approved items and likely confirmation passes before closing the worker. Keep and reuse it, close it, spawn a fresh explicit lane, or take later work local under the continuity rules; never close it when foreseeable later work will need it.
 
 For normal managed work, use the spawn prompt and worker's final response as the work packet and report. Record concise worker and reviewer evidence in the checklist. Create separate files only under the exceptions in `references/slice-artifacts.md`.
 

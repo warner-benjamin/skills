@@ -36,10 +36,14 @@ Create a separate slice or result file only when a runner cannot preserve the ex
 Set `Plan: ready` only when no material decision remains and each work item states:
 
 - a short ID and objective
-- likely paths or an ownership boundary
+- likely paths or symbols and an ownership boundary
 - real dependencies
+- the chosen implementation direction, integration points, and relevant invariants for non-mechanical work
+- important edge, error, and compatibility behavior when applicable
 - an observable acceptance condition
 - targeted checks
+
+Detail decisions and repository evidence, not narrative volume. If an implementer would still need to choose the architecture, public contract, data flow, or expected failure behavior, keep the plan in `drafting`; do not rely on a higher-effort worker to fill the gap.
 
 Create one matching checklist row for each work item. Use `pending`, `in-progress`, `blocked`, `complete`, or `skipped`. Keep at most one dependent item `in-progress`. Parallel items may both be active only when their file and behavior ownership are independent.
 

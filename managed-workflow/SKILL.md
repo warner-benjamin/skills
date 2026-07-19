@@ -13,7 +13,7 @@ Route work through `managed-plan`, `managed-implement`, and `managed-quality` wh
 
 Read `references/workflow-contract.md` and choose `managed` or `strict`.
 
-- For `managed`, create the core artifacts, obtain human approval, use one `multi_agent_v1` implementation worker by default when delegation is worthwhile, set its model and reasoning effort explicitly, keep the main agent on integration, run final human code cleanup, and verify.
+- For `managed`, create the core artifacts, obtain human approval, use one `multi_agent_v1` implementation worker at Luna `high` by default when delegation is worthwhile, set its model and reasoning effort explicitly, keep the main agent on integration, run final human code cleanup, and verify.
 - For `strict`, also run the independent review required by the shared contract and phase skills. Record its outcome in the checklist.
 
 Every explicit managed-workflow invocation creates `plan.md` and `checklist.md`, even when the implementation is small. Small immediate tasks that do not need this process should not invoke the skill. If the user requests planning only, run `managed-plan` and stop before implementation.
@@ -36,7 +36,7 @@ Add `--strict` for a known strict path. The command fails if the run directory a
 
 Before each phase, read that phase's `SKILL.md`.
 
-During delegated work, do not babysit a running worker. Pause parent work and use the increasing 2-, 5-, then 8-minute wait sequence without progress commentary, status polling, repository probes, context rereading, or side work. Resume a tool-yielded wait silently; act only on completion, an explicit worker message, user steering, a hard stop, or a material external event.
+During delegated work, do not babysit a running worker. Call `wait_agent` with the active worker ID in `targets` and `timeout_ms: 1500000`. `wait_agent` returns as soon as the worker finishes, so the 25-minute timeout is only an upper bound and does not delay completed work. Await the call and do nothing else while it is pending: no progress commentary, status polling, repository probes, context rereading, or side work. If it times out while the worker is still running, repeat the same call with `timeout_ms: 1500000`; never omit the timeout or use an escalating sequence. Resume a tool-yielded wait silently; act only on completion, an explicit worker message, user steering, a hard stop, or a material external event.
 
 1. Run `managed-plan` to research, choose an approach, and define work items with acceptance checks.
 2. Present `plan.md` and `checklist.md`, ask for implementation approval, and stop.
@@ -53,3 +53,4 @@ Operate autonomously inside the approved plan. Return to planning when code or n
 
 - Read `references/hard-stops.md` before consequential or ambiguous actions.
 - Read `references/validation-examples.md` only when testing or revising this skill family.
+- After revising this skill family, run `python3 "$SKILL_DIR/scripts/validate_skill_family.py"`.

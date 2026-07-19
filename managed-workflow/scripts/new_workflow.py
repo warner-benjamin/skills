@@ -71,9 +71,15 @@ Workflow: `{run_dir}`
 
 ## Work
 
-| ID | Objective | Paths | Depends on | Done when | Checks |
-| --- | --- | --- | --- | --- | --- |
-| work-1 | <objective> | <ownership boundary> | <none or ID> | <observable result> | <targeted checks> |
+### work-1: <objective>
+
+- Ownership: <likely paths or symbols and the ownership boundary>
+- Dependencies: <none or work-item IDs>
+- Direction: <chosen implementation direction>
+- Integration points and invariants: <relevant contracts and behavior that must remain true>
+- Edge, error, and compatibility behavior: <important cases or not applicable>
+- Done when: <observable acceptance condition>
+- Checks: <targeted checks>
 
 ## Verification
 
@@ -102,6 +108,7 @@ Quality: pending
 
 | ID | Status | Worker | Evidence |
 | --- | --- | --- | --- |
+| work-1 | pending | - | - |
 
 ## Checks
 

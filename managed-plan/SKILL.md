@@ -35,10 +35,10 @@ Use these sections:
 
 - `Goal`: State the requested outcome, success conditions, and meaningful exclusions.
 - `Approach`: State one chosen design, the important observed facts, and the contracts or edge cases that affect implementation.
-- `Work`: Define ordered work items with an objective, ownership boundary, dependencies, observable acceptance condition, and targeted checks.
+- `Work`: Define ordered work items with an objective, ownership boundary, dependencies, chosen implementation direction, relevant integration points and invariants, observable acceptance condition, and targeted checks. Name likely paths or symbols when repository evidence supports them.
 - `Verification`: State the implementation checks, the final verifier, and the quality lane as `backend`, `frontend`, `mixed`, or `not-required`.
 
-Add `Risks and approvals` only when needed. Keep the plan concise, but include enough detail that an implementer does not need to choose the architecture or invent expected behavior.
+Add `Risks and approvals` only when needed. Keep the plan concise by detailing decisions rather than narrating discovery. For each non-mechanical item, resolve the architecture or local pattern, API and data flow, important edge and error behavior, and compatibility expectations that would otherwise be left to the implementer. A plan is not ready merely because it names files and tests.
 
 Create one checklist row for each work item with status `pending`. Do not choose a worker model in the plan. Model choice belongs to dispatch in `managed-implement`.
 
@@ -46,12 +46,12 @@ Create one checklist row for each work item with status `pending`. Do not choose
 
 For `managed`, apply the plan readiness test and set `Plan review: not-required`. Do not create a separate self-review artifact.
 
-For `strict`, follow `references/plan-review.md` and run one fresh review. Fix valid findings and update the plan. Use re-review only after material fixes to blocking findings.
+For `strict`, follow `references/plan-review.md` and run one fresh review using the independent plan-review routing in `$WORKFLOW_SKILL_DIR/references/agents.md`. A strict label alone selects the familiar strict lane; it does not require Terra or Sol. Fix valid findings and update the plan. Use re-review only after material fixes to blocking findings.
 
 ## Human approval and handoff
 
 Leave `Implementation authorization: waiting`. A request that also asks for implementation does not approve a plan the user has not seen.
 
-Set `Plan: ready` only after material decisions are resolved, work rows exist, and the applicable review gate permits implementation. Update the checklist with concise review and authorization evidence.
+Set `Plan: ready` only after material decisions are resolved, work items and matching checklist rows exist, and the applicable review gate permits implementation. Update the checklist with concise review and authorization evidence.
 
 Present both artifact paths, summarize the approach and material risks, ask the user whether to proceed, and stop. Plan feedback, approval of one design choice, or praise does not count as implementation approval. When this skill runs inside `managed-workflow`, return with authorization waiting so the orchestrator also stops.

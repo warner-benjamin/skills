@@ -46,7 +46,7 @@ Run this phase for every managed change to source, test, or user interface code.
 7. Fix high confidence findings directly. Keep behavior and public contracts stable unless the reviewed plan authorizes a change.
 8. Inspect the final diff again. Confirm that cleanup removed complexity instead of moving it into a new abstraction.
 9. Set `Verification: pending`, rerun the affected checks, and run the broad verifier when integration could regress.
-10. Ask the same reviewer to confirm only material fixes to blocking findings.
+10. Keep the reviewer open through cleanup and ask that same open reviewer to confirm only material fixes to blocking findings. Close it only after the quality verdict is final; do not resume a closed reviewer.
 11. Set `Quality: passed` and `Verification: passed` only after the cleanup and checks succeed.
 
 Apply small cleanup locally. Delegate a substantial cleanup only when it has a clear ownership boundary. Create packets, results, or review files only when strict evidence, workspace transfer, or resume safety needs them.
