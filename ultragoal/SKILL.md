@@ -7,6 +7,8 @@ description: Design, critique, activate, and run durable Codex goals through gro
 
 Own one durable objective from grounding through verified completion. Use native goal and plan state; do not build a second workflow state machine.
 
+Set `SKILL_DIR` to the absolute directory containing this file. Resolve `QUALITY_REVIEW_SKILL` directly as `$SKILL_DIR/../quality-review/SKILL.md`. Do not search the skills tree for it. If that sibling file is missing, report an incomplete installation instead of substituting another quality skill.
+
 ## Choose the mode
 
 - **Design:** Ground and critique a proposed goal. Do not call `create_goal` or implement.
@@ -95,7 +97,7 @@ Keep an implementer open through parent inspection, one focused correction pass,
 
 Require focused review to pass before crossing a risk-bearing boundary such as authorization, privacy, destructive data changes, migrations, concurrency, or external effects. The parent may perform it unless the user or governing instructions require independence; if required independence is unavailable, stop before the boundary and report the capability gap.
 
-When maintained implementation code, tests, user-interface code, or agent instructions changed, run the sibling `quality-review` skill before final completion. Announce why it is being used. For integrated multi-worker or consequential changes, prefer one fresh read-only aggregate reviewer when subagents are authorized; otherwise apply the skill directly. Quality review complements rather than replaces risk-specific review.
+When maintained implementation code, tests, user-interface code, or agent instructions changed, read `QUALITY_REVIEW_SKILL` completely and follow it before final completion. Announce why it is being used. For integrated multi-worker or consequential changes, prefer one fresh read-only aggregate reviewer when subagents are authorized and include the resolved absolute `QUALITY_REVIEW_SKILL` path in its prompt; otherwise apply the skill directly. Quality review complements rather than replaces risk-specific review.
 
 Before aggregate review, freeze the intended change and pass an explicit inventory covering staged, unstaged, deleted, renamed, and relevant untracked files. A branch diff alone is not proof of complete scope.
 
