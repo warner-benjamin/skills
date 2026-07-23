@@ -15,7 +15,7 @@ Set `SKILL_DIR` to the absolute directory containing this file. Resolve `QUALITY
 - **Activate:** Ground the goal, define its verifier and plan, call `create_goal`, then continue the work.
 - **Resume:** Reconcile the active goal, current plan, governing documents, repository state, and completed evidence before continuing.
 
-Treat an explicit request to use `$ultragoal` and complete, build, implement, or pursue a concrete objective as Activate. Stay in Design only when the user asks to draft, critique, or discuss the goal without starting it.
+Treat an explicit request to use `$ultragoal` and complete, build, implement, or pursue a concrete objective as Activate. Questions, investigations, suspected gaps, and requests to research, inspect, draft, critique, or discuss remain Design unless the user explicitly asks to start implementation. Never infer activation merely because the investigation could lead to code changes.
 
 In Design mode, do not update the native plan or write durable artifacts unless the user explicitly requests them. In Activate mode, do not force a second approval turn when the user already asked for implementation; pause only for a material unresolved choice or authority outside the request.
 
@@ -87,9 +87,9 @@ Use a user-selected or runbook-selected model and effort. Otherwise prefer the i
 | High-consequence decision or review | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
 | Critical decision or review | `gpt-5.6-sol`, `max` | Explicit critical assurance or unresolved high-risk reasoning |
 
-Give each worker one objective, governing context, ownership boundary, invariants, non-goals, behavioral exit condition, checks, and stop condition. Require it to preserve unrelated work, avoid commits, and report behavior, changed paths, checks, deviations, and concrete risks. Use isolated workspaces or disjoint write sets for parallel coding. Keep ownership of scope, integration, architecture, verification, and completion in the parent; treat every result as an untrusted draft.
+Give each worker one objective, governing context, ownership boundary, invariants, non-goals, behavioral exit condition, checks, and stop condition. Require it to preserve unrelated work, avoid commits, and report behavior, changed paths, checks, deviations, and concrete risks. Default to `fork_context: false` with a self-contained packet and exact governing-document paths; fork context only when the bounded task genuinely requires conversation history that the packet cannot safely capture. Use isolated workspaces or disjoint write sets for parallel coding. Keep ownership of scope, integration, architecture, verification, and completion in the parent; treat every result as an untrusted draft.
 
-Immediately after dispatch, call `wait_agent` with the active IDs and `timeout_ms: 1500000`. The timeout is only an upper bound and returns immediately when any target finishes. Do no commentary, polling, repository inspection, context rereading, or side work while pending. For parallel lanes, collect completed results and immediately wait on remaining active IDs with the same timeout; do not integrate until every coding lane is terminal.
+Immediately after dispatch, call `wait_agent` with the active IDs and `timeout_ms: 1500000`. The timeout is only an upper bound and returns immediately when any target finishes. If the enclosing tool call yields a running cell, resume that same cell silently; do not issue another `wait_agent` call. If `wait_agent` itself times out while targets remain active, call it again with the same active IDs and `timeout_ms: 1500000`. A timeout is not terminal. Do no commentary, shorter status polling, repository inspection, context rereading, or side work while pending. For parallel lanes, collect completed results and immediately wait on remaining active IDs with the same timeout; do not integrate until every coding lane is terminal.
 
 Keep an implementer open through parent inspection, one focused correction pass, verification, required review, and acceptance. Reuse it with `send_input`; do not resume a closed agent. Use one fresh read-only reviewer when independence or a risk-bearing boundary matters, keep it open for focused confirmation, and do not create a reviewer chain.
 
@@ -97,11 +97,15 @@ Keep an implementer open through parent inspection, one focused correction pass,
 
 Require focused review to pass before crossing a risk-bearing boundary such as authorization, privacy, destructive data changes, migrations, concurrency, or external effects. The parent may perform it unless the user or governing instructions require independence; if required independence is unavailable, stop before the boundary and report the capability gap.
 
+Before declaring a design or implementation artifact frozen or dispatching its reviewer, confirm the exact scope, source and dependency versions, unresolved user choices, governing documents, and intended change inventory. Continue grounding instead of reviewing a knowingly moving target. Ask the reviewer to challenge every new abstraction, persisted discriminator, and compatibility layer against existing library primitives and the smallest sufficient design.
+
 When maintained implementation code, tests, user-interface code, or agent instructions changed, read `QUALITY_REVIEW_SKILL` completely and follow it before final completion. Announce why it is being used. For integrated multi-worker or consequential changes, prefer one fresh read-only aggregate reviewer when subagents are authorized and include the resolved absolute `QUALITY_REVIEW_SKILL` path in its prompt; otherwise apply the skill directly. Quality review complements rather than replaces risk-specific review.
 
 Before aggregate review, freeze the intended change and pass an explicit inventory covering staged, unstaged, deleted, renamed, and relevant untracked files. A branch diff alone is not proof of complete scope.
 
 Resolve accepted findings, inspect the resulting diff again, and rerun affected checks plus the strongest final verifier.
+
+Any material change to a reviewed artifact invalidates its prior approval. Reuse the open reviewer for focused confirmation or, if it was closed or independence requires it, use one fresh reviewer before activation or completion.
 
 ## Complete honestly
 
@@ -115,3 +119,5 @@ Mark the goal complete only when:
 - no required work remains.
 
 Report the outcome, strongest evidence, important review-driven changes, unresolved advisory findings, and remaining concrete risk. Mark the goal blocked only under the platform blocker rule when a true external condition prevents meaningful progress.
+
+Immediately before any `update_goal` completion or blocked transition, reconcile the current goal status, latest agent notifications, active or ambiguous worker ownership, authoritative worktree, and external state. Never mark blocked while an unreconciled worker may still return meaningful progress, and never overwrite a user-controlled paused or cancelled state.
