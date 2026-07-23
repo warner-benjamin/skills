@@ -1,6 +1,0 @@
-interface:
-  display_name: "Managed Implement"
-  short_description: "Execute a human-approved implementation plan"
-  default_prompt: "Use $managed-implement to execute this human-approved plan with appropriate delegation, integration, and verification."
-policy:
-  allow_implicit_invocation: false

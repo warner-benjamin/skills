@@ -1,0 +1,6 @@
+interface:
+  display_name: "Quality Review"
+  short_description: "Demand ambitious, evidence-backed code quality"
+  default_prompt: "Use $quality-review to audit this diff for structural simplification, maintainability, and frontend quality."
+policy:
+  allow_implicit_invocation: false

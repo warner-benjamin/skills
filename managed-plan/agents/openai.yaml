@@ -1,6 +1,0 @@
-interface:
-  display_name: "Managed Plan"
-  short_description: "Create human-reviewed implementation plans"
-  default_prompt: "Use $managed-plan to research this project, create the plan and checklist, and present them for approval."
-policy:
-  allow_implicit_invocation: false

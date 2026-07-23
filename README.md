@@ -1,38 +1,31 @@
-## Managed skills
+## Durable delivery skills
 
-The `managed-*` skill family provides four separate phases:
+This repository provides two explicitly invoked skills:
 
-- `managed-workflow` selects a managed or strict assurance level and coordinates the other phases.
-- `managed-plan` researches the repository and writes a concise implementation plan.
-- `managed-implement` delegates through `multi_agent_v1`, using a Luna-first depth ladder plus Terra breadth overrides and Sol consequence routes while the main agent owns integration and verification.
-- `managed-quality` removes AI shaped residue from integrated backend and frontend code, then reverifies behavior.
+- `ultragoal` grounds and activates a durable objective, maintains native goal and plan state, coordinates dependency-ordered implementation, keeps the parent responsible for integration, and proves completion with the strongest feasible verifier.
+- `quality-review` performs an ambitious, evidence-backed maintainability and product-quality audit across backend, general, test, and frontend code. It searches for structural simplifications before local cleanup and can be used independently or as Ultragoal's final aggregate quality gate.
 
-Every managed workflow creates a detailed executable `plan.md` and concise `checklist.md`, presents them for human review, and waits for explicit approval before implementation. After approval, normal managed work activates goal mode when persistence helps, starts one explicitly configured implementation worker when delegation is worthwhile, uses the main agent for integration review, runs a final human code cleanup, and verifies the cleaned result. Model routing uses Luna `high` for most reviewed, bounded implementation, Luna `medium` only for disposable or deterministically checked work, and Luna `xhigh` or `max` only when the item retains inherent discovery or earns additional reasoning depth. Terra and Sol are selected for knowledge breadth or consequence rather than as automatic cost-quality steps. A higher-effort worker is not a substitute for a plan that leaves available design decisions unresolved. Strict work adds an explicitly configured independent reviewer for changes with high risk and records its evidence in the checklist.
+`ultragoal` deliberately avoids a parallel workflow state machine. It prefers existing design documents and delivery runbooks, the native active goal, and the native plan. Additional generated workflow files are created only when the user requests durable artifacts or an external handoff cannot use the existing state.
 
-Worker prompts and final responses are the normal delegated-work record. Separate slice, result, review, or final-report files are created only when the user explicitly requests them or an external workspace or handoff cannot preserve the normal record. Small immediate work that does not need these artifacts should not invoke the managed workflow.
+Delegated work remains bounded and manager-owned: workers receive one behavioral contract, the parent waits without polling, personally inspects the complete diff, permits at most one focused correction pass, verifies from the integration workspace, and accepts or commits only at requested boundaries. Risk-specific reviews remain separate from the final quality review.
 
-The skills can be invoked separately or coordinated through `managed-workflow`.
+Both skills disable implicit invocation. Use `$ultragoal` for a persistent managed objective and `$quality-review` for the strict quality gate.
 
-These skills are inspired by a personal agent workflow and informed by the following third-party skills.
+Migration from the retired family is direct: use `$ultragoal` Design instead of `managed-plan`, `$ultragoal` Activate or Resume instead of `managed-workflow` and `managed-implement`, and `$quality-review` instead of `managed-quality`. No compatibility wrappers are retained.
 
 ### Sources
 
 - Ultragoal:
   [`dots/agents/skills/ultragoal/SKILL.md`](https://github.com/jxnl/dots/blob/e0174bdea2a55e8fe9d2912edafacb4abe9b3251/agents/skills/ultragoal/SKILL.md)
 
-  Inspired conditional goal mode, restart-safe objectives, completion standards, and bounded child work.
-
-- Codex Dynamic Workflows:
-  [`codex-dynamic-workflows/SKILL.md`](https://github.com/DannyMac180/skills/blob/5695fa19b9d39b8270025e79633b49a8b863f9a2/codex-dynamic-workflows/SKILL.md)
-
-  Inspired explicit orchestration, work ownership, integration policy, verification, and durable workflow files.
+  Inspired explicit goal activation, outcome grounding, real-surface verification, anti-cheating rules, restart discipline, completion proof, and parent-owned delegation.
 
 - Thermo-Nuclear Code Quality Review:
   [`plugins/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md`](https://github.com/cursor/plugins/blob/cfd81b3961ef5fddc90e9f2994fa1c87cd454e61/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md)
 
-  Inspired the final structural simplification review.
+  Inspired ambitious structural simplification, code-judo reframing, spaghetti prevention, and the strong approval bar.
 
 - AI Code Audit and AI Frontend Audit:
   [`audit-ai-code/SKILL.md`](https://github.com/jxnl/dots/blob/74d80b1045c3a026704193ee69d09048276a79f1/agents/skills/audit-ai-code/SKILL.md) and [`audit-ai-frontend/SKILL.md`](https://github.com/jxnl/dots/blob/74d80b1045c3a026704193ee69d09048276a79f1/agents/skills/audit-ai-frontend/SKILL.md)
 
-  Inspired the backend and frontend checks for generated residue, intentional APIs, component and data shape, accessibility, responsive behavior, and generic visual defaults.
+  Inspired local-idiom checks, canonical ownership and API review, generated-residue and test audits, browser verification, component and data-shape review, accessibility, responsive resilience, and fact-versus-inference discipline.

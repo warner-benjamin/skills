@@ -1,4 +1,0 @@
-interface:
-  display_name: "Managed Workflow"
-  short_description: "Plan, approve, delegate, clean up, verify"
-  default_prompt: "Use $managed-workflow to create a plan and checklist for my approval, then implement, clean up, and verify after I approve."
