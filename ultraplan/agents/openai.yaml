@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ultraplan"
+  short_description: "Design execution-ready durable goal plans"
+  default_prompt: "Use $ultraplan to ground and critique this objective and return an execution-ready activation packet."
+policy:
+  allow_implicit_invocation: false

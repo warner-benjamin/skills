@@ -1,0 +1,4 @@
+interface:
+  display_name: "Delegate"
+  short_description: "Use subagents without duplicating their work"
+  default_prompt: "Use $delegate to carry out this requested subagent delegation without duplicating the assigned work."
