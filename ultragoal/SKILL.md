@@ -87,11 +87,51 @@ Use a user-selected or runbook-selected model and effort. Otherwise prefer the i
 | High-consequence decision or review | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
 | Critical decision or review | `gpt-5.6-sol`, `max` | Explicit critical assurance or unresolved high-risk reasoning |
 
-Give each worker one objective, governing context, ownership boundary, invariants, non-goals, behavioral exit condition, checks, and stop condition. Require it to preserve unrelated work, avoid commits, and report behavior, changed paths, checks, deviations, and concrete risks. Default to `fork_context: false` with a self-contained packet and exact governing-document paths; fork context only when the bounded task genuinely requires conversation history that the packet cannot safely capture. Use isolated workspaces or disjoint write sets for parallel coding. Keep ownership of scope, integration, architecture, verification, and completion in the parent; treat every result as an untrusted draft.
+Give each worker one immutable objective, governing context, ownership boundary, invariants, non-goals, behavioral exit condition, checks, and stop condition. Reject a packet as too broad when it contains multiple independently testable outcomes or could return useful partial completion; split it by behavioral invariant rather than merely by frontend, backend, or plan slice. Do not repurpose an agent thread for another objective or slice.
 
-Immediately after dispatch, call `wait_agent` with the active IDs and `timeout_ms: 1500000`. The timeout is only an upper bound and returns immediately when any target finishes. If the enclosing tool call yields a running cell, resume that same cell silently; do not issue another `wait_agent` call. If `wait_agent` itself times out while targets remain active, call it again with the same active IDs and `timeout_ms: 1500000`. A timeout is not terminal. Do no commentary, shorter status polling, repository inspection, context rereading, or side work while pending. For parallel lanes, collect completed results and immediately wait on remaining active IDs with the same timeout; do not integrate until every coding lane is terminal.
+Require workers to preserve unrelated work, avoid commits, and report behavior, changed paths, checks, deviations, and concrete risks. Default to `fork_context: false` with a self-contained packet and exact governing-document paths; fork context only when the bounded task genuinely requires conversation history that the packet cannot safely capture. Use isolated workspaces or disjoint write sets for parallel coding. Keep ownership of scope, integration, architecture, verification, and completion in the parent; treat every result as an untrusted draft.
 
-Keep an implementer open through parent inspection, one focused correction pass, verification, required review, and acceptance. Reuse it with `send_input`; do not resume a closed agent. Use one fresh read-only reviewer when independence or a risk-bearing boundary matters, keep it open for focused confirmation, and do not create a reviewer chain.
+Keep cross-worker seams, generated artifacts, contract regeneration, merge fixes, and localized changes in already-integrated code with the parent. Do not delegate a small known fix when transferring context and reviewing the result is likely to cost more than implementing it locally.
+
+Immediately after dispatch, start one long wait with this exact Code Mode call:
+
+```js
+// @exec: {"yield_time_ms": 1500000, "max_output_tokens": 30000}
+const result = await tools.multi_agent_v1__wait_agent({
+  targets: activeAgentIds,
+  timeout_ms: 1500000,
+});
+for (const [id, status] of Object.entries(result.status ?? {})) {
+  text(`${id}: ${JSON.stringify(status)}`);
+}
+text(`timed_out:${result.timed_out}`);
+```
+
+The matching outer yield and agent timeout keep this single call open for up to 25 minutes and return immediately when any target finishes. Do not call `functions.wait`, start another `wait_agent`, add commentary, inspect the repository, reread context, or do side work while it is pending. After `timed_out:true`, run the same call again with the remaining active IDs. For parallel lanes, collect completed results and immediately run the same call for the remaining active IDs; do not integrate until every coding lane has returned `completed` or `errored`.
+
+Keep an implementer open through parent inspection, one focused correction pass, verification, required review, and acceptance. An implementer thread may receive at most two task prompts: its initial packet and one consolidated correction packet. A reviewer thread may receive its initial review and one focused confirmation. Before every `send_input`, count the task prompts already sent to that thread; never send a third task prompt. Do not resume a closed agent or create a reviewer chain.
+
+When material work remains after the correction pass, end that worker's ownership and return the item to planning. Identify the root cause, then implement a bounded integration fix locally or dispatch one fresh, smaller packet with new ownership. Do not continue implementer-reviewer ping-pong.
+
+## Re-plan unstable work
+
+Stop incremental correction and re-plan the affected work when:
+
+- an implementer exhausts its correction pass;
+- two agents miss the same acceptance condition;
+- a supposedly accepted item fails its broad verifier because of the new work;
+- an aggregate review finds three or more unrelated blocking root causes;
+- successive small fixes repeatedly invalidate review approval.
+
+Batch every known finding before resuming implementation. Replace symptom-sized fixes with root-cause work items, define fresh ownership and exit conditions, and update the native plan before dispatching again. Do not ask the user unless re-planning changes the finish line, authority, or accepted outcome.
+
+At each accepted boundary, reconcile active agents, prompts used per agent, review rounds, broad verifier runs, and known advisory findings. If any circuit breaker has fired, record the re-scoped approach in the native plan before continuing.
+
+## Control verification cost
+
+Run targeted checks while implementation is moving. Run a broad repository gate only when no known fixes remain and the intended item or aggregate state is frozen. Before starting it, confirm that no broad verifier from the goal is still running; if a tool call yields a process session, continue that same session instead of starting an overlapping run.
+
+After a broad failure, reproduce and diagnose it narrowly before running the broad gate again. At ordinary slice boundaries, run the broad suite only when the governing acceptance checks or risk justify it. Always run the declared strongest final verifier on the final frozen state.
 
 ## Review at the right boundaries
 
@@ -99,11 +139,15 @@ Require focused review to pass before crossing a risk-bearing boundary such as a
 
 Before declaring a design or implementation artifact frozen or dispatching its reviewer, confirm the exact scope, source and dependency versions, unresolved user choices, governing documents, and intended change inventory. Continue grounding instead of reviewing a knowingly moving target. Ask the reviewer to challenge every new abstraction, persisted discriminator, and compatibility layer against existing library primitives and the smallest sufficient design.
 
-When maintained implementation code, tests, user-interface code, or agent instructions changed, read `QUALITY_REVIEW_SKILL` completely and follow it before final completion. Announce why it is being used. For integrated multi-worker or consequential changes, prefer one fresh read-only aggregate reviewer when subagents are authorized and include the resolved absolute `QUALITY_REVIEW_SKILL` path in its prompt; otherwise apply the skill directly. Quality review complements rather than replaces risk-specific review.
+When maintained implementation code, tests, user-interface code, or agent instructions changed, read `QUALITY_REVIEW_SKILL` completely and follow it before final completion. Announce why it is being used. By default, run the strict quality review once on the frozen aggregate implementation rather than after every ordinary slice. Use earlier quality review only when the user or governing sources require it, or when a consequential slice is too large to defer safely. Quality review complements rather than replaces risk-specific review.
+
+For integrated multi-worker or consequential changes, prefer one fresh read-only aggregate reviewer when subagents are authorized and include the resolved absolute `QUALITY_REVIEW_SKILL` path in its prompt; otherwise apply the skill directly.
 
 Before aggregate review, freeze the intended change and pass an explicit inventory covering staged, unstaged, deleted, renamed, and relevant untracked files. A branch diff alone is not proof of complete scope.
 
-Resolve accepted findings, inspect the resulting diff again, and rerun affected checks plus the strongest final verifier.
+Collect and classify the complete review result before editing. Resolve accepted blocking findings in one consolidated remediation batch, inspect the resulting diff again, rerun affected checks, and request one focused confirmation. Do not request review after each small repair. If confirmation finds new blocking root causes, trigger the unstable-work circuit breaker instead of dispatching symptom-sized corrections.
+
+Treat `P0` and `P1` findings as blocking. Preserve `P2` findings as advisory residual risk and do not fix them during the active goal unless the user requested them, an explicit acceptance check requires them, or the repair is incidental to a blocking fix.
 
 Any material change to a reviewed artifact invalidates its prior approval. Reuse the open reviewer for focused confirmation or, if it was closed or independence requires it, use one fresh reviewer before activation or completion.
 
