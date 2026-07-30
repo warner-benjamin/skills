@@ -94,7 +94,7 @@ Reuse the same open reviewer for materially related review, remediation confirma
 
 Before spawning an agent, inventory the open agents. Reuse an open agent when its role, objective, ownership boundary, governing context, and artifact set remain compatible. Reuse the original implementer for related corrections and follow-up checks on its slice, and the original reviewer for remediation confirmation or materially related review. Do not create overlapping agents for substantially the same work.
 
-Treat an agent's `completed` status as completion of its current prompt, not acceptance of its work slice or release of its ownership. Keep an implementer open through parent inspection, targeted verification, review findings, corrective work, and final acceptance. Keep a reviewer open through remediation and confirmation. Reuse has no numeric prompt or correction-round limit: batch related findings instead of drip-feeding them, keep follow-ups focused on the stable contract, and continue with the same compatible agent while the work converges.
+Treat an agent's `completed` status as completion of its current prompt, not acceptance of its work slice or release of its ownership. Keep an implementer open through parent inspection, targeted verification, review findings, corrective work, and final acceptance. Keep a reviewer open through remediation and confirmation. Reuse has no numeric prompt or correction-round limit: batch related findings instead of drip-feeding them and continue only while failures narrow, the behavioral gap shrinks, or the diagnosis materially improves. Re-scope when failures repeat unchanged, fixes oscillate, or repairs merely move the failure.
 
 Request a focused correction or clarification with:
 
@@ -114,5 +114,7 @@ text(JSON.stringify(closed));
 ```
 
 Treat closing as terminal. Avoid `resume_agent` because resuming through the multi-agent tools may change the effective agent type and invalidate model, role, or continuity assumptions. If work appears after closure, prefer a fresh agent with a self-contained packet. Resume only when the closed thread contains essential context that cannot be reconstructed and a possible type change is harmless.
+
+When an agent errors or is cancelled, reconcile its report and partial changes, explicitly release its ownership, close it, and reassign the remaining slice. Do not resume the failed agent.
 
 Reuse only within a stable role and ownership contract. When repeated corrections reveal that the objective, ownership boundary, or integration contract is unstable, stop extending the slice and return it for re-scoping.

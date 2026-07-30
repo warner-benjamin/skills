@@ -64,7 +64,7 @@ Do not weaken tests, delete meaningful assertions, replace the declared interact
 
 ## Output findings
 
-Return up to eight findings for review-only requests. Return fewer when the evidence supports fewer, and return none when the diff is clean. Merge repeated symptoms under their root cause and prioritize:
+Return every supported P0 and P1 finding for review-only requests, plus up to eight P2 findings. Disclose when additional P2 findings were suppressed. Return fewer when the evidence supports fewer, and return none when the diff is clean. Merge repeated symptoms under their root cause and prioritize:
 
 1. Structural regressions and missed code-judo simplifications.
 2. Spaghetti growth, ownership leaks, and state-model problems.
@@ -78,7 +78,7 @@ For each finding include:
 - **Class:** `P0` for a correctness, safety, or completion blocker; `P1` for a material structural or maintainability regression; `P2` for a worthwhile bounded improvement
 - **Root cause**
 - **Why it matters**
-- **Possible non-AI explanation**
+- **Possible deliberate rationale**
 - **Recommended remedy**
 - **Acceptance check**
 - **Confidence:** `High`, `Medium`, or `Low`

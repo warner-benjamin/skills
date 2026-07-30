@@ -114,6 +114,8 @@ Treat an agent's `completed` status as completion of its current prompt, not acc
 
 Treat closing as terminal. Avoid `resume_agent` because resuming through the multi-agent tools may change the effective agent type and invalidate model, role, or continuity assumptions. If work appears after closure, prefer a fresh agent with a self-contained packet. Resume only when the closed thread contains essential context that cannot be reconstructed and a possible type change is harmless.
 
+When an agent errors or is cancelled, reconcile its report and partial worktree changes, update the native plan, explicitly release its ownership, close it, and reassign the remaining slice to the parent, a compatible open agent, or a fresh agent. Do not resume the failed agent.
+
 Reuse has no numeric prompt or correction-round limit. Batch related findings instead of drip-feeding them, keep each follow-up focused on the stable contract, and continue with the same compatible agent while corrections converge. After each correction, require concrete convergence evidence such as fewer failing checks or cases, a smaller remaining behavioral gap, or a materially stronger diagnosis. If the same failure recurs without narrowing, fixes oscillate, or repairs merely move the failure, treat the work as non-converging and re-plan rather than extending an invalid slice.
 
 ## Re-plan unstable work
@@ -122,9 +124,8 @@ Stop incremental correction and re-plan the affected work when:
 
 - a correction repeats the same verifier failure without reducing the failing cases or narrowing the diagnosis;
 - fixes oscillate between states or move the failure without shrinking the behavioral gap;
-- two agents miss the same acceptance condition;
 - a supposedly accepted item fails its broad verifier because of the new work;
-- an aggregate review finds three or more unrelated blocking root causes;
+- aggregate review exposes blocking root causes that invalidate the work contract or ownership boundary;
 - successive small fixes repeatedly invalidate review approval.
 
 Batch every known finding before resuming implementation. Replace symptom-sized fixes with root-cause work items, define fresh ownership and exit conditions, and update the native plan before dispatching again. Do not ask the user unless re-planning changes the finish line, authority, or accepted outcome.
@@ -161,11 +162,12 @@ Mark the goal complete only when:
 
 - the observable outcome exists;
 - every required work item and requested commit or artifact is complete;
-- every blocking risk-specific or quality finding is resolved or explicitly accepted by the user;
+- every P0, correctness, safety, and completion blocker is resolved;
+- every blocking risk-specific finding and every P1 finding is resolved;
 - verification passes on the final state after the last maintained change;
 - the declared completion proof is available;
 - no required work remains.
 
-Report the outcome, strongest evidence, important review-driven changes, unresolved advisory findings, and remaining concrete risk. Mark the goal blocked only under the blocker standard declared in the active goal when a true external condition prevents meaningful progress.
+Report the outcome, strongest evidence, important review-driven changes, unresolved advisory findings, and remaining concrete risk. Mark the goal blocked only when the same true external condition satisfies the active goal's blocker standard, prevents meaningful progress for at least three consecutive goal turns, and no active or ambiguous agent can still help.
 
 Immediately before any `update_goal` completion or blocked transition, reconcile the current goal status, latest agent notifications, active or ambiguous worker ownership, authoritative worktree, and external state. Never mark blocked while an unreconciled worker may still return meaningful progress, and never overwrite a user-controlled paused or cancelled state.

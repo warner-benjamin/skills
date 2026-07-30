@@ -1,21 +1,21 @@
-## Durable delivery skills
+## Planning and durable delivery skills
 
-This repository provides four delivery skills:
+This repository provides three core delivery skills and one experimental standalone skill:
 
-- `ultraplan` grounds and critiques a proposed durable objective, decomposes it into bounded dependency-ordered parent and subagent lanes with proposed models and efforts, and returns an execution-ready activation packet without mutating goal state or implementing.
+- `ultraplan` researches and challenges an objective, compares viable directions, and produces a proportional execution plan with execution-ready parent and subagent work. It can return a conversational handoff, update one canonical plan document, or append an activation packet when durable-goal machinery is useful.
 - `ultragoal` validates and activates an execution-ready objective, maintains native goal and plan state, coordinates dependency-ordered implementation, keeps the parent responsible for integration, and proves completion with the strongest feasible verifier.
 - `quality-review` performs an ambitious, evidence-backed maintainability and product-quality audit across backend, general, test, and frontend code. It searches for structural simplifications before local cleanup and can be used independently or as Ultragoal's final aggregate quality gate.
-- `delegate` carries out an explicit request to use subagents, gives each worker sole ownership of its assigned scope while running, waits without polling, and limits parent verification to targeted post-return spot-checks instead of duplicate work.
+- Experimental `delegate` carries out an explicit request to use subagents without durable goal state. The core skills never depend on it being installed.
 
-`ultraplan` is design-only and returns a conversational activation packet unless the user requests one canonical durable artifact. `ultragoal` deliberately avoids a parallel workflow state machine: it validates that packet or an existing runbook against live state, then uses the native active goal and plan for execution.
+`ultraplan` is research-and-design only: it verifies premises, pushes back when evidence disagrees, chooses a direction, and returns one authoritative plan with concise milestones plus execution-complete work-item contracts. Durable-goal activation is an optional final wrapper. `ultragoal` validates an activation handoff against live state, then uses the native active goal and plan for execution without creating a parallel workflow state machine.
 
-Ultraplan scales its packet to the goal: small parent-owned plans may compress concerns and omit lane or wave machinery, while delegated or risk-bearing plans retain the full execution map.
+Ultraplan scales its plan to the work: small parent-owned plans stay compact, while delegated work receives the exact context, boundaries, model assignment, checks, and evidence needed for a less capable agent to start immediately.
 
 Delegated work remains bounded and manager-owned: workers receive one behavioral contract, the parent waits without polling, personally inspects the complete diff, reuses compatible open implementers and reviewers through correction and confirmation, verifies from the integration workspace, and closes agents only after their slices and reviews are accepted. Risk-specific reviews remain separate from the final quality review.
 
-Ultraplan proposes execution lanes and model/effort assignments; Ultragoal revalidates them against live state before dispatch. Their duplicated Luna/Terra/Sol assignment tables are intentionally identical and must remain synchronized. The parent may continue genuinely independent work while agents run, but must never duplicate or interfere with delegated ownership.
+Ultraplan proposes execution lanes and model/effort assignments; Ultragoal revalidates them against live state before dispatch. Their inline Luna/Terra/Sol tables remain intentionally identical. The parent may continue genuinely independent work while agents run, but must never duplicate or interfere with delegated ownership.
 
-`ultraplan`, `ultragoal`, and `quality-review` disable implicit invocation. Use `$ultraplan` to design or critique a persistent objective, `$ultragoal` to activate or resume it, and `$quality-review` for the strict quality gate. `delegate` activates for an explicit request to use subagents and can also be invoked as `$delegate`.
+`ultraplan`, `ultragoal`, and `quality-review` disable implicit invocation. Use `$ultraplan` to research, challenge, and design ordinary or persistent work; use `$ultragoal` to activate or resume a durable objective; and use `$quality-review` for the strict frozen-state quality gate. Use experimental `$delegate` only for an explicit standalone delegation request.
 
 Migration from the retired family is direct: use `$ultraplan` instead of `managed-plan`, `$ultragoal` instead of `managed-workflow` and `managed-implement`, and `$quality-review` instead of `managed-quality`. Invoke `$ultraplan` directly for planning-only requests and `$ultragoal` only for activation or execution; no retired wrappers are retained.
 
