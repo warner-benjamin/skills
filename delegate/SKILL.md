@@ -1,11 +1,11 @@
 ---
 name: delegate
-description: Carry out an explicit user request to use one or more Codex subagents without the parent duplicating their assigned work. Use only when the user directly asks to use, spawn, delegate to, or run subagents or parallel agents. Covers bounded task packets, model and effort selection, efficient long waits, post-return spot-checking, focused correction, and cleanup.
+description: Carry out an explicit user request to use one or more Codex subagents without the parent duplicating their assigned work. Use only when the user directly asks to use, spawn, delegate to, or run subagents or parallel agents. Uses multi-agent v2 for bounded task packets, compatible model selection, efficient waits, focused correction, and reusable task identities.
 ---
 
 # Delegate
 
-Carry out the user's requested delegation without duplicating it. Give each subagent sole ownership of its assigned work until the slice is accepted. Keep parent ownership of integration, targeted verification, and the final answer.
+Carry out the user's requested subagent delegation without duplicating it. Give each subagent sole ownership of its assigned work until the slice is accepted. Keep parent ownership of integration, targeted verification, and the final answer.
 
 ## Honor the requested delegation
 
@@ -15,7 +15,7 @@ Before spawning, separate the delegated scope from any parent work. Keep parent 
 
 ## Select the lane
 
-Use the inherited model and effort by default. Override them only for a concrete task need.
+Use the inherited model and effort by default. Override them only for a concrete task need, and use only models advertised by `functions.collaboration.spawn_agent`.
 
 | Need | Model and effort | Typical use |
 | --- | --- | --- |
@@ -41,38 +41,21 @@ Give every agent a self-contained packet containing:
 - invariants and non-goals;
 - the behavioral exit condition;
 - required checks and stop conditions;
+- communication rules: report only blockers, stable dependency handoffs, material scope changes, and completion; never send heartbeats;
 - instructions to preserve unrelated work and avoid commits;
 - the required report: outcome, changed paths, checks, deviations, and concrete risks.
 
-Default to `fork_context: false`. Use `fork_context: true` only for work that genuinely requires conversation history which cannot be captured safely in the packet.
+Default to a context-free spawn with a self-contained packet. Use a history fork only when the task genuinely requires conversation history that the packet cannot safely capture.
 
-```js
-const agent = await tools.multi_agent_v1__spawn_agent({
-  fork_context: false,
-  message: workPacket,
-});
-text(JSON.stringify(agent));
-```
+Call `functions.collaboration.spawn_agent` directly with a unique lowercase `task_name`, the packet as `message`, and `fork_turns: "none"`. Use `fork_turns: "all"` or a positive integer string only when history is required. A full-history fork inherits the parent model and effort; when a model or effort override is needed, use `"none"` or a positive integer. Never call collaboration tools through `functions.exec`.
 
 After dispatch, do not search, read, analyze, implement, or verify the files, questions, evidence, or code paths assigned to that agent. Continue only work outside its ownership boundary. Never redo a delegated task merely because the parent is waiting. Begin spot-checking only after the subagent returns.
 
 ## Wait without polling
 
-At the wait point, start one long wait with the active agent IDs:
+Treat mailbox updates as events, not invitations to poll. Continue only independent parent work outside every agent's ownership. When none remains, call `functions.collaboration.wait_agent` directly with no targets and a long timeout, normally at least 900,000 milliseconds. It wakes early for mailbox activity and does not return the message content. Do not request routine progress, emit status commentary, inspect delegated work, or do side work while a wait is pending.
 
-```js
-// @exec: {"yield_time_ms": 1500000, "max_output_tokens": 30000}
-const result = await tools.multi_agent_v1__wait_agent({
-  targets: activeAgentIds,
-  timeout_ms: 1500000,
-});
-for (const [id, status] of Object.entries(result.status ?? {})) {
-  text(`${id}: ${JSON.stringify(status)}`);
-}
-text(`timed_out:${result.timed_out}`);
-```
-
-The matching outer yield and agent timeout keep one call open for up to 25 minutes and return immediately when any target finishes. Do not call `functions.wait`, start another `wait_agent`, or emit status commentary while this call is pending. After `timed_out:true`, run the same call again with the remaining active IDs. Remove completed and errored agents from the active set, then run the same call for the remaining IDs.
+Read each delivered update and act on the event. Answer a blocker, forward a stable dependency contract once, integrate a completed non-interfering lane, or re-scope invalid work. Call `functions.collaboration.list_agents` only when reusable-agent discovery matters before dispatch, after a timeout or ambiguous update, or before the final completion decision. If required agents remain active and no independent parent work exists, wait again.
 
 ## Integrate without redoing
 
@@ -83,38 +66,21 @@ Treat every returned report and change as an untrusted draft, but do not repeat 
 3. Run the relevant checks from the parent workspace.
 4. Spot-check claims, files, or code paths that are suspicious, surprising, high-risk, weakly evidenced, or outside the assigned boundary.
 5. Double-check only the questionable part with a focused read, command, test, or reproduction. Do not independently reconstruct the worker's entire analysis.
-6. Send concrete findings back to the same compatible open agent with `send_input` for focused correction.
+6. Send concrete findings back to the same compatible agent with `functions.collaboration.followup_task`.
 7. Accept and integrate only after the targeted checks pass.
 
 Suspicious parts include unexplained scope expansion, omitted or failing checks, unsupported claims, unexpected files, hidden compatibility layers, and security, authorization, privacy, migration, concurrency, or destructive-data boundaries.
 
 Reuse the same open reviewer for materially related review, remediation confirmation, and follow-up checks. Use a separate reviewer only for required independence or a genuinely distinct review objective. Do not create a second agent to repeat the implementer's or reviewer's assignment.
 
-## Reuse and close agents
+## Reuse and release agents
 
-Before spawning an agent, inventory the open agents. Reuse an open agent when its role, objective, ownership boundary, governing context, and artifact set remain compatible. Reuse the original implementer for related corrections and follow-up checks on its slice, and the original reviewer for remediation confirmation or materially related review. Do not create overlapping agents for substantially the same work.
+Before spawning when existing agents may be reusable, call `functions.collaboration.list_agents` once to inventory them. Otherwise use the task identities already tracked by the parent. Reuse an agent when its role, objective, ownership boundary, governing context, and artifact set remain compatible. Reuse the original implementer for related corrections and follow-up checks on its slice, and the original reviewer for remediation confirmation or materially related review. Do not create overlapping agents for substantially the same work.
 
-Treat an agent's `completed` status as completion of its current prompt, not acceptance of its work slice or release of its ownership. Keep an implementer open through parent inspection, targeted verification, review findings, corrective work, and final acceptance. Keep a reviewer open through remediation and confirmation. Reuse has no numeric prompt or correction-round limit: batch related findings instead of drip-feeding them and continue only while failures narrow, the behavioral gap shrinks, or the diagnosis materially improves. Re-scope when failures repeat unchanged, fixes oscillate, or repairs merely move the failure.
+Treat an agent's `completed` status as completion of its current prompt, not acceptance of its work slice or release of its ownership. Keep the logical ownership contract through parent inspection, targeted verification, review findings, corrective work, and final acceptance. Reuse has no numeric prompt or correction-round limit: batch related findings instead of drip-feeding them and continue only while failures narrow, the behavioral gap shrinks, or the diagnosis materially improves. Re-scope when failures repeat unchanged, fixes oscillate, or repairs merely move the failure.
 
-Request a focused correction or clarification with:
+Use `functions.collaboration.send_message` to answer a blocker or pass a stable contract while an agent is still working. Use `functions.collaboration.followup_task` for a new actionable unit, correction, or check after its current prompt completes; send it during active work only when the new instruction is urgent and safe to incorporate. If work becomes unsafe, invalid, or materially mis-scoped, call `functions.collaboration.interrupt_agent`, reconcile its partial work, and then re-scope with `functions.collaboration.followup_task`. Idle agents release execution capacity automatically and can be reloaded by task name.
 
-```js
-const submission = await tools.multi_agent_v1__send_input({
-  target: agentId,
-  message: focusedCorrectionRequest,
-});
-text(JSON.stringify(submission));
-```
-
-Close an agent only after the slice's exit condition and checks pass, all associated reviews are resolved, and no further response is expected. Then close it promptly to release the concurrency slot:
-
-```js
-const closed = await tools.multi_agent_v1__close_agent({ target: agentId });
-text(JSON.stringify(closed));
-```
-
-Treat closing as terminal. Avoid `resume_agent` because resuming through the multi-agent tools may change the effective agent type and invalidate model, role, or continuity assumptions. If work appears after closure, prefer a fresh agent with a self-contained packet. Resume only when the closed thread contains essential context that cannot be reconstructed and a possible type change is harmless.
-
-When an agent errors or is cancelled, reconcile its report and partial changes, explicitly release its ownership, close it, and reassign the remaining slice. Do not resume the failed agent.
+When an agent errors or is interrupted, reconcile its report and partial changes and explicitly release its ownership. Reuse it with `functions.collaboration.followup_task` only when the contract remains stable; otherwise assign a fresh task name.
 
 Reuse only within a stable role and ownership contract. When repeated corrections reveal that the objective, ownership boundary, or integration contract is unstable, stop extending the slice and return it for re-scoping.

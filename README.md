@@ -11,7 +11,7 @@ This repository provides three core delivery skills and one experimental standal
 
 Ultraplan scales its plan to the work: small parent-owned plans stay compact, while delegated work receives the exact context, boundaries, model assignment, checks, and evidence needed for a less capable agent to start immediately.
 
-Delegated work remains bounded and manager-owned: workers receive one behavioral contract, the parent waits without polling, personally inspects the complete diff, reuses compatible open implementers and reviewers through correction and confirmation, verifies from the integration workspace, and closes agents only after their slices and reviews are accepted. Risk-specific reviews remain separate from the final quality review.
+Delegated work remains bounded and manager-owned: workers receive one behavioral contract, send only material events, and never receive heartbeat polls. The parent uses long event-driven waits, integrates completed non-interfering lanes while other work continues, personally inspects the complete diff, reuses compatible task identities through correction and confirmation, and verifies from the integration workspace. Multi-agent v2 releases idle execution capacity automatically. Risk-specific reviews remain separate from the final quality review.
 
 Ultraplan proposes execution lanes and model/effort assignments; Ultragoal revalidates them against live state before dispatch. Their inline Luna/Terra/Sol tables remain intentionally identical. The parent may continue genuinely independent work while agents run, but must never duplicate or interfere with delegated ownership.
 
