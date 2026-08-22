@@ -15,7 +15,7 @@ Before spawning, separate the delegated scope from any parent work. Keep parent 
 
 ## Select the lane
 
-Use the inherited model and effort by default. Override them only for a concrete task need, and use only models advertised by `functions.collaboration.spawn_agent`.
+Use the inherited model and effort by default. Resolve their exact values before dispatch; when the runtime does not expose them, pass an explicit compatible model and effort so the dispatch can be reported accurately. Otherwise override them only for a concrete task need, and use only models advertised by `functions.collaboration.spawn_agent`.
 
 | Need | Model and effort | Typical use |
 | --- | --- | --- |
@@ -47,13 +47,21 @@ Give every agent a self-contained packet containing:
 
 Default to a context-free spawn with a self-contained packet. Use a history fork only when the task genuinely requires conversation history that the packet cannot safely capture.
 
-Call `functions.collaboration.spawn_agent` directly with a unique lowercase `task_name`, the packet as `message`, and `fork_turns: "none"`. Use `fork_turns: "all"` or a positive integer string only when history is required. A full-history fork inherits the parent model and effort; when a model or effort override is needed, use `"none"` or a positive integer. Never call collaboration tools through `functions.exec`.
+Call `functions.collaboration.spawn_agent` directly with a unique `task_name`, the packet as `message`, and `fork_turns: "none"`. Use `fork_turns: "all"` or a positive integer string only when history is required. A full-history fork inherits the parent model and effort; when a model or effort override is needed, use `"none"` or a positive integer. Never call collaboration tools through `functions.exec`.
+
+After every successful direct spawn from the root, immediately tell the user in commentary the agent's canonical task name, one-line objective, exact model, and reasoning effort. Report each agent separately and do not defer this notice until the final answer. A non-root agent uses the nested dispatch relay below instead.
 
 After dispatch, do not search, read, analyze, implement, or verify the files, questions, evidence, or code paths assigned to that agent. Continue only work outside its ownership boundary. Never redo a delegated task merely because the parent is waiting. Begin spot-checking only after the subagent returns.
+
+Sol and Terra subagents may delegate bounded child slices of their own assignment. Before spawning a child, they must load and apply this Delegate skill as that child's parent, including its ownership, task-packet, wait, verification, reuse, and dispatch-notice rules. Nested delegation must remain within the original delegation request and the worker's own scope, authority, write boundaries, invariants, and available concurrency; it must not expand the task or create overlapping work.
+
+After a nested spawn succeeds, the spawning agent must immediately send its direct parent a dispatch notice with the parent-to-child task lineage, the child's one-line objective, exact model, and reasoning effort. Every non-root recipient must forward the notice to its direct parent without waiting for completion. The root agent must announce the nested dispatch to the user in commentary. Treat dispatch notices as material events, not heartbeats, and include this relay requirement in every packet that permits nested delegation.
 
 ## Wait without polling
 
 Treat mailbox updates as events, not invitations to poll. Continue only independent parent work outside every agent's ownership. When none remains, call `functions.collaboration.wait_agent` directly with no targets and a long timeout, normally at least 900,000 milliseconds. It wakes early for mailbox activity and does not return the message content. Do not request routine progress, emit status commentary, inspect delegated work, or do side work while a wait is pending.
+
+A long `wait_agent` call is an event-driven mailbox wait that wakes for agent updates or new user input.
 
 Read each delivered update and act on the event. Answer a blocker, forward a stable dependency contract once, integrate a completed non-interfering lane, or re-scope invalid work. Call `functions.collaboration.list_agents` only when reusable-agent discovery matters before dispatch, after a timeout or ambiguous update, or before the final completion decision. If required agents remain active and no independent parent work exists, wait again.
 
