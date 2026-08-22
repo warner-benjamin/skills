@@ -46,6 +46,8 @@ Push hard when the diff:
 
 Prefer the design that feels inevitable in hindsight: direct, boring, typed, explicit, and smaller in concepts. Delete complexity rather than redistribute it.
 
+Treat comments and docstrings as part of the implementation, not decoration. Keep them only when concise and needed to communicate a non-obvious current contract, invariant, boundary, or behavior that clearer code cannot. They must describe the code as it exists, not edit history, prior behavior, review discussion, or why a patch was made. Remove narration of obvious code and prefer clearer names or structure. Preserve required public-API documentation, but keep it terse, accurate, and current.
+
 ## Balance ambition with evidence
 
 Recommend a broad restructuring when it is the clearest behavior-preserving remedy. Do not soften a structural problem into naming or line-level nits merely because the larger fix is less convenient.
