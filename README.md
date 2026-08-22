@@ -1,37 +1,66 @@
-## Planning and durable delivery skills
+# Planning and durable delivery skills
 
-This repository provides three core delivery skills and one experimental standalone skill:
+This repository contains the skills that I use with Codex and other AI agents:
 
-- `ultraplan` researches and challenges an objective, compares viable directions, and produces a proportional execution plan with execution-ready parent and subagent work. It can return a conversational handoff, update one canonical plan document, or append an activation packet when durable-goal machinery is useful.
-- `ultragoal` validates and activates an execution-ready objective, maintains native goal and plan state, coordinates dependency-ordered implementation, keeps the parent responsible for integration, and proves completion with the strongest feasible verifier.
-- `quality-review` performs an ambitious, evidence-backed maintainability and product-quality audit across backend, general, test, and frontend code. It searches for structural simplifications before local cleanup and can be used independently or as Ultragoal's final aggregate quality gate.
-- Experimental `delegate` carries out an explicit request to use subagents without durable goal state. The core skills never depend on it being installed.
+## Skills
 
-`ultraplan` is research-and-design only: it verifies premises, pushes back when evidence disagrees, chooses a direction, and returns one authoritative plan with concise milestones plus execution-complete work-item contracts. Durable-goal activation is an optional final wrapper. `ultragoal` validates an activation handoff against live state, then uses the native active goal and plan for execution without creating a parallel workflow state machine.
+- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and makes a proportional execution plan. The plan contains execution-ready work for the parent agent and subagents. It can return a conversational handoff or update one canonical plan document. It can also append an activation packet when durable-goal machinery is useful.
+- `ultragoal` validates and activates an execution-ready objective. It maintains native goal and plan state and coordinates work in dependency order. The parent remains responsible for integration. The skill proves completion with the strongest feasible verifier.
+- `quality-review` audits maintainability and product quality with evidence. It covers backend, general, test, and frontend code. It searches for structural simplifications before local cleanup. You can use it independently or as the final aggregate quality gate for Ultragoal.
+- `delegate` fulfills an explicit request to use subagents without durable goal state. The core skills do not depend on it.
+- External `simple-english` writes and rewrites technical text with ASD-STE100 Simplified Technical English. A pinned Git submodule references the original [`AminBlg/SimpleEnglish`](https://github.com/AminBlg/SimpleEnglish/tree/main/skills/simple-english) skill.
 
-Ultraplan scales its plan to the work: small parent-owned plans stay compact, while delegated work receives the exact context, boundaries, model assignment, checks, and evidence needed for a less capable agent to start immediately.
+## External skill setup
 
-Delegated work remains bounded and manager-owned: workers receive one behavioral contract, send only material events, and never receive heartbeat polls. The parent uses long event-driven waits, integrates completed non-interfering lanes while other work continues, personally inspects the complete diff, reuses compatible task identities through correction and confirmation, and verifies from the integration workspace. Multi-agent v2 releases idle execution capacity automatically. Risk-specific reviews remain separate from the final quality review.
+The `simple-english` directory is a relative symlink to `external/simple-english`.
 
-Ultraplan proposes execution lanes and model/effort assignments; Ultragoal revalidates them against live state before dispatch. Their inline Luna/Terra/Sol tables remain intentionally identical. The parent may continue genuinely independent work while agents run, but must never duplicate or interfere with delegated ownership.
+Clone this repository with the `--recurse-submodules` option.
 
-`ultraplan`, `ultragoal`, and `quality-review` disable implicit invocation. Use `$ultraplan` to research, challenge, and design ordinary or persistent work; use `$ultragoal` to activate or resume a durable objective; and use `$quality-review` for the strict frozen-state quality gate. Use experimental `$delegate` only for an explicit standalone delegation request.
+If you already cloned the repository, run `git submodule update --init`.
 
-Migration from the retired family is direct: use `$ultraplan` instead of `managed-plan`, `$ultragoal` instead of `managed-workflow` and `managed-implement`, and `$quality-review` instead of `managed-quality`. Invoke `$ultraplan` directly for planning-only requests and `$ultragoal` only for activation or execution; no retired wrappers are retained.
+## Planning and execution
 
-### Sources
+`ultraplan` only researches and designs. It validates premises, challenges incorrect assumptions, selects a direction, and produces one authoritative plan. The plan has concise milestones and complete work-item contracts. Durable-goal activation is an optional final wrapper.
 
-- Ultraplan and Ultragoal:
-  [`dots/agents/skills/ultragoal/SKILL.md`](https://github.com/jxnl/dots/blob/e0174bdea2a55e8fe9d2912edafacb4abe9b3251/agents/skills/ultragoal/SKILL.md)
+`ultragoal` validates an activation handoff against the current state. Then it uses the native active goal and plan for execution. It does not create a parallel workflow state machine.
 
-  Inspired explicit goal activation, outcome grounding, real-surface verification, anti-cheating rules, restart discipline, completion proof, and parent-owned delegation.
+Ultraplan adjusts each plan to the work. Small plans that the parent owns remain compact. Delegated work includes exact context, boundaries, model assignment, validations, and evidence. Thus, a less capable agent can start immediately.
 
-- Thermo-Nuclear Code Quality Review:
-  [`plugins/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md`](https://github.com/cursor/plugins/blob/cfd81b3961ef5fddc90e9f2994fa1c87cd454e61/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md)
+Delegated work has clear limits, and the parent keeps ownership. Each worker receives one behavioral contract and sends only material events. Workers do not receive heartbeat polls. The parent uses long, event-driven waits. It integrates completed, non-interfering lanes while other work continues. The parent personally inspects the complete diff.
 
-  Inspired ambitious structural simplification, code-judo reframing, spaghetti prevention, and the strong approval bar.
+The parent reuses compatible task identities for corrections and confirmation. It runs final validation from the integration workspace. Multi-agent v2 releases idle execution capacity automatically. Reviews for specific risks remain separate from the final quality review.
 
-- AI Code Audit and AI Frontend Audit:
-  [`audit-ai-code/SKILL.md`](https://github.com/jxnl/dots/blob/74d80b1045c3a026704193ee69d09048276a79f1/agents/skills/audit-ai-code/SKILL.md) and [`audit-ai-frontend/SKILL.md`](https://github.com/jxnl/dots/blob/74d80b1045c3a026704193ee69d09048276a79f1/agents/skills/audit-ai-frontend/SKILL.md)
+Ultraplan proposes execution lanes and model/effort assignments. Ultragoal validates them again against the current state before dispatch. The inline Luna/Terra/Sol tables in both skills are intentionally identical. The parent can do independent work while agents operate. It must not duplicate or interfere with work that it delegated.
 
-  Inspired local-idiom checks, canonical ownership and API review, generated-residue and test audits, browser verification, component and data-shape review, accessibility, responsive resilience, and fact-versus-inference discipline.
+## Skill invocation
+
+`ultraplan`, `ultragoal`, and `quality-review` disable implicit invocation.
+
+- Use `$ultraplan` to research, challenge, and design ordinary or persistent work.
+- Use `$ultragoal` to activate or resume a durable objective.
+- Use `$quality-review` for the strict frozen-state quality gate.
+- Use `$delegate` only for an explicit standalone delegation request.
+
+## Migration from retired skills
+
+- Use `$ultraplan` instead of `managed-plan`.
+- Use `$ultragoal` instead of `managed-workflow` or `managed-implement`.
+- Use `$quality-review` instead of `managed-quality`.
+- Use `$ultraplan` directly for planning-only requests.
+- Use `$ultragoal` only for activation or execution.
+
+The repository does not retain wrappers for the retired skills.
+
+## Sources
+
+- **Ultraplan and Ultragoal:** [`dots/agents/skills/ultragoal/SKILL.md`](https://github.com/jxnl/dots/blob/e0174bdea2a55e8fe9d2912edafacb4abe9b3251/agents/skills/ultragoal/SKILL.md)
+
+  This source inspired explicit goal activation, outcome grounding, real-surface validation, anti-cheating rules, restart discipline, completion proof, and parent-owned delegation.
+
+- **Thermo-Nuclear Code Quality Review:** [`plugins/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md`](https://github.com/cursor/plugins/blob/cfd81b3961ef5fddc90e9f2994fa1c87cd454e61/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md)
+
+  This source inspired structural simplification, code-judo reframing, spaghetti prevention, and a strong approval threshold.
+
+- **AI Code Audit and AI Frontend Audit:** [`audit-ai-code/SKILL.md`](https://github.com/jxnl/dots/blob/74d80b1045c3a026704193ee69d09048276a79f1/agents/skills/audit-ai-code/SKILL.md) and [`audit-ai-frontend/SKILL.md`](https://github.com/jxnl/dots/blob/74d80b1045c3a026704193ee69d09048276a79f1/agents/skills/audit-ai-frontend/SKILL.md)
+
+  These sources inspired local-idiom validation, canonical ownership, API reviews, generated-residue audits, test audits, and browser validation. They also inspired component reviews, data-shape reviews, accessibility, responsive resilience, and clear distinctions between facts and inferences.

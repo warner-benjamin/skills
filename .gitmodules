@@ -1,0 +1,4 @@
+[submodule "external/simple-english"]
+	path = external/simple-english
+	url = https://github.com/AminBlg/SimpleEnglish.git
+	branch = main
