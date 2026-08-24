@@ -4,7 +4,7 @@ This repository contains the skills that I use with Codex and other AI agents:
 
 ## Skills
 
-- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and makes a proportional execution plan. The plan contains execution-ready work for the parent agent and subagents. It can return a conversational handoff or update one canonical plan document. It can also append an activation packet when durable-goal machinery is useful.
+- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and writes one new authoritative Markdown execution plan for the parent agent and subagents. It does not search for or read existing plans unless explicitly instructed. It reuses an established ignored `.plans/` storage convention; otherwise it asks whether the new plan should be checked in. It can also append an activation packet when durable-goal machinery is useful.
 - `ultragoal` validates and activates an execution-ready objective. It maintains native goal and plan state and coordinates work in dependency order. The parent remains responsible for integration. The skill proves completion with the strongest feasible verifier.
 - `quality-review` audits maintainability and product quality with evidence. It covers backend, general, test, and frontend code. It searches for structural simplifications before local cleanup. You can use it independently or as the final aggregate quality gate for Ultragoal.
 - `delegate` fulfills an explicit request to use subagents without durable goal state. The core skills do not depend on it.
