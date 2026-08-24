@@ -12,7 +12,7 @@ This repository contains the skills that I use with Codex and other AI agents:
 
 ## External skill setup
 
-The `simple-english` directory is a relative symlink to `external/simple-english`.
+The `simple-english` directory is a relative symlink to `.third-party-skills/simple-english`.
 
 Clone this repository with the `--recurse-submodules` option.
 

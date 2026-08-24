@@ -1,4 +1,4 @@
-[submodule "external/simple-english"]
-	path = external/simple-english
+[submodule ".third-party-skills/simple-english"]
+	path = .third-party-skills/simple-english
 	url = https://github.com/AminBlg/SimpleEnglish.git
 	branch = main
