@@ -6,6 +6,15 @@ description: >-
 # Ultragoal
 
 Own one durable objective from activation through verified completion. Use native goal and plan state. Do not create a second workflow state machine. Set `SKILL_DIR` to the absolute directory that contains this file. Set `QUALITY_REVIEW_SKILL` to `$SKILL_DIR/../quality-review/SKILL.md`. If review requires the missing sibling file, report an incomplete installation. Do not use a different quality skill.
+
+## Keep implementation proportionate
+
+Treat the plan as a scope limit. Use the smallest implementation that satisfies its work items and project conventions.
+Do not add abstractions, compatibility layers, cleanup, refactors, or tests unless the plan or current evidence requires them.
+Run targeted checks during implementation. Do not add tests for hypothetical risks or the appearance of rigor.
+Preserve the declared final verifier, acceptance criteria, and required risk reviews.
+Stop when the outcome and completion conditions are satisfied.
+
 ## Write clearly
 
 Use simple, literal language in commentary, plan entries, worker instructions, review requests, and final reports. Use one term for each concept. State the conclusion first. Then give the evidence and consequence. Name each actor, action, target, and condition. Define unfamiliar technical terms. Revise important instructions and reports twice. First, remove ambiguity, filler, slogans, and unnecessary jargon. Then read the text without the conversation context. Remove useless clauses. Restore details that are necessary for correct execution or verification. Plain writing must preserve the contract and show the risk.
@@ -74,14 +83,16 @@ Use sequential agents for dependent or overlapping work. Use parallel agents onl
 
 | Need | Model and effort | Typical use |
 | --- | --- | --- |
-| Cheap bounded scout | `gpt-5.6-luna`, `medium` | Disposable mapping or mechanical research with cheap failure |
-| Default bounded worker | `gpt-5.6-luna`, `high` | Ready feature slices, tests, and clear fixes |
-| Difficult bounded reasoning | `gpt-5.6-luna`, `xhigh` or `max` | Coupled diagnosis that needs only local knowledge |
-| Knowledge breadth | `gpt-5.6-terra`, `high` or `xhigh` | Unfamiliar frameworks, protocols, languages, or cross-layer synthesis |
-| Difficult broad synthesis | `gpt-5.6-terra`, `max` | Quality-first cross-layer work that needs maximum breadth and reasoning |
+| Mechanical execution | `gpt-5.6-luna`, `low` | Exact lookup, running a specified command, applying obvious edits, or checking an explicit condition |
+| Cheap bounded scout | `gpt-5.6-luna`, `medium` | Disposable mapping or mechanical research with inexpensive failure |
+| Default bounded worker | `gpt-5.6-luna`, `high` | Feature scopes, tests, and clear fixes |
+| Difficult bounded reasoning | `gpt-5.6-luna`, `xhigh` | Coupled reasoning or diagnosis with sufficient local knowledge |
+| Knowledge breadth | `gpt-5.6-terra`, `high` | Unfamiliar frameworks, protocols, languages, or cross-layer synthesis |
+| Difficult broad synthesis | `gpt-5.6-terra`, `xhigh` | Quality-first cross-layer work that requires maximum breadth and reasoning |
 | Frontier knowledge | `gpt-5.6-sol`, `high` | Obscure cross-domain knowledge outside the normal breadth lane |
 | High-consequence decision or review | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
-| Critical decision or review | `gpt-5.6-sol`, `max` | Explicit critical assurance or unresolved high-risk reasoning |
+| Critical decision or review | `gpt-5.6-sol`, `max` | Critical assurance or unresolved high-risk reasoning. You should rarely need `max` reasoning. |
+Improve an unclear task packet before you select a stronger model. Do not run serial model tournaments.
 
 Give each worker one fixed objective, governing context, ownership boundary, invariants, non-goals, exit condition, checks, and stop condition. If a packet has multiple independent outcomes, reject it as too broad. If partial completion can produce a useful result, reject the packet as too broad. Split packets by behavioral invariant, not by technology layer or plan section. Do not repurpose an agent across incompatible roles, ownership boundaries, or independent outcomes.
 
