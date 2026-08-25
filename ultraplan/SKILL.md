@@ -58,7 +58,7 @@ Before finalizing the direction, identify uncertainties that could materially ch
 - irreversible actions or external effects;
 - which materially different direction should be chosen.
 
-Ask the user about these uncertainties even when the AI could proceed by making an assumption. Ask early enough that the answer can still shape the plan.
+Do not replace a consequential user preference or authority decision with an AI assumption. If a smallest reversible assumption preserves the outcome and authority boundary, do not ask; make and label that assumption. Ask early enough that a required answer can still shape the plan.
 
 Do not ask the user to supply information that can reasonably be discovered from the repository, documentation, tools, experiments, or primary sources. The AI owns research into existing behavior, relevant files and symbols, APIs, implementation options, feasibility, dependencies, tests, and execution details.
 
@@ -72,7 +72,9 @@ Research enough context before asking a question. Present the decision in a comp
 
 Ask only questions whose answers could materially change the outcome, direction, scope, acceptance criteria, or risk posture. Combine related questions and avoid questionnaires.
 
-Wait for an answer when proceeding would commit the plan to a consequential preference, incompatible direction, new authority, or irreversible consequence. Otherwise continue with the smallest reversible assumption, label it clearly, and explain where the plan would change if the assumption is wrong.
+When proceeding would commit the plan to a consequential preference, incompatible direction, new authority, or irreversible consequence, a user answer is required. If `request_user_input` is callable in the current mode, use it and wait for the answer. If it is not callable, put the question in the final response and end the turn immediately. Do not ask a required question in commentary, try to change modes, or state a recommendation and continue as if the user accepted it. Once a question is required, pause research, resource acquisition, delegation, direction selection, and artifact writing until the user answers.
+
+When no answer is required, continue with the smallest reversible assumption. Label it clearly and explain where the plan would change if the assumption is wrong.
 
 After initial grounding and before comparing approaches, perform a decision audit:
 
@@ -150,17 +152,17 @@ For each delegated lane, add its role, model and effort, ordered item IDs, depen
 
 Always write the plan to one Markdown file. Create a new plan by default. Do not use a conversational response, native plan state, or another format as the only authoritative plan. Update an existing Markdown plan or runbook only when the user or a governing instruction explicitly directs Ultraplan to that artifact. An existing plan is not authoritative merely because it is present, tracked, recent, or stored in a conventional location. Do not create parallel planning state or duplicate an explicitly designated authoritative document.
 
-Do not search for, open, summarize, compare, or reuse existing plan files unless the user or a governing instruction explicitly identifies them as relevant. Before asking about storage for the new plan, inspect only the project root, repository instructions, the existence and Git status of likely plan directories, `<project-root>/.plans/`, and `<project-root>/.git/info/exclude`. File and directory names may establish a storage convention, but their plan contents are out of scope. Do not ask when the answer is already established:
+Do not search for, open, summarize, compare, or reuse existing plan files unless the user or a governing instruction explicitly identifies them as relevant. Before selecting storage for the new plan, inspect only the project root, repository instructions, the existence and Git status of likely plan directories, `<project-root>/.plans/`, and `<project-root>/.git/info/exclude`. File and directory names may establish a storage convention, but their plan contents are out of scope. Apply these decisions:
 
 - If the user or a governing instruction explicitly named a Markdown artifact to update, use it and preserve its tracked status.
 - If the user explicitly said whether the new plan should be checked in, follow that decision.
-- If `<project-root>/.plans/` already exists and is covered by the root-anchored `/.plans/` rule in `<project-root>/.git/info/exclude`, treat the repository as having an established untracked-plan convention and use it without asking again.
+- Otherwise, use a local untracked plan under `<project-root>/.plans/`.
 
-When no existing decision or convention resolves the location, ask the user whether the plan should be checked in. Explain the two outcomes briefly: a checked-in plan becomes maintained project documentation; an unchecked plan remains local under `<project-root>/.plans/`. Continue independent research while waiting when useful, but do not choose the authoritative file or finalize the handoff until the user answers.
+Do not ask the user where to store the plan. Plan storage is an implementation detail unless the user or a governing instruction already makes the plan a maintained artifact.
 
 For a checked-in plan, infer the repository's maintained Markdown documentation convention from repository instructions and directory structure without opening existing plan files. Create a new, clear project-relative Markdown filename and do not overwrite another artifact. If no convention exists, choose a routine location and filename without asking the user to decide naming minutiae. Do not add the file to Git staging or commit it unless the user separately authorized that action.
 
-For an unchecked plan, create `<project-root>/.plans/` and ensure `<project-root>/.git/info/exclude` contains the repository-local, root-anchored rule `/.plans/`. Do not add that rule to the tracked `.gitignore` or another committed ignore file. Write a new, descriptively named Markdown file inside `.plans/` without opening or overwriting existing plans. If the project is not a Git worktree, or the directory or repository-local exclusion cannot be created, request approval or report the artifact gap instead of writing the plan to a temporary or external location.
+For the default local plan, create `<project-root>/.plans/` when it does not exist. If the project is a Git worktree, ensure `<project-root>/.git/info/exclude` contains the repository-local, root-anchored rule `/.plans/`. Do not add that rule to the tracked `.gitignore` or another committed ignore file. Write a new, descriptively named Markdown file inside `.plans/` without opening or overwriting existing plans. If the project is not a Git worktree, still use `<project-root>/.plans/` and omit the Git exclusion. If the directory or a required Git exclusion cannot be created, request approval or report the artifact gap instead of writing the plan elsewhere.
 
 Return these concerns, combining them when clarity permits:
 
