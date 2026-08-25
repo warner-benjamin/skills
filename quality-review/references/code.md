@@ -10,7 +10,7 @@ Use this reference for backend, CLI, library, service, data, script, test, and g
 - Verify that new imports, methods, packages, permissions, and defaults are real and used as their source defines.
 - Move behavior to the module or type that already owns the concept. Avoid broad context objects and utility dumping grounds.
 
-Keep APIs narrow and intentional. Flag:
+Keep each API narrow and give it a clear purpose. Report:
 
 - duplicate helpers or shadow APIs with slightly different names or behavior;
 - boolean arguments that select unrelated modes;

@@ -9,7 +9,7 @@ Use this reference for components, routes, pages, styles, browser behavior, and 
 - Preserve established product structure unless the user authorizes a redesign.
 - When no useful precedent exists, define one explicit interface contract instead of falling back to a generic dashboard or landing page.
 
-If runnable, inspect the real UI. Use screenshots for visible claims only; label code, interaction, responsive, or accessibility claims as inferred until source, the DOM or accessibility tree, or browser behavior proves them.
+If runnable, inspect the real UI. Use screenshots only as evidence for visible claims. Treat code, interaction, responsive, and accessibility claims as inferred until source, the DOM or accessibility tree, or browser behavior proves them.
 
 ## Data, state, and component shape
 
@@ -43,7 +43,7 @@ Remove containers and decoration that add no grouping, state, or meaning. Do not
 
 ## Accessibility and resilience
 
-Use native semantics first. Inspect accessible names and labels, headings and landmarks, visible focus, keyboard order, dialog and menu behavior, contrast, touch targets, reduced motion, and non-color state cues.
+Use native semantics first. Inspect accessible names, labels, headings, landmarks, visible focus, keyboard order, dialog and menu behavior, contrast, touch targets, reduced motion, and non-color state cues.
 
 Exercise narrow screens, larger text, long labels, missing values, overflow, many rows, asynchronous state changes, and failure recovery. A desktop layout that merely shrinks without deciding mobile priority is incomplete.
 

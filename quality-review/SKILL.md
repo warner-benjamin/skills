@@ -9,6 +9,8 @@ Review for implementation quality, structural simplicity, maintainability, local
 
 ## Select the operation
 
+Use the operation that matches the request:
+
 - For a review, remain read-only and return prioritized findings plus a verdict.
 - For a cleanup or fix request, audit first, implement accepted high-confidence repairs, inspect the resulting diff, and verify behavior.
 - When called by an Ultragoal parent, review the frozen aggregate change inventory. The parent may select one fresh read-only reviewer when independence is useful. A dispatched reviewer must apply this skill directly and must not delegate the review again; the parent owns fixes and integration.
@@ -46,7 +48,7 @@ Push hard when the diff:
 
 Prefer the design that feels inevitable in hindsight: direct, boring, typed, explicit, and smaller in concepts. Delete complexity rather than redistribute it.
 
-Treat comments and docstrings as part of the implementation, not decoration. Keep them only when concise and needed to communicate a non-obvious current contract, invariant, boundary, or behavior that clearer code cannot. They must describe the code as it exists, not edit history, prior behavior, review discussion, or why a patch was made. Remove narration of obvious code and prefer clearer names or structure. Preserve required public-API documentation, but keep it terse, accurate, and current.
+Treat comments and docstrings as implementation, not decoration. Keep them only when concise and needed to communicate a non-obvious current contract, invariant, boundary, or behavior that clearer code cannot. They must describe the code as it exists, not edit history, prior behavior, review discussion, or why a patch was made. Remove narration of obvious code and prefer clearer names or structure. Preserve required public-API documentation, but keep it terse, accurate, and current.
 
 ## Balance ambition with evidence
 
@@ -66,7 +68,15 @@ Do not weaken tests, delete meaningful assertions, replace the declared interact
 
 ## Output findings
 
-Return every supported P0 and P1 finding for review-only requests, plus up to eight P2 findings. Disclose when additional P2 findings were suppressed. Return fewer when the evidence supports fewer, and return none when the diff is clean. Merge repeated symptoms under their root cause and prioritize:
+For review-only requests, apply these limits:
+
+- Return every supported P0 and P1 finding.
+- Return at most eight P2 findings.
+- Disclose when additional P2 findings were suppressed.
+- Return fewer findings when the evidence supports fewer, and return none when the diff is clean.
+- Merge repeated symptoms under their root cause.
+
+Prioritize findings in this order:
 
 1. Structural regressions and missed code-judo simplifications.
 2. Spaghetti growth, ownership leaks, and state-model problems.
