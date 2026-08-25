@@ -4,10 +4,11 @@ This repository contains the skills that I use with Codex and other AI agents:
 
 ## Skills
 
-- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and writes one new authoritative Markdown execution plan for the parent agent and subagents. It does not search for or read existing plans unless explicitly instructed. It reuses an established ignored `.plans/` storage convention; otherwise it asks whether the new plan should be checked in. It can also append an activation packet when durable-goal machinery is useful.
+- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and writes one new authoritative Markdown execution plan for the parent agent and subagents. It does not search for or read existing plans unless explicitly instructed. It updates an explicitly named artifact; otherwise it creates an untracked plan under `.plans/`. It can also append an activation packet when durable-goal machinery is useful.
 - `ultragoal` validates and activates an execution-ready objective. It maintains native goal and plan state and coordinates work in dependency order. The parent remains responsible for integration. The skill proves completion with the strongest feasible verifier.
 - `quality-review` audits maintainability and product quality with evidence. It covers backend, general, test, and frontend code. It searches for structural simplifications before local cleanup. You can use it independently or as the final aggregate quality gate for Ultragoal.
 - `delegate` fulfills an explicit request to use subagents without durable goal state. The core skills do not depend on it.
+- `myskills` pulls this repository and its submodules. It updates each installed custom skill in place without backups or temporary copies of old versions.
 - External `simple-english` writes and rewrites technical text with ASD-STE100 Simplified Technical English. A pinned Git submodule references the original [`AminBlg/SimpleEnglish`](https://github.com/AminBlg/SimpleEnglish/tree/main/skills/simple-english) skill.
 
 ## External skill setup
@@ -40,6 +41,7 @@ Ultraplan proposes execution lanes and model/effort assignments. Ultragoal valid
 - Use `$ultragoal` to activate or resume a durable objective.
 - Use `$quality-review` for the strict frozen-state quality gate.
 - Use `$delegate` only for an explicit standalone delegation request.
+- Use `$myskills` to pull this repository and update every installed custom skill.
 
 ## Migration from retired skills
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "My Skills"
+  short_description: "Update top-level personal skills from Git"
+  default_prompt: "Use $myskills to pull the personal skills repository and replace its installed top-level skills."
