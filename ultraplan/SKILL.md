@@ -1,6 +1,6 @@
 ---
 name: ultraplan
-description: Research, challenge, develop directions, and decompose complex work into one evidence-based Markdown execution plan. Include work contracts, verification, completion proof, and an optional activation packet. Use only for explicit $ultraplan requests, rigorous pre-work planning, critique, or execution handoffs without implementation.
+description: Research, challenge, develop directions, and decompose complex work into one evidence-based Markdown execution plan. Include work contracts, verification, completion proof, fresh subagent review, and an optional activation packet. Use only for explicit $ultraplan requests, rigorous pre-work planning, critique, or execution handoffs without implementation.
 ---
 
 # Ultraplan
@@ -121,20 +121,59 @@ Assign each lane an exact model and effort. Obey user or governing choices. Othe
 
 | Need | Model and effort | Typical use |
 | --- | --- | --- |
-| Cheap bounded scout | `gpt-5.6-luna`, `medium` | Disposable mapping or mechanical research |
-| Default bounded worker | `gpt-5.6-luna`, `high` | Ready feature slices, tests, and clear corrections |
-| Difficult bounded reasoning | `gpt-5.6-luna`, `xhigh` or `max` | Coupled reasoning or diagnosis with local knowledge |
-| Knowledge breadth | `gpt-5.6-terra`, `high` or `xhigh` | Unfamiliar technology or cross-layer synthesis |
-| Difficult broad synthesis | `gpt-5.6-terra`, `max` | Quality-first broad work with maximum reasoning |
-| Frontier knowledge | `gpt-5.6-sol`, `high` | Obscure cross-domain knowledge |
-| High-consequence decision or review | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data, or consequential concurrency |
-| Critical decision or review | `gpt-5.6-sol`, `max` | Critical assurance or unresolved high-risk reasoning |
+| Mechanical execution | `gpt-5.6-luna`, `low` | Exact lookup, running a specified command, applying obvious edits, or checking an explicit condition |
+| Cheap bounded scout | `gpt-5.6-luna`, `medium` | Disposable mapping or mechanical research with inexpensive failure |
+| Default bounded worker | `gpt-5.6-luna`, `high` | Feature scopes, tests, and clear fixes |
+| Difficult bounded reasoning | `gpt-5.6-luna`, `xhigh` | Coupled reasoning or diagnosis with sufficient local knowledge |
+| Knowledge breadth | `gpt-5.6-terra`, `high` | Unfamiliar frameworks, protocols, languages, or cross-layer synthesis |
+| Difficult broad synthesis | `gpt-5.6-terra`, `xhigh` | Quality-first cross-layer work that requires maximum breadth and reasoning |
+| Frontier knowledge | `gpt-5.6-sol`, `high` | Obscure cross-domain knowledge outside the normal breadth lane |
+| High-consequence decision | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
+| Critical decision | `gpt-5.6-sol`, `max` | Critical assurance or unresolved high-risk reasoning. You should rarely need `max` reasoning. |
 
 Increase Luna effort for deeper local reasoning. Use Terra for breadth. Use Sol for consequential decisions or reviews.
 Complete the work contract before you assign a stronger model. Do not assign competing models to the same task.
 For each lane, record its role, model, effort, ordered items, dependencies, dispatch group, ownership, checks, evidence, reuse, and reviewer.
-If delegation adds no value, write `parent-owned; no subagents` once.
-Assignments stay provisional until execution revalidates models, tools, compatible agents, and dependencies. Ultraplan never spawns agents.
+If implementation delegation adds no value, write `parent-owned implementation; no implementation subagents` once.
+Assignments stay provisional until execution revalidates models, tools, compatible agents, and dependencies. Ultraplan never spawns implementation agents.
+
+## Require independent plan review
+
+Every Ultraplan plan requires one fresh read-only subagent reviewer. This rule includes small and parent-owned plans.
+
+Explicit Ultraplan invocation authorizes this review delegation.
+
+After the draft becomes coherent, freeze it. Read [references/plan-review-prompt.md](references/plan-review-prompt.md) completely.
+
+Adapt the template with exact plan paths, evidence sources, stable decisions, and mechanisms to challenge. Keep its repeated simplification checks.
+
+Call `functions.collaboration.spawn_agent` directly. Pass the adapted template and use `fork_turns: "none"`.
+
+Do not give the reviewer the parent's intended verdict. Give only the draft, governing context, decisions, and required review scope.
+
+Dispatch the reviewer after the draft stops changing. The reviewer must have no earlier research, planning, authorship, or review role.
+
+Do not reuse a prior agent for the initial review. Parent self-review does not satisfy this requirement.
+
+The reviewer must remain read-only and must not spawn more agents. The parent owns all plan changes.
+
+Collect all findings before editing the plan. Resolve all must-fix problems and required simplifications together.
+
+Treat must-fix correctness problems and required simplifications as blocking. Treat optional refinements as advisory.
+
+Any change to the reviewed plan invalidates approval. Freeze the corrected plan and request a complete rereview from the same reviewer.
+
+Use `functions.collaboration.followup_task` for the rereview. Require the reviewer to examine the complete final plan, not only the corrections.
+
+If the reviewer is unavailable, dispatch a new fresh reviewer for the complete frozen plan.
+
+If reviewer tools are unavailable, keep the artifact `not ready`. Report the capability gap and end the turn.
+
+Do not replace the reviewer with parent review. Do not present the artifact as final or approved.
+
+If the current user request or higher-priority instructions prohibit all subagents, keep the artifact `not ready`. Report the conflict and end the turn.
+
+Do not mark the plan `ready` until the reviewer approves the complete final plan without blocking findings.
 
 ## Produce one authoritative handoff
 
@@ -169,7 +208,8 @@ Do not make the summary a second plan. Omit routine details and do not list only
 Review the final artifact for source support, consistency, complete contracts, feasible verification, and direction agreement.
 A formatting review or superseded draft is not readiness evidence. After a material rewrite, operate the affected checks again.
 Report the exact gap for absent claims, contracts, real-surface tests, or durable artifacts.
-For small work, keep the plan compact. Do not invent alternatives, headings, lanes, models, or review work. Resolve all decisions that an executor cannot infer.
+For small work, keep the plan compact. Do not invent alternatives, headings, lanes, or models. The required independent review still applies.
+Resolve all decisions that an executor cannot infer.
 Add persistent-goal details only for work that benefits from recovery, waiting, or repeated verification. A reliable verifier must exist.
 The next correction must not usually require another preference decision.
 Include an objective, blocker standard, completion proof, and either `ready` or the exact readiness gap. Otherwise, use an ordinary execution plan.

@@ -16,6 +16,7 @@ If no independent parent work remains, start the long wait. If the user requests
 Use the inherited model and effort by default. Before dispatch, identify their exact values.
 If the runtime hides these values, select an explicit compatible model and effort. This selection makes accurate reporting possible.
 Override inherited values only for a concrete task requirement. Use only models that `functions.collaboration.spawn_agent` advertises.
+
 | Need | Model and effort | Typical use |
 | --- | --- | --- |
 | Mechanical execution | `gpt-5.6-luna`, `low` | Exact lookup, running a specified command, applying obvious edits, or checking an explicit condition |
@@ -25,8 +26,9 @@ Override inherited values only for a concrete task requirement. Use only models 
 | Knowledge breadth | `gpt-5.6-terra`, `high` | Unfamiliar frameworks, protocols, languages, or cross-layer synthesis |
 | Difficult broad synthesis | `gpt-5.6-terra`, `xhigh` | Quality-first cross-layer work that requires maximum breadth and reasoning |
 | Frontier knowledge | `gpt-5.6-sol`, `high` | Obscure cross-domain knowledge outside the normal breadth lane |
-| High-consequence decision or review | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
-| Critical decision or review | `gpt-5.6-sol`, `max` | Critical assurance or unresolved high-risk reasoning. You should rarely need `max` reasoning. |
+| High-consequence decision | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
+| Critical decision | `gpt-5.6-sol`, `max` | Critical assurance or unresolved high-risk reasoning. You should rarely need `max` reasoning. |
+
 Improve an unclear task packet before you select a stronger model. Do not run serial model tournaments.
 ## Dispatch bounded work
 

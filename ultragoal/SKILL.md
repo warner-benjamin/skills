@@ -1,7 +1,7 @@
 ---
 name: ultragoal
 description: >-
-  Run durable Codex goals from activation through verified completion. Use native goal and plan state, dependency-ordered implementation, bounded delegation, parent-owned integration, verification, review, and completion proof. Use only for explicit $ultragoal requests, persistent goals, or long managed implementations. The request must require goal state and completion evidence.
+  Run durable Codex goals from activation through verified completion. Use native goal and plan state, dependency-ordered implementation, bounded delegation, parent-owned integration, verification, fresh subagent review, and completion proof. Use only for explicit $ultragoal requests, persistent goals, or long managed implementations. The request must require goal state and completion evidence.
 ---
 # Ultragoal
 
@@ -74,11 +74,23 @@ For each work item:
 Treat plan waves as groups of dependency-ready work, not durable state. Dispatch eligible lanes in the current wave together. Do only independent parent work during a wave. Integrate returned work before the next dependent wave. Then validate it. If live dependencies differ from the plan, resequence the wave. If evidence invalidates a material design choice, revise the work item in the native plan. Include its objective, dependencies, ownership, invariants, exit condition, and checks. Do not assign a stronger model to repair an unclear work item.
 ## Coordinate subagents without losing ownership
 
-If bounded subagents materially help, use them. Use no subagents for small or tightly coupled work.
+If bounded subagents materially help, use them. Use no implementation subagents for small or tightly coupled work.
+
+Every Ultragoal requires one fresh read-only subagent for the final aggregate review. This rule also applies to small and parent-only implementations.
 
 Explicit Ultragoal activation authorizes this bounded delegation.
 
-Use sequential agents for dependent or overlapping work. Use parallel agents only for independent work with separate ownership. If delegation changes permitted cost, required review independence, or the accepted outcome, ask the user. If agent tools are unavailable, work locally. If the user requires delegation or independence, stop instead. If the user, governing source, or activation packet selects suitable available values, use them. Otherwise, inherit model and effort from the parent. Resolve their exact values before dispatch. If the runtime hides them, pass explicit compatible values for accurate reporting. If an override materially helps, use it. Increase Luna effort for depth. Use Terra for breadth. Use Sol for consequential decisions or reviews. Complete the work packet before you select a stronger model. Do not assign competing models to the same task.
+Use sequential agents for dependent or overlapping work. Use parallel agents only for independent work with separate ownership.
+
+If implementation delegation changes the permitted cost or accepted outcome, ask the user. If agent tools are unavailable, do the implementation locally.
+
+The required reviewer is not implementation delegation. A plan or activation packet cannot use a no-subagent rule to remove this requirement.
+
+If the current user request or higher-priority instructions prohibit all subagents, report the conflict. Do not activate the goal. If active, do not complete it.
+
+If reviewer tools are unavailable, stop before completion. Report the capability gap. Do not replace the reviewer with parent review.
+
+If the user, governing source, or activation packet selects suitable available values, use them. Otherwise, inherit model and effort from the parent. Resolve their exact values before dispatch. If the runtime hides them, pass explicit compatible values for accurate reporting. If an override materially helps, use it. Increase Luna effort for depth. Use Terra for breadth. Use Sol for consequential decisions or reviews. Complete the work packet before you select a stronger model. Do not assign competing models to the same task.
 ### Available agents guide
 
 | Need | Model and effort | Typical use |
@@ -90,8 +102,8 @@ Use sequential agents for dependent or overlapping work. Use parallel agents onl
 | Knowledge breadth | `gpt-5.6-terra`, `high` | Unfamiliar frameworks, protocols, languages, or cross-layer synthesis |
 | Difficult broad synthesis | `gpt-5.6-terra`, `xhigh` | Quality-first cross-layer work that requires maximum breadth and reasoning |
 | Frontier knowledge | `gpt-5.6-sol`, `high` | Obscure cross-domain knowledge outside the normal breadth lane |
-| High-consequence decision or review | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
-| Critical decision or review | `gpt-5.6-sol`, `max` | Critical assurance or unresolved high-risk reasoning. You should rarely need `max` reasoning. |
+| High-consequence decision | `gpt-5.6-sol`, `xhigh` | Security, permissions, destructive data work, or consequential concurrency |
+| Critical decision | `gpt-5.6-sol`, `max` | Critical assurance or unresolved high-risk reasoning. You should rarely need `max` reasoning. |
 Improve an unclear task packet before you select a stronger model. Do not run serial model tournaments.
 
 Give each worker one fixed objective, governing context, ownership boundary, invariants, non-goals, exit condition, checks, and stop condition. If a packet has multiple independent outcomes, reject it as too broad. If partial completion can produce a useful result, reject the packet as too broad. Split packets by behavioral invariant, not by technology layer or plan section. Do not repurpose an agent across incompatible roles, ownership boundaries, or independent outcomes.
@@ -164,7 +176,45 @@ Collect all known findings before implementation resumes. Replace symptom fixes 
 Run targeted checks during implementation. Run a broad repository gate only after the intended state stops changing and no known fixes remain. Before a broad gate, make sure that no goal verifier still runs. If a tool returns a process session, continue that session. After a broad failure, reproduce it narrowly. Diagnose it. Then run the broad gate again. If acceptance checks or risk require the broad suite at a slice boundary, run it. Always run the declared strongest final verifier on the final frozen state.
 ## Review at the right boundaries
 
-Require focused review before material authorization, privacy, destructive data, migration, concurrency, or external-effect risks. If the user or governing instructions require independence, the parent cannot review. Otherwise, the parent can review. If required independence is unavailable, stop before the action. Report the capability gap. Before review, define the scope, source and dependency versions, unresolved choices, governing documents, and intended change inventory. Do not review an artifact that still changes. Ask reviewers to challenge new abstractions, persisted discriminators, and compatibility layers. Compare each challenged design with existing library features and the smallest sufficient design. If maintained code, tests, user-interface code, or agent instructions changed, read `QUALITY_REVIEW_SKILL` completely. Apply it before final completion. Use the quality review in addition to each required risk-specific review. Announce the reason for the quality review. By default, run one strict review after aggregate implementation stops changing. If the user, governing source, or risk requires an earlier review, run it. If subagents are authorized, prefer one fresh read-only aggregate reviewer for integrated multi-worker or consequential changes. Include the absolute `QUALITY_REVIEW_SKILL` path in that prompt. Otherwise, apply the skill directly. Before aggregate review, freeze the change. Inventory staged, unstaged, deleted, renamed, and relevant untracked files. Pass this inventory to the reviewer. A branch diff is insufficient. Collect all review findings before editing. Classify them. Resolve accepted blockers together. Inspect the change. Run affected checks again. Request focused confirmation from the same open reviewer. If confirmation finds new blocking causes, re-plan the unstable work. Treat `P0` and `P1` findings as blockers. Keep `P2` findings as advisory risk. Fix `P2` findings only for user requests, acceptance requirements, or blocking-fix side effects. Any material change invalidates prior approval. Reuse the open reviewer for confirmation. Use a fresh reviewer only for required independence or after the previous reviewer closes. Do not resume a closed reviewer.
+Require focused review before material authorization, privacy, destructive data, migration, concurrency, or external-effect risks.
+
+The parent can do a preliminary review. Parent review does not satisfy a required risk review or the final aggregate review.
+
+Use a fresh read-only subagent at each required review boundary. One reviewer can cover all required scopes at the same frozen boundary.
+
+Use one fresh read-only subagent for the final aggregate review. Dispatch this reviewer after the aggregate implementation stops changing.
+
+Before this review, the reviewer must not have planned, implemented, integrated, or reviewed the goal. Do not reuse a prior agent.
+
+The reviewer must examine the complete frozen change. This rule is mandatory when the parent implemented some or all of the plan.
+
+Before review, define the scope, source and dependency versions, unresolved choices, governing documents, and intended change inventory.
+
+Do not review an artifact that still changes. Freeze the change before aggregate review.
+
+Inventory staged, unstaged, deleted, renamed, and relevant untracked files. Pass this inventory to the reviewer. A branch diff is insufficient.
+
+If maintained code, tests, user-interface code, or agent instructions changed, read `QUALITY_REVIEW_SKILL` completely. Announce the reason for this review.
+
+Include the absolute `QUALITY_REVIEW_SKILL` path in the reviewer prompt. Require the reviewer to apply that skill directly.
+
+Add each required risk-specific scope to the reviewer packet. Quality review does not replace security, privacy, migration, concurrency, or external-effect review.
+
+Ask the reviewer to challenge new abstractions, persisted discriminators, and compatibility layers. Compare challenged designs with existing library features and the smallest sufficient design.
+
+Collect all review findings before editing. Classify them. Resolve all blockers together. Inspect the change. Run affected checks again.
+
+Any change to the reviewed inventory invalidates approval. Freeze the corrected aggregate. Request a complete rereview from the same reviewer.
+
+Use `functions.collaboration.followup_task` for this rereview. Require the reviewer to examine the complete final inventory, not only the corrections.
+
+If the rereview finds new blocking causes, re-plan the unstable work. Treat `P0` and `P1` findings as blockers.
+
+Keep `P2` findings as advisory risk. Fix them only for user requests, acceptance requirements, or blocking-fix side effects.
+
+The same reviewer remains independent for this rereview. If that reviewer is unavailable, dispatch a new fresh reviewer for the complete frozen change.
+
+Do not mark the goal completed without approval from the required reviewer.
 ## Complete honestly
 
 Completion requires all these conditions:
@@ -174,6 +224,9 @@ Completion requires all these conditions:
 - All `P0`, correctness, safety, and completion blockers are resolved.
 - All blocking risk findings and all `P1` findings are resolved.
 - Verification passes on the final state after the last maintained change.
+- A fresh read-only subagent reviewed the complete frozen change.
+- The reviewer had no earlier planning, implementation, integration, or review role in the goal.
+- The reviewer approved the complete final state after the last change to the reviewed inventory.
 - The completion proof is available.
 - No required work remains.
 

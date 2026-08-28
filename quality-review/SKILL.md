@@ -13,7 +13,10 @@ Use the operation that matches the request:
 
 - For a review, remain read-only and return prioritized findings plus a verdict.
 - For a cleanup or fix request, audit first, implement accepted high-confidence repairs, inspect the resulting diff, and verify behavior.
-- When called by an Ultragoal parent, review the frozen aggregate change inventory. The parent may select one fresh read-only reviewer when independence is useful. A dispatched reviewer must apply this skill directly and must not delegate the review again; the parent owns fixes and integration.
+- For an Ultragoal review, the parent must dispatch one fresh read-only subagent with the frozen aggregate change inventory.
+- The reviewer must have no earlier planning, implementation, integration, or review role in that goal.
+- The dispatched reviewer must apply this skill directly. The reviewer must not delegate the review again.
+- The parent owns fixes and integration. After corrections, the same reviewer must examine the complete final frozen inventory again.
 
 Do not infer authorship from style. Treat AI-shaped code as a quality smell whose findings still require repository evidence.
 

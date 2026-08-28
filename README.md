@@ -4,8 +4,8 @@ This repository contains the skills that I use with Codex and other AI agents:
 
 ## Skills
 
-- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and writes one new authoritative Markdown execution plan for the parent agent and subagents. It does not search for or read existing plans unless explicitly instructed. It updates an explicitly named artifact; otherwise it creates an untracked plan under `.plans/`. It can also append an activation packet when durable-goal machinery is useful.
-- `ultragoal` validates and activates an execution-ready objective. It maintains native goal and plan state and coordinates work in dependency order. The parent remains responsible for integration. The skill proves completion with the strongest feasible verifier.
+- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and writes one new authoritative Markdown execution plan for the parent agent and subagents. A fresh read-only subagent reviews the complete frozen plan before handoff. It does not search for or read existing plans unless explicitly instructed. It updates an explicitly named artifact; otherwise it creates an untracked plan under `.plans/`. It can also append an activation packet when durable-goal machinery is useful.
+- `ultragoal` validates and activates an execution-ready objective. It maintains native goal and plan state. The parent remains responsible for integration. A fresh read-only subagent must review the final frozen change before completion. The skill proves completion with the strongest feasible verifier.
 - `quality-review` audits maintainability and product quality with evidence. It covers backend, general, test, and frontend code. It searches for structural simplifications before local cleanup. You can use it independently or as the final aggregate quality gate for Ultragoal.
 - `delegate` fulfills an explicit request to use subagents without durable goal state. The core skills do not depend on it.
 - `myskills` pulls this repository and its submodules. It updates each installed custom skill in place without backups or temporary copies of old versions.
@@ -29,7 +29,7 @@ Ultraplan adjusts each plan to the work. Small plans that the parent owns remain
 
 Delegated work has clear limits, and the parent keeps ownership. Each worker receives one behavioral contract and sends only material events. Workers do not receive heartbeat polls. The parent uses long, event-driven waits. It integrates completed, non-interfering lanes while other work continues. The parent personally inspects the complete diff.
 
-The parent reuses compatible task identities for corrections and confirmation. It runs final validation from the integration workspace. Multi-agent v2 releases idle execution capacity automatically. Reviews for specific risks remain separate from the final quality review.
+The parent reuses compatible task identities for corrections. It runs final validation from the integration workspace. A fresh subagent does the final aggregate review. After corrections, the same reviewer examines the complete frozen change again. Reviews for specific risks remain separate from the quality review.
 
 Ultraplan proposes execution lanes and model/effort assignments. Ultragoal validates them again against the current state before dispatch. The inline Luna/Terra/Sol tables in both skills are intentionally identical. The parent can do independent work while agents operate. It must not duplicate or interfere with work that it delegated.
 
