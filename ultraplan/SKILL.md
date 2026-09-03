@@ -1,6 +1,6 @@
 ---
 name: ultraplan
-description: Research, challenge, develop directions, and decompose complex work into one evidence-based Markdown execution plan. Include work contracts, verification, completion proof, fresh subagent review, and an optional activation packet. Use only for explicit $ultraplan requests, rigorous pre-work planning, critique, or execution handoffs without implementation.
+description: Research, challenge, develop directions, and decompose complex work into one evidence-based Markdown execution plan. Include work contracts, verification, completion proof, independent subagent review, and an optional activation packet. Use only for explicit $ultraplan requests, rigorous pre-work planning, critique, or execution handoffs without implementation.
 ---
 
 # Ultraplan
@@ -139,7 +139,7 @@ Assignments stay provisional until execution revalidates models, tools, compatib
 
 ## Require independent plan review
 
-Every Ultraplan plan requires one fresh read-only subagent reviewer. This rule includes small and parent-owned plans.
+Every Ultraplan plan requires one read-only subagent reviewer. Spawn a fresh agent for the initial review, then keep that reviewer for every rereview round. This rule includes small and parent-owned plans.
 
 Explicit Ultraplan invocation authorizes this review delegation.
 
@@ -147,7 +147,7 @@ After the draft becomes coherent, freeze it. Read [references/plan-review-prompt
 
 Adapt the template with exact plan paths, evidence sources, stable decisions, and mechanisms to challenge. Keep its repeated simplification checks.
 
-Call `functions.collaboration.spawn_agent` directly. Pass the adapted template and use `fork_turns: "none"`.
+Call `functions.collaboration.spawn_agent` directly. Pass the adapted template and use `fork_turns: "none"`. Retain the returned agent ID or canonical task name as the plan's reviewer identity.
 
 Do not give the reviewer the parent's intended verdict. Give only the draft, governing context, decisions, and required review scope.
 
@@ -161,11 +161,11 @@ Collect all findings before editing the plan. Resolve all must-fix problems and 
 
 Treat must-fix correctness problems and required simplifications as blocking. Treat optional refinements as advisory.
 
-Any change to the reviewed plan invalidates approval. Freeze the corrected plan and request a complete rereview from the same reviewer.
+Only a substantive change to the reviewed plan invalidates approval. A substantive change alters the chosen direction, a consequential claim or assumption, a requirement or boundary, a dependency or owner, a work-item contract, the verification strategy, a risk control, readiness evidence, or what an executor will do. After a substantive change, freeze the corrected plan and request a complete rereview from the same reviewer identity.
 
-Use `functions.collaboration.followup_task` for the rereview. Require the reviewer to examine the complete final plan, not only the corrections.
+Do not rereview after an administrative or non-semantic edit. This includes changing the plan status to `ready` after approval, recording the review result, updating metadata or timestamps, formatting, correcting typos or grammar, and rewording that does not change meaning. The completed review authorizes the subsequent status-only change to `ready`.
 
-If the reviewer is unavailable, dispatch a new fresh reviewer for the complete frozen plan.
+Use `functions.collaboration.followup_task` with the retained reviewer ID or canonical task name for every rereview. A reviewer that completed its previous turn is idle and reusable; completion does not make it unavailable. Require the reviewer to examine the complete final plan, not only the corrections. Do not call `spawn_agent` for a rereview while that reviewer identity remains available.
 
 If reviewer tools are unavailable, keep the artifact `not ready`. Report the capability gap and end the turn.
 

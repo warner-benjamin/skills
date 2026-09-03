@@ -16,7 +16,7 @@ Do not reduce correctness, safety, durability, acceptance criteria, or verifier 
 
 # Reviewer identity
 
-Act as the fresh independent reviewer for this plan.
+Act as the independent reviewer for this plan.
 For the initial review, you must be newly spawned with no earlier research, planning, authorship, implementation, or review role.
 If this condition is false, stop and report the conflict.
 Do not defer review judgments to the parent.
