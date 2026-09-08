@@ -4,7 +4,7 @@ This repository contains the skills that I use with Codex and other AI agents:
 
 ## Skills
 
-- `ultraplan` researches an objective and challenges its assumptions. It compares viable directions and writes one new authoritative Markdown execution plan for the parent agent and subagents. A fresh read-only subagent reviews the complete frozen plan before handoff. It does not search for or read existing plans unless explicitly instructed. It updates an explicitly named artifact; otherwise it creates an untracked plan under `.plans/`. It can also append an activation packet when durable-goal machinery is useful.
+- `ultraplan` researches an objective, checks out or downloads relevant reference materials, challenges assumptions, and chooses the simplest sufficient approach. It writes one Markdown execution plan with concrete completion checks, then obtains independent subagent review. It uses a designated artifact or creates an untracked plan under `.plans/`.
 - `ultragoal` validates and activates an execution-ready objective. It maintains native goal and plan state. The parent remains responsible for integration. A fresh read-only subagent must review the final frozen change before completion. The skill proves completion with the strongest feasible verifier.
 - `quality-review` audits maintainability and product quality with evidence. It covers backend, general, test, and frontend code. It searches for structural simplifications before local cleanup. You can use it independently or as the final aggregate quality gate for Ultragoal.
 - `delegate` fulfills an explicit request to use subagents without durable goal state. The core skills do not depend on it.
@@ -22,17 +22,17 @@ If you already cloned the repository, run `git submodule update --init`.
 
 ## Planning and execution
 
-`ultraplan` only researches and designs. It validates premises, challenges incorrect assumptions, selects a direction, and produces one authoritative plan. The plan has concise milestones and complete work-item contracts. Durable-goal activation is an optional final wrapper.
+`ultraplan` researches and designs before implementation. Its authoritative plan includes the chosen direction, supporting evidence, ordered work, boundaries, and verification. Execution requires separate activation, which may already be authorized by the user.
 
 `ultragoal` validates an activation handoff against the current state. Then it uses the native active goal and plan for execution. It does not create a parallel workflow state machine.
 
-Ultraplan adjusts each plan to the work. Small plans that the parent owns remain compact. Delegated work includes exact context, boundaries, model assignment, validations, and evidence. Thus, a less capable agent can start immediately.
+Ultraplan adjusts each plan to the work. Small plans remain compact. When delegation is useful, the plan gives workers enough context, boundaries, and completion checks to start without rediscovering the design.
 
 Delegated work has clear limits, and the parent keeps ownership. Each worker receives one behavioral contract and sends only material events. Workers do not receive heartbeat polls. The parent uses long, event-driven waits. It integrates completed, non-interfering lanes while other work continues. The parent personally inspects the complete diff.
 
 The parent reuses compatible task identities for corrections. It runs final validation from the integration workspace. A fresh subagent does the final aggregate review. After corrections, the same reviewer examines the complete frozen change again. Reviews for specific risks remain separate from the quality review.
 
-Ultraplan proposes execution lanes and model/effort assignments. Ultragoal validates them again against the current state before dispatch. The inline Luna/Terra/Sol tables in both skills are intentionally identical. The parent can do independent work while agents operate. It must not duplicate or interfere with work that it delegated.
+Ultraplan proposes ownership, useful concurrency, and model/effort assignments, with handoff detail matched to each worker. Execution revalidates those assignments and adjusts the brief if the worker changes before dispatch. The parent can do independent work while agents operate. It must not duplicate or interfere with work that it delegated.
 
 ## Skill invocation
 
@@ -43,16 +43,6 @@ Ultraplan proposes execution lanes and model/effort assignments. Ultragoal valid
 - Use `$quality-review` for the strict frozen-state quality gate.
 - Use `$delegate` only for an explicit standalone delegation request.
 - Use `$myskills` to pull this repository and update every installed custom skill.
-
-## Migration from retired skills
-
-- Use `$ultraplan` instead of `managed-plan`.
-- Use `$ultragoal` instead of `managed-workflow` or `managed-implement`.
-- Use `$quality-review` instead of `managed-quality`.
-- Use `$ultraplan` directly for planning-only requests.
-- Use `$ultragoal` only for activation or execution.
-
-The repository does not retain wrappers for the retired skills.
 
 ## Sources
 
