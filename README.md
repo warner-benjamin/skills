@@ -9,6 +9,7 @@ This repository contains the skills that I use with Codex and other AI agents:
 - `quality-review` audits maintainability and product quality with evidence. It covers backend, general, test, and frontend code. It searches for structural simplifications before local cleanup. You can use it independently or as the final aggregate quality gate for Ultragoal.
 - `delegate` fulfills an explicit request to use subagents without durable goal state. The core skills do not depend on it.
 - `myskills` pulls this repository and its submodules. It updates each installed custom skill in place without backups or temporary copies of old versions.
+- `quiet-polling` waits for long-running jobs with brief scheduled updates and polling intervals of 5, 10, 15, 20, then 25 minutes. It starts later on the ladder when the expected runtime supports it.
 - External `simple-english` writes and rewrites technical text with ASD-STE100 Simplified Technical English. A pinned Git submodule references the original [`AminBlg/SimpleEnglish`](https://github.com/AminBlg/SimpleEnglish/tree/main/skills/simple-english) skill.
 
 ## External skill setup

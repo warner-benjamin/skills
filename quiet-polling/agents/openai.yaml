@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quiet Polling"
+  short_description: "Wait quietly with adaptive 5–25 minute polling"
+  default_prompt: "Use $quiet-polling to monitor any long-running job with adaptive polling and brief scheduled updates."
