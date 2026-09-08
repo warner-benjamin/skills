@@ -1,6 +1,6 @@
 interface:
   display_name: "Ultraplan"
   short_description: "Research and design execution-ready plans"
-  default_prompt: "Use $ultraplan to research and challenge this objective, choose a direction, and write the smallest execution-ready Markdown plan or activation handoff."
+  default_prompt: "Use $ultraplan to gather references, research and challenge this objective, and write the smallest independently reviewed Markdown execution plan."
 policy:
   allow_implicit_invocation: false

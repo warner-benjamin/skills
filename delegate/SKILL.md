@@ -21,7 +21,7 @@ Honor requested models and efforts; otherwise use these starting points among co
 | Substantial coder | `gpt-5.6-sol`, `medium` | Substantial but bounded implementation, tests, repository fixes, or moderately difficult reasoning |
 | Frontier knowledge | `gpt-6-astra`, `low` | Obscure cross-domain knowledge or a hard task with a clear approach and checks |
 | Ambiguous or consequential judgment | `gpt-6-astra`, `medium` | Synthesis, diagnosis, design, independent review, or permissions, data, and concurrency decisions |
-| Critical reasoning | `gpt-6-astra`, `high` | Interacting high-risk constraints or a consequential reasoning or security |
+| Critical reasoning | `gpt-6-astra`, `high` | Interacting high-risk constraints or a consequential reasoning or security decisions |
 
 In the Codex runtime, Luna cannot use `send_message`; Terra can ask the parent for help, review, or decisions. Use Luna for cheap fire-and-forget assignments that can finish without that dialogue. Give it a final-report exit for blockers. Terra's stronger long-context retrieval results also support exploration across many files. Use Terra medium for exploration and high for moderately difficult reasoning or implementation over Luna where back-and-forth matters; use Sol or Astra when the worker needs greater independent reasoning. Fire-and-forget still requires parent acceptance.
 
