@@ -53,7 +53,11 @@ Honor requested models and efforts. Otherwise use these starting points among av
 
 Use the [implementation prompt](references/implementation-prompt.md) for implementation workers, adapting it to the assignment and worker. For other delegated tasks, adapt it to the requested deliverable.
 
-Use collaboration tools directly. Prefer `fork_turns: "none"` with a complete brief; use history when needed. Full-history forks inherit model and effort and cannot take overrides. Briefly announce the task and selected model/effort, reporting inheritance honestly when exact values are hidden. Related dispatches may share a notice.
+Use collaboration tools directly. Prefer `fork_turns: "none"` with a complete brief; use history when needed. Full-history forks inherit model and effort and cannot take overrides.
+
+Before dispatching any subagent, including implementation workers and independent reviewers, briefly announce its task, selected model, and reasoning effort level in the commentary channel. Report inheritance honestly when exact values are hidden. Related dispatches may share a notice.
+
+Keep the user informed through the commentary channel as coordination happens, including during independent review. Use one short sentence to summarize what you are messaging agents about, questions or blockers subagents raised, and the guidance, decisions, or follow-up you send back. Include material handoffs and review findings; related exchanges may share an update. Summarize the substance instead of copying agent transcripts.
 
 While a worker owns active work, do only independent parent work. Do not inspect its files or sources to monitor progress, duplicate research, or anticipate its result. Inspection requires completed work, an explicit stable handoff, or a concrete guidance request; inspect only the delivered portion or what answers the question. Review access does not transfer implementation ownership. Coordinate unexpected dependencies through messages and bounded handoffs.
 

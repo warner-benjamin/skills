@@ -33,6 +33,8 @@ Prefer a self-contained packet with `fork_turns: "none"`. Use a partial history 
 
 ## Protect active work
 
+Keep the user informed through the commentary channel as coordination happens. Use one short sentence to summarize what you are messaging agents about, questions or blockers subagents raised, and the guidance, decisions, or follow-up you send back. Include material handoffs and review findings; related exchanges may share an update. Summarize the substance instead of copying agent transcripts.
+
 While a worker owns active work, do only independent parent work. Do not read its files, diffs, sources, or implementation to duplicate research, monitor progress, anticipate findings, or verify unfinished work. Overlap requires an explicit user request for duplicate analysis or a coordinated ownership transfer.
 
 Inspection requires an explicit handoff: completed work, a stable partial result, or a concrete request for guidance. Inspect only the delivered portion or what answers the question, then return to independent work or waiting. A progress update is not a handoff, and review access does not transfer implementation ownership.

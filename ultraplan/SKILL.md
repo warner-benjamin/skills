@@ -17,7 +17,13 @@ Keep research copies and their generated files under `<project-root>/.external_r
 
 Distinguish observations from inferences and unresolved assumptions. Stop researching when further evidence would not change the direction, work, verification, or risk.
 
-When delegation is useful, use `gpt-5.6-terra` at `medium` effort for less consequential code exploration during planning, such as tracing callers, mapping dependencies, or locating relevant tests. Give it bounded questions and ask for source anchors; keep consequential synthesis and direction decisions with the parent. Honor user-specified models and efforts.
+## Delegation
+
+You may use `gpt-5.6-terra` at `medium` effort for less consequential code exploration during planning, such as tracing callers, mapping dependencies, or locating relevant tests. Give it bounded questions and ask for source anchors; keep consequential synthesis and direction decisions with the parent. Honor user-specified models and efforts.
+
+Before dispatching any subagent, including research workers and independent reviewers, briefly announce its task, selected model, and reasoning effort level in the commentary channel. Report inheritance honestly when exact values are hidden. Related dispatches may share a notice.
+
+When coordinating research or review subagents, keep the user informed through the commentary channel as exchanges happen. Use one short sentence to summarize what you are messaging agents about, questions or blockers they raised, and the guidance, decisions, or follow-up you send back. Include material handoffs and review findings; related exchanges may share an update. Summarize the substance instead of copying agent transcripts.
 
 ## Challenge the solution and resolve choices
 
