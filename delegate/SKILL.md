@@ -47,4 +47,6 @@ Worker completion is not acceptance. Compare the deliverable against the full be
 
 Batch omissions and corrections into a `followup_task` for the same compatible agent. Use `send_message` for guidance during active work. Keep ownership through corrections and acceptance; an idle agent remains reusable.
 
+Before transferring ownership after a blocker or interruption, reconcile the worker's partial changes and explicitly assign the remaining scope.
+
 Read [nested-delegation.md](references/nested-delegation.md) before permitting a worker to spawn children.

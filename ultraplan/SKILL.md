@@ -29,7 +29,17 @@ Resolve technical questions through research. Ask the user early about consequen
 
 Compare materially different approaches when the choice is consequential or unclear. Choose one based on outcome fit, simplicity, compatibility, verification cost, and risk. Explain why it wins and record rejected alternatives only when their rationale matters to execution.
 
+Design around existing owners, APIs, data models, and project conventions. Keep related behavior together and control flow explicit. Before proposing branches, flags, wrappers, or layers, check whether changing the data shape or placing behavior with its owner removes the need. Prefer one authoritative representation of state and derive other values when practical; justify duplicated state and the synchronization it requires.
+
+Introduce abstractions only for current requirements or demonstrated duplication that they materially simplify. Do not plan speculative extension points, configuration, compatibility paths, or fallback behavior. When replacing behavior, include removal of obsolete paths within the agreed scope; retain parallel paths only for an explicit compatibility or migration need, with a clear retirement condition when temporary.
+
+Prefer established, maintained libraries with evidence of production use over custom implementations of solved problems. Check existing project dependencies first. Assess fit, compatibility, maintenance, licensing, and integration cost before adding a dependency; use a small local implementation when it is simpler overall. Justify consequential custom implementations when a suitable library exists.
+
 Remove scope, abstractions, coordination, and tests that have no requirement or evidenced risk. Match the plan's detail to the work; a small change may need one implementation item and one targeted check.
+
+### Resolve backward compatibility
+
+If backward compatibility is not already settled by the user or governing requirements, ask the user whether it is needed unless the evidence clearly shows it is unnecessary. Identify the affected callers, public APIs, persisted data, or deployed versions and explain the tradeoff. Continue independent planning while awaiting the answer, but leave compatibility-dependent choices unresolved. When compatibility is required, record its exact scope and any migration or retirement conditions; when it is unnecessary, plan the direct change without compatibility machinery.
 
 ## Write an executable plan
 
@@ -57,7 +67,7 @@ Propose delegation only when its value exceeds coordination costs. The planner a
 | Substantial coder | `gpt-5.6-sol`, `medium` | Substantial but bounded implementation, tests, repository fixes, or moderately difficult reasoning |
 | Frontier knowledge | `gpt-6-astra`, `low` | Obscure cross-domain knowledge or a hard task with a clear approach and checks |
 | Ambiguous or consequential judgment | `gpt-6-astra`, `medium` | Synthesis, diagnosis, design, independent review, or permissions, data, and concurrency decisions |
-| Critical reasoning | `gpt-6-astra`, `high` | Interacting high-risk constraints or a consequential reasoning or security decisions |
+| Critical reasoning | `gpt-6-astra`, `high` | Interacting high-risk constraints or consequential reasoning or security decisions |
 
 Match each handoff to the intended worker. Luna needs an explicit approach, precise entry points, concrete checks, and a final-report exit for blockers because it cannot use `send_message`. Terra, Sol, and Astra can return consequential design or scope decisions to the parent while continuing independent work. Stronger workers can own broader reasoning, but every handoff still needs the relevant evidence, constraints, and acceptance criteria.
 
