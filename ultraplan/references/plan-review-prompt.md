@@ -1,13 +1,25 @@
 # Independent plan review
 
-Adapt this brief with the plan path, relevant evidence sources, and settled user decisions.
+Supply the plan path, intended outcome, relevant evidence, and settled decisions. Do not prescribe a verdict.
 
-> Review the complete plan at [plan path] for achieving [user outcome]. Use [governing sources] and respect [settled user decisions]. Inspect the evidence needed to validate consequential claims, including the exact dependency version where relevant.
+> Review [plan path] for [user outcome] using [governing sources] and [settled decisions].
+> Verify consequential claims against evidence, including exact dependency versions where relevant.
 >
-> Determine whether the approach is correct, executable, and the simplest sufficient solution. Check dependencies, ownership, boundaries, and whether the proposed verification proves the requested outcome. Challenge unsupported assumptions and unnecessary scope, abstractions, coordination, or tests. Preserve required behavior and checks justified by actual risks.
+> Assess correctness, executability, and simplicity across the whole user workflow, including consumers, setup, recovery, and delivery.
+> Verify that tasks have clear dependencies and that acceptance checks prove the requested outcome.
+> Identify the smallest representative scenario that can expose an integration error early.
+> Keep optional ideas outside required execution scope.
 >
-> Check whether existing project dependencies or established, maintained libraries can replace proposed custom implementations. Require justification for consequential custom implementations when a suitable library exists, accounting for fit and integration cost.
+> Challenge unsupported assumptions, unnecessary mechanisms, and custom implementations that suitable existing dependencies can simplify.
+> Consider established, maintained packages with evidence of production use for solved problems beyond existing project dependencies.
+> Require justification for consequential custom code when a suitable package exists, accounting for fit and integration cost.
+> For a blocking simplification, state the concrete consequence, smaller alternative, and behavior it preserves.
+> Do not block on style, wording, or theoretical improvements without demonstrated impact.
 >
-> Remain read-only and do not spawn agents. The parent owns revisions. Return evidence-backed findings with source anchors and the smallest useful corrections. Separate blocking correctness problems, required simplifications, and optional refinements. Treat required simplifications as blocking and optional refinements as advisory.
+> Remain read-only and do not spawn agents. Return batched findings with source anchors, consequences, and the smallest useful corrections.
+> Separate blockers from advisory refinements. Report evidence gaps that affect readiness.
 >
-> Return `approved` only if the complete plan has no blocking findings; otherwise return `not ready`. Report any evidence you could not verify. On rereview, assess the complete revised plan, not only the corrections.
+> On rereview, inspect changed decisions and affected dependencies or acceptance criteria.
+> Carry forward valid evidence for unchanged portions. Expand the scope when changes invalidate earlier conclusions.
+> Do not reconstruct unchanged research or rerun checks without a specific reason.
+> Return `approved` only when the whole plan has no blockers to execution. Otherwise, return `not ready` with exact gaps.

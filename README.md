@@ -6,11 +6,11 @@ These skills provide instructions for Codex. This ReadMe was written with the `s
 
 ### `ultraplan`
 
-The agent researches an objective, questions assumptions, and writes the simplest sufficient execution plan with completion checks. It uses a designated artifact or an untracked plan under `.plans/`. Readiness requires approval from an independent review agent.
+The agent resolves consequential uncertainty and writes a compact execution plan with observable completion checks. It separates required work from optional ideas. It uses a designated artifact or an untracked plan under `.plans/`. Readiness requires independent review.
 
 ### `ultragoal`
 
-The agent activates or resumes a durable objective and maintains native goal and plan state through implementation. The parent agent owns integration and acceptance. Completion requires successful verification and approval from an independent review agent.
+The agent activates or resumes a durable objective and carries authorized execution through usable delivery. It maintains one progress plan and verifies the required user workflow. Completion requires successful verification and independent review. User verification handoffs include artifacts, setup, and a short checklist.
 
 ### `quality-review`
 
@@ -18,7 +18,7 @@ The agent reviews code structure, maintainability, and product quality with repo
 
 ### `delegate`
 
-The agent selects and coordinates explicitly requested subagents without durable goal state. Subagent roles are recommended based on agent capabilities.
+The agent owns routing and coordination for explicit delegation and authorized ultraplan or ultragoal workers. It favors coherent ownership, material updates, and acceptance without duplicated work. The routing table provides model and effort defaults.
 
 ### `myskills`
 
@@ -49,7 +49,7 @@ Use these commands to invoke the skills:
 - Use `$ultraplan` to research and plan ordinary or persistent work. Question assumptions with this skill.
 - Use `$ultragoal` to activate or resume a durable objective.
 - Use `$quality-review` to review code quality or make authorized repairs.
-- Only for an explicit standalone delegation request, use `$delegate`.
+- Use `$delegate` for an explicit delegation request. Ultraplan and ultragoal also use its coordination guidance.
 - Use `$myskills` to install or update the top-level skills from this repository.
 
 ## Sources

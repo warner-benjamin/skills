@@ -1,92 +1,85 @@
 ---
 name: ultraplan
-description: Research and challenge an objective, choose an approach, and write an independently reviewed execution plan. Use when explicitly asked to use ultraplan for planning before implementation.
+description: Research an objective and write a compact, independently reviewed execution plan. Use when explicitly asked to use ultraplan.
 ---
 
 # Ultraplan
 
-Turn an uncertain request into the smallest justified plan that another executor can carry out and prove complete. This workflow produces a Markdown handoff. Implementation follows planning only when the user has authorized execution, including in the original request. Do not create a goal or parallel native plan state.
+Resolve consequential uncertainty and produce the smallest executable handoff. Keep implementation separate unless the user already authorized execution.
+Do not create a goal or duplicate native plan state during planning.
 
-## Establish the problem and gather references
+## Establish the outcome
 
-Identify the intended outcome, existing behavior, constraints, and acceptance criteria. Read the repository instructions and only the documents, code, callers, tests, history, and live state that can affect the plan.
+Identify the intended user workflow, constraints, non-goals, and observable completion criteria. Read the repository instructions and evidence that can change the approach.
+Verify consequential claims against code, callers, tests, and primary sources. Distinguish observations from inferences and unresolved assumptions.
 
-Check out reference repositories and download relevant source, documentation, or packages when needed to resolve consequential claims. Prefer primary sources. Use the project's exact dependency version; for a new dependency, identify a compatible stable release before relying on its behavior.
+Compare materially different approaches where the choice affects correctness, user effort, maintenance, or risk.
+Evaluate the whole workflow, including setup, consumers, recovery, and delivery. Resolve those priorities before developing detailed tasks.
+Prefer existing owners, APIs, and data models.
+Remove scope and mechanisms without a requirement or evidenced risk. Preserve settled compatibility decisions and required behavior.
+If compatibility is unresolved, identify affected callers, persisted data, and deployed versions before proposing migration machinery.
+Ask the user only when evidence and existing authority cannot settle a consequential choice. Continue independent planning while awaiting the answer.
 
-Keep research copies and their generated files under `<project-root>/.external_resources/`, excluded through Git's local exclude file. Keep them separate from project dependencies and the active environment; avoid running installation scripts just to inspect source. Record the source URL and exact version or revision, and cite the files or documentation that support decisions.
+Prefer established, maintained packages with evidence of production use over custom code for solved problems.
+Inspect existing project dependencies first. Assess functional fit, compatibility, maintenance, licensing, and integration cost before adding a package.
+Verify relied-on behavior against the exact dependency version.
+When a suitable package exists, justify a consequential custom implementation in the plan.
+Use a small local implementation when it is simpler overall than adding a dependency.
 
-Distinguish observations from inferences and unresolved assumptions. Stop researching when further evidence would not change the direction, work, verification, or risk.
+## Gather useful evidence
 
-## Delegation
+When consequential claims need source inspection, obtain the relevant repository, documentation, or package version.
+Keep research copies under `<project-root>/.external_resources/`, excluded through Git's local exclude file.
+Keep those copies separate from project dependencies and the active environment. Avoid installation scripts used only to inspect source.
+Record source URLs and exact versions or revisions. Stop research when further evidence cannot change the approach, work, verification, or risk.
 
-You may use `gpt-5.6-terra` at `medium` effort for less consequential code exploration during planning, such as tracing callers, mapping dependencies, or locating relevant tests. Give it bounded questions and ask for source anchors; keep consequential synthesis and direction decisions with the parent. Honor user-specified models and efforts.
+For uncertain integration behavior, identify the smallest representative scenario that can disprove the approach.
+Examples include first use, cancellation followed by reuse, or configured options reaching an external API.
+Use available evidence or an authorized probe to resolve the uncertainty. Otherwise, schedule the scenario early in execution and state the remaining assumption.
+Distinguish implementation readiness from required final verification. An unavailable final verifier remains an explicit completion gap.
+If external access or user testing controls completion, settle the milestone and handoff before execution. Do not silently weaken acceptance criteria.
 
-Before dispatching any subagent, including research workers and independent reviewers, briefly announce its task, selected model, and reasoning effort level in the commentary channel. Report inheritance honestly when exact values are hidden. Related dispatches may share a notice.
+## Write the execution plan
 
-When coordinating research or review subagents, keep the user informed through the commentary channel as exchanges happen. Use one short sentence to summarize what you are messaging agents about, questions or blockers they raised, and the guidance, decisions, or follow-up you send back. Include material handoffs and review findings; related exchanges may share an update. Summarize the substance instead of copying agent transcripts.
+Write one authoritative Markdown artifact at the designated path or under `<project-root>/.plans/`.
+Exclude a default `.plans/` artifact through Git's local exclude file. Do not overwrite unrelated artifacts or commit the plan without authorization.
 
-## Challenge the solution and resolve choices
+Keep the main plan sufficient to execute without reconstructing the conversation:
 
-Check that the problem exists, the proposed mechanism addresses its cause, and the constraints permit it. Look for existing features and simpler local changes before adding machinery. Surface conflicts with governing decisions and propose a compatible alternative; do not silently change constraints to make a solution fit.
+- State the outcome, chosen approach, constraints, settled decisions, and material assumptions.
+- Order tasks by dependencies and identify relevant paths, interfaces, and ownership boundaries.
+- Give observable completion criteria and the necessary checks for each task.
+- Specify the final user workflow, required environment, and evidence that proves completion.
+- Include deliverables and an actionable handoff for required user verification.
 
-Resolve technical questions through research. Ask the user early about consequential preferences, tradeoffs, or authority decisions that existing instructions do not settle. Give the relevant evidence, viable options, and recommendation. Continue independent work while awaiting an answer, but do not commit the dependent part of the plan. Use and label reasonable reversible assumptions for routine details.
+Keep detailed research in linked references only when it supports execution. Do not copy source inventories or repeat constraints across tasks.
+Separate required work from optional ideas and deferred alternatives. Plan approval does not authorize those additions.
+Scale detail to the task. A small change can need one implementation item and one targeted check.
 
-## Choose the smallest sufficient approach
+## Delegate and review
 
-Compare materially different approaches when the choice is consequential or unclear. Choose one based on outcome fit, simplicity, compatibility, verification cost, and risk. Explain why it wins and record rejected alternatives only when their rationale matters to execution.
+Explicit ultraplan invocation authorizes research delegation and one independent plan reviewer, subject to user and runtime limits.
+Use [delegate](../delegate/SKILL.md) for routing, briefs, communication, ownership, and acceptance mechanics.
+Delegate research only when its value exceeds coordination costs. Prefer coherent questions over many small lookups.
+Delegate only independent, non-overlapping questions answerable from the supplied context without ongoing inter-agent communication.
+Resolve shared decisions before dispatch. Keep coupled research and synthesis with one owner.
+Reserve intermediate messages for unexpected blockers or consequential decisions. Independent review starts from a stable plan handoff.
+Record provisional execution scopes and dependencies only where delegation helps. Let execution select workers against current scope and runtime capabilities.
 
-Design around existing owners, APIs, data models, and project conventions. Keep related behavior together and control flow explicit. Before proposing branches, flags, wrappers, or layers, check whether changing the data shape or placing behavior with its owner removes the need. Prefer one authoritative representation of state and derive other values when practical; justify duplicated state and the synchronization it requires.
+Once the draft is stable, dispatch one fresh read-only reviewer with `fork_turns: "none"`.
+Use the [plan review prompt](references/plan-review-prompt.md) with the outcome, plan, evidence, and settled decisions.
+Add reviewers only for distinct unresolved risks or explicit user requests.
 
-Introduce abstractions only for current requirements or demonstrated duplication that they materially simplify. Do not plan speculative extension points, configuration, compatibility paths, or fallback behavior. When replacing behavior, include removal of obsolete paths within the agreed scope; retain parallel paths only for an explicit compatibility or migration need, with a clear retirement condition when temporary.
+Batch findings before corrections. Resolve correctness, evidence, and material complexity blockers. Treat optional wording and style suggestions as advisory.
+After substantive corrections, reuse the reviewer to inspect changed decisions and affected dependencies or acceptance criteria.
+Carry forward valid evidence for unchanged portions. Expand rereview when changes invalidate earlier conclusions.
+Do not repeat a full investigation solely to renew approval. Meaning-preserving edits do not require rereview.
 
-Prefer established, maintained libraries with evidence of production use over custom implementations of solved problems. Check existing project dependencies first. Assess fit, compatibility, maintenance, licensing, and integration cost before adding a dependency; use a small local implementation when it is simpler overall. Justify consequential custom implementations when a suitable library exists.
-
-Remove scope, abstractions, coordination, and tests that have no requirement or evidenced risk. Match the plan's detail to the work; a small change may need one implementation item and one targeted check.
-
-### Resolve backward compatibility
-
-If backward compatibility is not already settled by the user or governing requirements, ask the user whether it is needed unless the evidence clearly shows it is unnecessary. Identify the affected callers, public APIs, persisted data, or deployed versions and explain the tradeoff. Continue independent planning while awaiting the answer, but leave compatibility-dependent choices unresolved. When compatibility is required, record its exact scope and any migration or retirement conditions; when it is unnecessary, plan the direct change without compatibility machinery.
-
-## Write an executable plan
-
-Write one authoritative Markdown artifact. Use the user-designated path or existing plan when directed; otherwise create a descriptively named file under `<project-root>/.plans/`, excluded through Git's local exclude file. Do not overwrite unrelated artifacts or stage or commit the plan without authorization.
-
-Include the outcome, chosen direction, supporting evidence, constraints, non-goals, and material assumptions. Order work by dependencies. Give each item enough context for an executor to start without rediscovering the design:
-
-- The behavior to change, relevant paths or symbols, and required boundaries or invariants.
-- Dependencies and ownership, including write limits when work is delegated.
-- Observable completion criteria and concrete checks or commands, with the evidence to return.
-
-Specify verification on the actual user surface, including necessary environment and setup. Cover failure or recovery paths when the risk warrants them. An unavailable required verifier is a readiness gap; do not quietly substitute a weaker proxy or weaken acceptance criteria.
-
-## Plan delegation and worker handoffs
-
-Propose delegation only when its value exceeds coordination costs. The planner assigns provisional scopes, dependencies, write limits, models, and efforts; the parent keeps integration and acceptance. Honor requested models and efforts; otherwise use these starting points among configurations the runtime exposes.
-
-| Work | Model and effort | Typical use |
-| --- | --- | --- |
-| Mechanical execution | `gpt-5.6-luna`, `low` | Exact lookup, specified command, obvious edits, or checking an explicit condition |
-| Cheap bounded scout | `gpt-5.6-luna`, `medium` | Scouting, evidence extraction, or mapping with explicit questions and cheap verification |
-| Clear bounded implementation | `gpt-5.6-luna`, `high` | Small feature scopes, tests, and clear fixes with explicit acceptance criteria |
-| Code exploration | `gpt-5.6-terra`, `medium` | Retrieve and connect evidence across unfamiliar code, trace dependencies, and ask the parent for guidance or decisions |
-| Moderately difficult work | `gpt-5.6-terra`, `high` | Bounded reasoning or implementation benefiting parent guidance on major decisions |
-| Substantial coder | `gpt-5.6-sol`, `medium` | Substantial but bounded implementation, tests, repository fixes, or moderately difficult reasoning |
-| Frontier knowledge | `gpt-6-astra`, `low` | Obscure cross-domain knowledge or a hard task with a clear approach and checks |
-| Ambiguous or consequential judgment | `gpt-6-astra`, `medium` | Synthesis, diagnosis, design, independent review, or permissions, data, and concurrency decisions |
-| Critical reasoning | `gpt-6-astra`, `high` | Interacting high-risk constraints or consequential reasoning or security decisions |
-
-Match each handoff to the intended worker. Luna needs an explicit approach, precise entry points, concrete checks, and a final-report exit for blockers because it cannot use `send_message`. Terra, Sol, and Astra can return consequential design or scope decisions to the parent while continuing independent work. Stronger workers can own broader reasoning, but every handoff still needs the relevant evidence, constraints, and acceptance criteria.
-
-Execution revalidates assignments against available models and current conditions before dispatch. If the worker changes, adjust the brief to its capabilities; substituting Luna for Astra may require resolving design choices and supplying more explicit steps. Runtime dispatch and coordination belong to execution.
-
-## Independently review and correct
-
-Every plan requires a fresh read-only subagent reviewer before it is ready. Explicit ultraplan invocation authorizes this review. Once the draft is stable, use [references/plan-review-prompt.md](references/plan-review-prompt.md) with the plan path, relevant sources, and settled user decisions. Give the reviewer a self-contained brief without the intended verdict, using `fork_turns: "none"`.
-
-The parent owns corrections. Resolve blocking correctness findings and required simplifications, then use `followup_task` with the same reviewer to review the complete revised plan. Substantive changes require rereview; formatting, wording without changed meaning, and recording approval do not.
-
-Mark the plan `ready` only after approval and resolution of consequential decisions and evidence gaps. If independent review is unavailable or prohibited, retain `not ready` and report the gap.
+Mark the plan `ready` only after independent approval and resolution of decisions or evidence gaps that block execution.
+If required review is unavailable, retain `not ready` and report the gap.
 
 ## Hand off
 
-Link the plan and briefly explain the direction, important tradeoffs, readiness or exact gaps, and next action. Keep execution details in the artifact so it remains sufficient without the conversation. End at the planning handoff unless the user has already authorized subsequent execution.
+Link the plan and state its direction, important tradeoffs, readiness, and exact remaining gaps.
+Keep execution details in the artifact. If execution is already authorized, continue without requesting permission again.
+Otherwise, finish at the planning handoff.
