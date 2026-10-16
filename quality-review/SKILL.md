@@ -22,7 +22,7 @@ Verify unfamiliar APIs, packages, defaults, and volatile external facts against 
 
 ## Search for structural simplification
 
-Do not stop at local cleanup. Ask whether a different owner, state model, data shape, or control flow would make whole branches, wrappers, modes, flags, helpers, or layers disappear. Delete complexity rather than redistribute it: moving code between files is useful only when it improves ownership, cohesion, or the concepts a reader must hold.
+Compare the complete solution with the simplest design that satisfies current requirements, including its setup, operation, and tests. Question the need for mechanisms before recommending repairs or additional safeguards around them. Ask whether a different owner, state model, data shape, or control flow makes whole branches, wrappers, modes, or layers unnecessary. Delete complexity rather than redistribute it. Moving code between files helps only when it improves ownership, cohesion, or understanding.
 
 Recommend a broad restructuring when it is the clearest behavior-preserving remedy. Do not soften a structural problem into naming or line-level nits merely because the larger fix is less convenient.
 
@@ -36,6 +36,8 @@ When implementing, make the smallest change that fully removes the root cause. P
 
 Match verification to the change, using narrow checks before broader integration checks when warranted. Reopen the final diff and confirm the repair removed complexity rather than moving it.
 
+Challenge duplicate coverage, tests tied to private implementation details, and production machinery used only by tests. For proposed test removals, identify retained protection and any meaningful coverage loss.
+
 Do not weaken tests, delete meaningful assertions, replace the declared interaction surface with mocks, or introduce a new verification framework solely for the review. Use the frontend reference for browser and accessibility verification.
 
 ## Findings and verdict
@@ -44,11 +46,13 @@ Merge repeated symptoms under their root cause. Lead with blocking issues and ma
 
 For each finding, give its priority, file and line, evidence, consequence, recommended remedy, and acceptance check. Explain alternative rationale or uncertainty when it materially affects the conclusion; separate labeled fields are unnecessary.
 
-- **P0:** A correctness, safety, or completion blocker.
-- **P1:** A material structural or maintainability regression, including a demonstrated missed simplification or product-quality failure.
-- **P2:** A worthwhile bounded improvement.
+| Priority | Meaning |
+| --- | --- |
+| **P0 — Critical** | A demonstrated critical failure requiring immediate attention, such as data loss or a serious security exposure. |
+| **P1 — Must fix** | A material correctness, requirements, or structural problem that must be resolved before accepting the reviewed work. |
+| **P2 — Improvement** | A supported, worthwhile improvement that does not block acceptance. |
 
-Return every supported P0 and P1 finding and at most eight P2 findings, disclosing any additional P2 findings omitted. Return fewer findings when warranted, including none when the change is clean.
+Return all distinct, supported findings, ordered by priority and impact. Do not impose a numerical cap or add findings to fill a quota. Keep any overview brief without omitting findings from the full report. Return no findings when the change is clean.
 
 Treat high-confidence P0 and P1 findings as blocking. Passing tests alone does not establish implementation quality. P2 findings are advisory and do not require user disposition before approval. Do not block on personal taste, cosmetic naming, or theoretical improvements without demonstrated current benefit.
 

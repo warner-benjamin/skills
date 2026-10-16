@@ -5,8 +5,7 @@ description: Coordinate explicitly requested Codex subagents, route tasks by dif
 
 # Delegate
 
-Use for explicitly requested delegation or delegation authorized by a workflow such as ultraplan or ultragoal.
-The parent owns integration and acceptance. Each worker owns its assigned scope until acceptance or explicit transfer.
+Use for explicitly requested delegation or delegation authorized by a workflow such as ultraplan or ultragoal. The parent owns integration and acceptance. Each worker owns its assigned scope until acceptance or explicit transfer.
 
 Optimize for accepted results within the user's Codex allowance. Consider elapsed time, parent review effort, and errors that survive review. Honor requested models and efforts; otherwise choose among configurations the runtime exposes.
 
@@ -42,14 +41,11 @@ Use available experience to refine routing; proceed with these defaults when no 
 
 ## Dispatch and ownership
 
-Delegate only when the benefit exceeds transfer and integration costs. Keep small or tightly coupled work local.
-Delegate only independent, non-overlapping assignments that can finish from the supplied context without ongoing inter-agent communication.
-Settle shared interfaces and prerequisites before dispatch. Start dependent assignments only after their prerequisites are accepted.
-Keep work requiring shared edits, joint design, or repeated coordination with one owner.
-Normally, one assignment and one final handoff suffice. Reserve intermediate messages for unexpected blockers or consequential decisions.
-Independent review examines a stable handoff and does not authorize concurrent implementation ownership.
-Give capable workers coherent components, behaviors, or research questions. Avoid dividing one decision across many small assignments.
-Prefer a flat team with distinct ownership. Before permitting nested delegation, read [nested-delegation.md](references/nested-delegation.md).
+Delegate only when the benefit exceeds transfer and integration costs. Keep small or tightly coupled work local. Delegate only independent, non-overlapping assignments that can finish from the supplied context without ongoing inter-agent communication. Settle shared interfaces and prerequisites before dispatch. Start dependent assignments only after their prerequisites are accepted. Keep work requiring shared edits, joint design, or repeated coordination with one owner.
+
+Normally, one assignment and one final handoff suffice. Reserve intermediate messages for unexpected blockers or consequential decisions. Independent review examines a stable handoff and does not authorize concurrent implementation ownership.
+
+Give capable workers coherent components, behaviors, or research questions. Avoid dividing one decision across many small assignments. Prefer a flat team with distinct ownership. Before permitting nested delegation, read [nested-delegation.md](references/nested-delegation.md).
 
 Give each worker a focused packet. Adapt this checklist and omit fields that do not apply:
 
@@ -72,31 +68,19 @@ Include these instructions in the assignment. Workers without inherited history 
 - Report the outcome, changed paths, checks and results, deviations, and unresolved issues. Identify stable portions ready for inspection.
 - Do not spawn children without explicit parent permission and the applicable coordination instructions.
 
-Specify the direct parent's task name and the available communication tool, normally `collaboration.send_message`.
-Use runtime capabilities rather than model names to determine tool access.
-If messaging is unavailable, require a final blocker report with completed work, evidence, and the needed decision.
-Do not let missing messaging authorize an unresolved consequential decision.
+Specify the direct parent's task name and the available communication tool, normally `collaboration.send_message`. Use runtime capabilities rather than model names to determine tool access. If messaging is unavailable, require a final blocker report with completed work, evidence, and the needed decision. Do not let missing messaging authorize an unresolved consequential decision.
 
-Prefer `fork_turns: "none"` with a self-contained packet. Use a partial history fork when useful.
-A full-history fork inherits model and effort and cannot take overrides. Use collaboration tools directly.
-Briefly announce the task and selected model/effort. Batch related dispatch notices and report unknown inheritance honestly.
+Prefer `fork_turns: "none"` with a self-contained packet. Use a partial history fork when useful. A full-history fork inherits model and effort and cannot take overrides. Use collaboration tools directly. Briefly announce the task and selected model/effort. Batch related dispatch notices and report unknown inheritance honestly.
 
-While a worker owns active work, do only independent parent work.
-Do not inspect its files, diffs, or sources to monitor progress, duplicate research, or anticipate findings.
-Overlap requires an explicit user request for duplicate analysis or a coordinated ownership transfer.
-Inspection requires completed work, an explicit stable handoff, or a concrete guidance request.
-Inspect only the delivered portion or what answers the question. Review access does not transfer implementation ownership.
-For unexpected dependencies, request the specific interface contract or bounded handoff instead of inspecting active work.
+While a worker owns active work, do only independent parent work. Do not inspect its files, diffs, or sources to monitor progress, duplicate research, or anticipate findings. Overlap requires an explicit user request for duplicate analysis or a coordinated ownership transfer.
+
+Inspection requires completed work, an explicit stable handoff, or a concrete guidance request. Inspect only the delivered portion or what answers the question. Review access does not transfer implementation ownership. For unexpected dependencies, request the specific interface contract or bounded handoff instead of inspecting active work.
 
 ## Communicate and wait
 
-Give the user material findings, decisions, blockers, and handoffs. Do not paraphrase every internal exchange or announce unchanged waiting states.
-Batch related corrections and updates. Follow higher-priority runtime update requirements without creating extra worker status requests.
+Give the user material findings, decisions, blockers, and handoffs. Do not paraphrase every internal exchange or announce unchanged waiting states. Batch related corrections and updates. Follow higher-priority runtime update requirements without creating extra worker status requests.
 
-When independent work is exhausted, use event-driven `collaboration.wait_agent` calls within runtime limits.
-An early return does not mean completion. A timeout does not authorize cancellation or restart.
-Handle actionable messages, then resume waiting until required handoffs and acceptance are complete.
-Avoid status polling, heartbeat requests, and invented side work. Do not end the turn promising to monitor.
+When independent work is exhausted, use event-driven `collaboration.wait_agent` calls within runtime limits. An early return does not mean completion. A timeout does not authorize cancellation or restart. Handle actionable messages, then resume waiting until required handoffs and acceptance are complete. Avoid status polling, heartbeat requests, and invented side work. Do not end the turn promising to monitor.
 
 ## Accept and escalate
 
@@ -111,6 +95,4 @@ Choose the next step from the failure:
 
 Do not climb every effort level mechanically. Luna high to Sol low/medium and Sol medium/high/xhigh to Astra low/medium are normal escalation routes. Choose by the cause of failure and the difficulty of acceptance.
 
-Batch corrections into a `followup_task` for the same compatible agent. Use `send_message` for guidance during active work.
-After handoff, take ownership of a local correction when that is simpler than delegating it. Verify the correction.
-Before changing workers, reconcile partial changes and explicitly transfer the remaining scope. Keep ownership clear through acceptance.
+Batch corrections into a `followup_task` for the same compatible agent. Use `send_message` for guidance during active work. After handoff, take ownership of a local correction when that is simpler than delegating it. Verify the correction. Before changing workers, reconcile partial changes and explicitly transfer the remaining scope. Keep ownership clear through acceptance.
