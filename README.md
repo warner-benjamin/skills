@@ -18,7 +18,11 @@ The agent reviews code structure, maintainability, and product quality with repo
 
 ### `delegate`
 
-The agent owns routing and coordination for explicit delegation and authorized ultraplan or ultragoal workers. It favors coherent ownership, material updates, and acceptance without duplicated work. The routing table provides model and effort defaults.
+The agent owns routing and coordination for explicit delegation and workers authorized by other skills. It favors coherent ownership, material updates, and acceptance without duplicated work. The routing table provides model and effort defaults.
+
+### `codebase-review`
+
+The agent delegates codebase slices to find unnecessary code, complicated setups, overtesting, performance problems, and maintainability issues. It saves progress, verifies findings, and consolidates all supported findings into one report. Simplification proposals explain what disappears and which behavior or test protection remains. Implementation and tests stay unchanged during review.
 
 ### `myskills`
 
@@ -42,14 +46,15 @@ If you already cloned the repository, run `git submodule update --init`.
 
 ## Skill invocation
 
-`ultraplan`, `ultragoal`, and `quality-review` disable implicit invocation.
+`ultraplan`, `ultragoal`, `quality-review`, and `codebase-review` disable implicit invocation.
 
 Use these commands to invoke the skills:
 
 - Use `$ultraplan` to research and plan ordinary or persistent work. Question assumptions with this skill.
 - Use `$ultragoal` to activate or resume a durable objective.
 - Use `$quality-review` to review code quality or make authorized repairs.
-- Use `$delegate` for an explicit delegation request. Ultraplan and ultragoal also use its coordination guidance.
+- Use `$codebase-review` for a broad review with delegated slices, durable findings, and a complete report.
+- Use `$delegate` for an explicit delegation request. Ultraplan, ultragoal, and codebase-review also use its coordination guidance.
 - Use `$myskills` to install or update the top-level skills from this repository.
 
 ## Sources

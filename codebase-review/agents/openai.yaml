@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codebase Review"
+  short_description: "Review codebase slices for simpler code and tests"
+
+policy:
+  allow_implicit_invocation: false
