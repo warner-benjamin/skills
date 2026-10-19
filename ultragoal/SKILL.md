@@ -19,6 +19,16 @@ Keep progress, evidence, and next actions in the native plan when available. Oth
 
 Record compatible scope updates in the plan. If the finish line changes, use the supported goal-editing mechanism. If that mechanism is unavailable, ask the user to change the objective through product controls. Never mark unfinished work complete to simulate an edit.
 
+## Isolate and commit repository work
+
+For a new goal that changes a Git repository, record the starting branch, starting commit, and original worktree path in the plan. Before implementation, create a new `codex/<goal-slug>` branch from that commit in a separate worktree. Use a unique name and path if either already exists. Perform implementation, validation, and review in that worktree, and give workers its absolute path. On resume, reuse the recorded goal branch and worktree instead of creating another pair. For a repository without Git, skip this workflow.
+
+Inspect the original worktree before setup. Preserve its staged, unstaged, and untracked changes; do not stash, reset, or commit them as part of setup. If the goal depends on existing uncommitted changes, copy only the required changes into the new worktree, record their provenance, and keep them distinct from new implementation in the commit history. Ask when ownership or inclusion is unclear. If the starting checkout is detached, record its commit and resolve the merge destination with the user before merging. If isolation fails, resolve the setup problem before implementation rather than silently working in the original checkout.
+
+Commit as work progresses: after each coherent implementation milestone and its relevant checks, and after accepted review corrections. Do not defer all commits until delivery. Inspect the diff and stage only intended files or hunks. Keep unrelated files, secrets, generated debris, and locally excluded plans out of commits. The parent owns staging and commits in a shared worktree; workers hand off changes and evidence without concurrent Git mutations. Record commit IDs and verification evidence in the plan.
+
+Before delivery, commit all intended repository changes and verify that the goal worktree is clean, with no intended untracked files left behind. Report any remaining unrelated or intentionally excluded files. Preserve the goal branch and worktree while a merge decision is pending. Do not merge, delete the branch, or remove the worktree automatically.
+
 ## Execute the agreed scope
 
 Use the smallest design that satisfies the outcome and project conventions. Prefer existing owners, APIs, data models, and suitable maintained dependencies. Verify relied-on dependency behavior against the exact version. Remove obsolete paths within scope and preserve settled compatibility requirements.
@@ -33,7 +43,7 @@ Keep small or tightly coupled work local. Give capable workers coherent componen
 
 Normally, one assignment and one final handoff suffice. Reserve intermediate messages for unexpected blockers or consequential decisions. Independent review starts from a stable handoff and does not create overlapping implementation ownership. Use the [implementation brief](references/implementation-prompt.md) for execution-specific context. The parent owns scope, architecture, integration, and final acceptance.
 
-Inspect delivered changes and verify integration before accepting dependent work. If evidence invalidates the approach or corrections stop resolving the cause, revise the plan and ownership before continuing. Preserve unrelated work. Produce required commits and artifacts within the authorized scope. Answer intervening user questions without abandoning unfinished authorized execution.
+Inspect delivered changes and verify integration before accepting dependent work. If evidence invalidates the approach or corrections stop resolving the cause, revise the plan and ownership before continuing. Preserve unrelated work. Produce incremental commits and required artifacts within the authorized scope. Answer intervening user questions without abandoning unfinished authorized execution.
 
 ## Limit coordination chatter
 
@@ -53,7 +63,7 @@ Run the declared final verifier on the finished state. Do not weaken tests, hide
 
 ## Review the stable result
 
-Every goal requires one fresh read-only reviewer of the complete stable change, including parent-only implementations. Start that reviewer with `fork_turns: "none"` and use the [final review prompt](references/final-review-prompt.md). Supply the governing intent, accepted updates, complete change inventory, verification evidence, and known gaps. Include staged, unstaged, deleted, renamed, and relevant untracked files. A branch diff can omit intended work.
+Every goal requires one fresh read-only reviewer of the complete stable change, including parent-only implementations. Start that reviewer with `fork_turns: "none"` and use the [final review prompt](references/final-review-prompt.md). Supply the governing intent, accepted updates, complete change inventory, verification evidence, and known gaps. Review all goal commits against the recorded starting commit, plus staged, unstaged, deleted, renamed, and relevant untracked files. A working-tree diff alone omits committed milestones; a branch diff can omit intended uncommitted work.
 
 For maintained code, tests, UI, or agent instructions, require [quality-review](../quality-review/SKILL.md) and provide its absolute path. If that required skill is missing, report an installation gap. Add dedicated risk review before consequential actions when the work requires it. Add other reviewers only for distinct unresolved risks or user requests.
 
@@ -66,5 +76,7 @@ The verdict still covers the complete result. Meaning-preserving wording and for
 ## Deliver and complete
 
 Provide the artifact or exact launch command, required setup, and concise verification results. If user verification remains, provide a short checklist, expected results, and the exact action or evidence needed. Distinguish completed delivery from pending platform verification. State relevant limitations and whether required changes are committed.
+
+For repository work, report the goal branch, worktree path, final commit, and recorded starting branch. After implementation, verification, and independent review finish, ask whether to merge the goal branch back into that starting branch. This merge decision is required by ultragoal; it does not block completion of an otherwise finished goal unless integration is part of its acceptance criteria. Merge only after the user authorizes it. Before an authorized merge, inspect the destination's current state and preserve existing changes; resolve integration issues and rerun affected checks as needed. Report the resulting commit and any remaining integration gaps.
 
 Mark the goal complete only after the outcome exists, required artifacts are delivered, and the declared final verification passes. Independent review must approve the final substantive state with blocking findings resolved. Reconcile outstanding agent work and repository or external state before changing goal status. Follow runtime rules for blocked status and preserve user-controlled status. Required external verification remains incomplete until its evidence arrives. For budgeted goals, report final token usage when supplied by the runtime.

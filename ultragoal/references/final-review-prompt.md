@@ -6,13 +6,13 @@ Use for a fresh read-only reviewer after implementation is stable. Supply eviden
 Execution plan: <absolute path, or inline outcome, approach, and acceptance criteria>
 Accepted updates: <settled decisions and scope changes>
 Governing sources: <requirements and repository instructions>
-Implementation: <workspace, base/revision, and complete intended change inventory>
+Implementation: <absolute goal worktree path, starting commit, goal branch/final revision, and complete intended change inventory>
 Evidence: <verification results, tested user workflows, and source/dependency versions>
 Delivery: <artifacts, launch instructions, and any required user verification>
 Known gaps: <unresolved issues or unavailable checks>
 Required review: <absolute quality-review skill path and additional risk scopes>
 
-Establish intent and accepted decisions before reviewing the complete stable implementation. Include staged, unstaged, deleted, renamed, and relevant untracked files. Report inaccessible or conflicting governing material as a review gap.
+Establish intent and accepted decisions before reviewing the complete stable implementation. Review all goal commits against the recorded starting commit, plus staged, unstaged, deleted, renamed, and relevant untracked files. Do not limit review to the latest commit or the working-tree diff. Report inaccessible or conflicting governing material as a review gap.
 
 Apply the required review skill. Verify integration and whether the evidence proves the requested user workflow. Distinguish source approval from installed or deployed behavior. Verify that required artifacts and instructions make the delivery usable. Do not replace a required verifier with test totals or a weaker proxy.
 
