@@ -2,3 +2,7 @@
 	path = .third-party-skills/simple-english
 	url = https://github.com/AminBlg/SimpleEnglish.git
 	branch = main
+[submodule ".third-party-skills/security-audit"]
+	path = .third-party-skills/security-audit
+	url = https://github.com/cloudflare/security-audit-skill.git
+	branch = main

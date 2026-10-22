@@ -36,7 +36,13 @@ The agent monitors long-running jobs with brief updates and adaptive polling int
 
 The agent writes technical text with ASD-STE100 Simplified Technical English. Our local copy derives from [`AminBlg/SimpleEnglish`](https://github.com/AminBlg/SimpleEnglish/tree/a6fcb4fde098b33617cc1578d151ebf58774b883/skills/simple-english) version 2.1.1. It removes the chat list/table bans and strict mode. This upstream version has no five-sentence reply limit. All other skill wording is unchanged. The [MIT license](simple-english/LICENSE) permits these modifications.
 
+### External skill: `security-audit`
+
+The agent audits code for security vulnerabilities through reconnaissance, coverage-led hunting, independent validation, and structured reports. The upstream source is [`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill), licensed under [MIT](.third-party-skills/security-audit/LICENSE). Its validators require Node.js.
+
 ## External skill setup
+
+The `security-audit` symlink points to `skills/security-audit` in the `.third-party-skills/security-audit` submodule. This preserves the upstream skill and its supporting files. Install it through `myskills`, which follows top-level skill symlinks.
 
 The `simple-english` directory contains the maintained local copy and its license. Install this directory through `myskills`.
 
