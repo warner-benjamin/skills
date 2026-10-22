@@ -34,11 +34,13 @@ The agent monitors long-running jobs with brief updates and adaptive polling int
 
 ### External skill: `simple-english`
 
-The agent writes technical text with ASD-STE100 Simplified Technical English. A pinned Git submodule references the original [`AminBlg/SimpleEnglish`](https://github.com/AminBlg/SimpleEnglish/tree/main/skills/simple-english) skill.
+The agent writes technical text with ASD-STE100 Simplified Technical English. Our local copy derives from [`AminBlg/SimpleEnglish`](https://github.com/AminBlg/SimpleEnglish/tree/a6fcb4fde098b33617cc1578d151ebf58774b883/skills/simple-english) version 2.1.1. It removes the chat list/table bans and strict mode. This upstream version has no five-sentence reply limit. All other skill wording is unchanged. The [MIT license](simple-english/LICENSE) permits these modifications.
 
 ## External skill setup
 
-The `simple-english` directory is a relative symlink to `.third-party-skills/simple-english/skills/simple-english`.
+The `simple-english` directory contains the maintained local copy and its license. Install this directory through `myskills`.
+
+The pinned submodule at `.third-party-skills/simple-english` retains the upstream source for comparison. When updating upstream, preserve these removals and exclude any five-sentence reply limit.
 
 Clone this repository with the `--recurse-submodules` option.
 
