@@ -18,6 +18,8 @@ Establish how this assignment fits the outcome and accepted decisions. If the pl
 Work in the supplied goal worktree. The parent owns staging and commits in the shared worktree; hand off your changed files and verification evidence without committing, switching branches, or changing worktrees.
 
 Use the smallest sufficient change within agreed interfaces and compatibility requirements. Remove obsolete paths within scope. Do not implement optional ideas from the plan without authorization. Exercise the relevant integration scenario early and run the assignment's necessary checks. Preserve acceptance criteria. Before handoff, inspect the change for unnecessary mechanisms and redundant tests.
+
+Tie added safeguards and test cases to a concrete requirement or evidence-backed risk. Do not invent edge cases or expand the assignment after its acceptance checks pass; hand off the result and any material unresolved gaps.
 ```
 
 Append the applicable worker instructions from delegate, including the actual parent and runtime communication capability. A model name alone does not establish whether messaging is available.
