@@ -4,7 +4,17 @@ For people installing or changing the server. Agents using the connected tool on
 
 ## Setup
 
-This Python 3 MCP server runs on Linux without third-party dependencies or API keys:
+The server runs on Linux without third-party Python dependencies or API keys. `$myskills` installs the skills and configures this server automatically. Setup requires Python 3.11+ and `codex` on `PATH`.
+
+To register or reload an already installed copy, run:
+
+```sh
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/quiet-polling/scripts/setup_mcp.py"
+```
+
+The helper points Codex at the installed script, preserves custom settings, reloads MCP connections through the app-server, and checks tool discovery without scheduling a wake. If Codex is closed, it uses a temporary app-server to write and verify the configuration; the connection loads when Codex next starts. An explicitly disabled server stays disabled. Use `--codex-home PATH` for a different installation.
+
+For manual configuration:
 
 ```toml
 [mcp_servers.quiet_polling]

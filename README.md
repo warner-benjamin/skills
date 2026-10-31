@@ -26,7 +26,7 @@ The agent delegates codebase slices to find unnecessary code, complicated setups
 
 ### `myskills`
 
-The agent updates this repository and its submodules, then installs top-level skills, including symlink targets. It replaces installed versions without backups. Use: "update $myskills".
+The agent updates this repository and its submodules, then runs the installer for top-level skills, including symlink targets. It replaces installed versions without backups and registers and reloads the quiet-polling MCP server. Use: "update $myskills".
 
 ### `quiet-polling`
 
