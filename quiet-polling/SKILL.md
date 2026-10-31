@@ -1,47 +1,39 @@
 ---
 name: quiet-polling
-description: Wait quietly for long-running jobs using adaptive polling intervals from 5 to 25 minutes. Use when running or monitoring builds, long-running tests, training, batch processing, remote jobs, or other work expected to take more than several minutes, or when the user requests quiet, infrequent progress checks.
+description: Wait quietly for long-running jobs or schedule a later wake in this chat. Use for builds, long-running tests, training, batch processing, remote jobs, requested infrequent checks, or requests to check back in hours.
 ---
 
 # Quiet polling
 
 The user prefers infrequent checks and brief updates to reduce unnecessary model calls, quota usage, and interruptions. Stay silent between scheduled checks; keep working until the job and required follow-up are complete.
 
-Apply this skill to tests only when they are expected to take, or have already run for, more than several minutes.
+Stay in the turn with native waits when you need their completion signal or the job depends on the session staying alive. Use `wake_after` for a planned check after ending the turn, such as a requested check in hours or a detached remote job. Apply this to tests only when they are expected to take, or have already run for, more than several minutes.
 
-## Choose the interval
+## Wait for work
 
-Use intervals of **5 → 10 → 15 → 20 → 25 minutes**, then repeat 25. These are delays between checks, not elapsed-time milestones.
+While staying in the turn, use the tool that owns the work:
 
-| Minutes | Milliseconds |
-| --- | --- |
-| 5 | 300000 |
-| 10 | 600000 |
-| 15 | 900000 |
-| 20 | 1200000 |
-| 25 | 1500000 |
+- Shell session: `write_stdin` with its session ID and empty input.
+- Running exec cell: `functions.wait` with the cell ID returned by `functions.exec`.
+- Existing agents: `collaboration.wait_agent`; messages arrive separately from its wait result. Inspect them and resume waiting if work remains.
+- Timer or remote status check within the current turn: `clock.sleep`, then query if needed. Job completion does not wake this timer; user input can interrupt it.
 
-- Unknown runtime: start at 5 minutes. Known remaining runtime: choose the smallest interval that covers it, capped at 25; an 8-minute job starts at 10.
-- Advance one rung whenever a scheduled check finds the job still running. Routine output or early tool returns do not reset or advance the schedule.
-- For builds and long-running tests that gate the next step, repeat the 5-minute interval instead of increasing it; completion-aware waits should still return immediately when the job finishes.
-- Confirm launch and retain the job ID, interval, and next deadline. Start a fresh schedule for each new job.
-- Never schedule more than 25 minutes between checks. This leaves a margin below the documented 30-minute minimum prompt-cache lifetime after a write or reuse.
+Follow tool and runtime limits, chaining shorter waits to the next check deadline using actual elapsed time. An internal timeout does not itself call for a status query or commentary. Do useful independent work when available.
 
-## Wait with the available tools
+For unknown runtimes, use delays of **5 → 10 → 15 → 20 → 25 → 30 minutes** between status checks, then repeat 30 minutes. Advance only when a scheduled check finds the job still running; routine output and shorter internal waits do not reset or advance this schedule. For predictable jobs, choose the smallest interval that covers the expected remaining runtime, capped at 30 minutes. For builds and tests that gate the next step, repeat 5 minutes. Completion-aware waits can return sooner; handle completion promptly. Keep the job ID and next check time.
 
-Prefer completion-aware waits; follow the current tool's schema and limits:
+## Resume this chat later
 
-| Work | Tool | Wake behavior |
-| --- | --- | --- |
-| Shell session | `write_stdin(session_id, chars="", yield_time_ms)` | Returns on process exit, including failure, or timeout. Ordinary output alone did not wake the tested poll. |
-| Yielded exec cell | `functions.wait(cell_id, yield_time_ms)` | Returns on cell completion or timeout; timeout preserves the running cell and returns new buffered output. Requires a running cell ID. |
-| Existing agents | `collaboration.wait_agent(timeout_ms)` | Wakes on an agent message before completion, on completion, or at timeout. Messages arrive separately from the wait result; resume waiting if work remains. |
-| Remote status API | `clock.sleep(duration_ms)`, then query | Sleeps for the duration; unrelated job completion does not wake it. User input can interrupt it according to the tool contract. |
+Use `wake_after` to schedule a later check, such as in 1, 5, or 12 hours, up to 24 hours away. Use a new descriptive `idempotency_key` for each new check; reuse a key only to retry the same registration.
 
-If a tool cannot wait the full interval, chain supported waits to the deadline using actual elapsed time. Do not add commentary or remote status requests just because an internal wait returned. Avoid busy loops. A wait timeout does not authorize cancelling or restarting the job. Do useful independent work when available, while preserving the next check deadline.
+Use `pause_goal: true` (the default) when this is the only outstanding wait and there is no other work to do in parallel. This pauses an active goal and resumes it when the timer is due. Otherwise, pass `pause_goal: false` so other work can continue. Choose this automatically from the remaining work. After confirmed registration with `goal_paused: true`, finish the current turn. Later goal changes do not cancel the timer; use `wake_cancel` to stop it.
 
-## Communicate sparingly
+When woken, perform the planned check and verify the job's state. If another later check is needed, register it with a new key.
 
-Give one brief launch update with the initial check interval. At each scheduled check, give a concise status update and the next interval. Do not narrate sleeps, tool retries, heartbeats, or unchanged logs between those checks. If the user wants more details, they will use the side chat option.
+Ordinary user input does not cancel a timer. Use `wake_cancel` when it is no longer wanted; if it paused a goal, tell the user the goal remains paused and they can resume it through the goal controls. Use `wake_status` for inspection, not periodic polling. Crashes require human-directed recovery; do not automatically rearm an uncertain pause or delivery.
 
-React promptly to detected completion, failure, blockers, or user input. Verify terminal status and outputs before reporting success. Otherwise keep waiting; do not end the turn promising to monitor unless persistent monitoring is actually active.
+## Communicate
+
+Give one brief launch or registration update, then report completion, failure, blockers, or meaningful changes. Do not narrate waits or unchanged status. Follow higher-priority runtime update requirements.
+
+A timer firing or a wait timing out does not prove job success or authorize cancellation. Verify terminal status and outputs before reporting success. Do not promise a later wake without a confirmed registration.

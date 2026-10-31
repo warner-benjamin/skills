@@ -30,7 +30,9 @@ The agent updates this repository and its submodules, then installs top-level sk
 
 ### `quiet-polling`
 
-The agent monitors long-running jobs with brief updates and adaptive polling intervals from 5 to 25 minutes. Builds and long tests that block the next step use 5-minute intervals.
+The agent uses native tools to wait for jobs and reports meaningful changes. A narrow `wake_after` tool schedules a later wake in the same chat, including checks in 2, 5, or 12 hours. It can pause an active goal for the wait and resume it when the timer is due. Crash recovery is manual.
+
+Server setup, implementation details, and validation are in the [maintenance documentation](quiet-polling/docs/maintenance.md).
 
 ### External skill: `simple-english`
 
