@@ -10,7 +10,7 @@ import tempfile
 import time
 import tomllib
 
-from quiet_polling import CodexRPC
+from quiet_polling import CodexRPC, codex_executable
 
 
 @contextmanager
@@ -22,9 +22,10 @@ def app_server(home):
         return
     # An isolated server supplies Codex's config writer when the app is closed.
     with tempfile.TemporaryDirectory(prefix='quiet-polling-setup-') as tmp:
-        socket = Path(tmp) / 'server.sock'
+        # Let Codex create the socket directory with its own Windows ACLs.
+        socket = Path(tmp) / 'control/server.sock'
         with (Path(tmp) / 'server.log').open('w') as log:
-            process = subprocess.Popen(['codex', 'app-server', '--listen', f'unix://{socket}'],
+            process = subprocess.Popen([codex_executable(), 'app-server', '--listen', f'unix://{socket}'],
                                        env={**os.environ, 'CODEX_HOME': str(home)}, cwd=home,
                                        stdout=log, stderr=log)
             try:

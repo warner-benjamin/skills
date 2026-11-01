@@ -100,7 +100,7 @@ def run_cases(probe):
                 assert len(pids) == 1, pids
                 case['mcp_server_pid'] = pids[0]
                 os.kill(pids[0], signal.SIGTERM)
-                until(lambda: not Path('/proc', str(pids[0])).exists())
+                until(lambda: pids[0] not in processes(state, worker=False))
                 case['record'] = until(lambda: (v if (v := record_for(t))['state'] == 'submitted' else None))
                 case['notice'] = until(lambda: outputs(t))[0]
             elif scenario == 'cancel':

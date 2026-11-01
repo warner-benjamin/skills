@@ -15,7 +15,7 @@ import uuid
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPT_DIR))
-from quiet_polling import CodexRPC
+from quiet_polling import CodexRPC, codex_executable
 
 
 def until(predicate, timeout=12):
@@ -61,6 +61,18 @@ class Provider(http.server.BaseHTTPRequestHandler):
 
 
 def processes(state, worker):
+    if os.name == 'nt':
+        output = subprocess.check_output(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command',
+            '[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new(); '
+            'Get-CimInstance Win32_Process | Select-Object ProcessId,CommandLine | ConvertTo-Json -Compress'],
+            encoding='utf-8')
+        rows = json.loads(output) or []
+        if isinstance(rows, dict):
+            rows = [rows]
+        return [row['ProcessId'] for row in rows
+                if str(SCRIPT_DIR / 'quiet_polling.py').lower() in (row['CommandLine'] or '').lower()
+                and str(state).lower() in (row['CommandLine'] or '').lower()
+                and ('--worker' in (row['CommandLine'] or '')) == worker]
     found = []
     for proc in Path('/proc').iterdir():
         if not proc.name.isdigit():
@@ -79,9 +91,13 @@ def run_probe(provider, cases, prefix):
     os.umask(0o077)
     root = Path(tempfile.mkdtemp(prefix=prefix))
     home = root / 'home'; home.mkdir()
-    (home / 'config.toml').write_text('[features]\napps=false\nhooks=false\ngoals=true\n')
-    state = root / 'state'; socket = root / 'server.sock'
+    state = root / 'state'; socket = root / 'control/server.sock'
     fixture = http.server.ThreadingHTTPServer(('127.0.0.1', 0), provider)
+    (home / 'config.toml').write_text(
+        'model_provider="probe"\n[model_providers.probe]\nname="fixture"\n'
+        f'base_url="http://127.0.0.1:{fixture.server_port}/v1"\n'
+        'wire_api="responses"\nsupports_websockets=false\n'
+        '[features]\napps=false\nhooks=false\ngoals=true\n')
     fixture.daemon_threads = True; fixture.requests = []; fixture.counts = {}; fixture.lock = threading.Lock()
     fixture.gate_next = False
     fixture.entered = threading.Event(); fixture.release = threading.Event()
@@ -91,16 +107,14 @@ def run_probe(provider, cases, prefix):
     threads = []; rpc = process = None
     with (root / 'server.stdout').open('w') as stdout, (root / 'server.stderr').open('w') as stderr:
         try:
-            report['version'] = subprocess.check_output(['codex', '--version'], text=True).strip()
+            report['version'] = subprocess.check_output([codex_executable(), '--version'], text=True).strip()
             env = {k: v for k, v in os.environ.items() if not k.startswith(('CODEX_', 'OPENAI_'))}
             env['CODEX_HOME'] = str(home)
-            process = subprocess.Popen(['codex', 'app-server', '--listen', 'unix://' + str(socket)], cwd=root,
-                                       env=env, stdout=stdout, stderr=stderr, start_new_session=True)
+            process = subprocess.Popen([codex_executable(), 'app-server', '--listen', 'unix://' + str(socket)], cwd=root,
+                                       env=env, stdout=stdout, stderr=stderr, start_new_session=os.name != 'nt')
             until(socket.exists)
             rpc = CodexRPC(str(socket))
             config = {'features.goals': True, 'features.apps': False, 'features.hooks': False, 'web_search': 'disabled',
-                      'model_providers.probe': {'name': 'fixture', 'base_url': f'http://127.0.0.1:{fixture.server_port}/v1',
-                                                'wire_api': 'responses', 'supports_websockets': False},
                       'mcp_servers.quiet_polling': {'command': sys.executable,
                           'args': [str(SCRIPT_DIR / 'quiet_polling.py'), '--state-dir', str(state), '--socket', str(socket)],
                           'tool_timeout_sec': 20, 'default_tools_approval_mode': 'approve'}}
@@ -126,8 +140,7 @@ def run_probe(provider, cases, prefix):
             for pid in processes(state, worker=True):
                 try:
                     os.kill(pid, signal.SIGTERM)
-                    proc = Path('/proc', str(pid))
-                    until(lambda: not proc.exists() or (proc / 'stat').read_text().rsplit(')', 1)[1].split()[0] == 'Z', 3)
+                    until(lambda: pid not in processes(state, worker=True), 5)
                 except (FileNotFoundError, ProcessLookupError):
                     pass
                 except Exception as error:
@@ -141,11 +154,16 @@ def run_probe(provider, cases, prefix):
                         report.setdefault('cleanup_errors', []).append(repr(error))
                 rpc.close()
             if process and process.poll() is None:
-                os.killpg(process.pid, signal.SIGTERM)
+                if os.name == 'nt':
+                    subprocess.run(['taskkill.exe', '/PID', str(process.pid), '/T', '/F'],
+                                   check=True, stdout=subprocess.DEVNULL)
+                else:
+                    os.killpg(process.pid, signal.SIGTERM)
                 try:
                     process.wait(timeout=5)
                 except subprocess.TimeoutExpired:
-                    os.killpg(process.pid, signal.SIGKILL); process.wait(timeout=5)
+                    process.kill() if os.name == 'nt' else os.killpg(process.pid, signal.SIGKILL)
+                    process.wait(timeout=5)
             fixture.shutdown(); fixture.server_close()
     (root / 'provider.json').write_text(json.dumps(fixture.requests, indent=2) + '\n')
     (root / 'result.json').write_text(json.dumps(report, indent=2) + '\n')

@@ -4,12 +4,12 @@ import argparse
 import base64
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
 import hashlib
 import json
 import math
 import os
 from pathlib import Path
+import shutil
 import socket
 import struct
 import subprocess
@@ -18,27 +18,64 @@ import threading
 import time
 import uuid
 
-VERSION = '0.4.0'
+VERSION = '0.5.0'
 DEFAULT_SOCKET = str(Path(os.environ.get('CODEX_HOME', Path.home() / '.codex')) / 'app-server-control/app-server-control.sock')
+DEFAULT_STATE = str(Path(os.environ.get('LOCALAPPDATA', Path.home())) / 'codex-quiet-polling/wakes'
+                    if os.name == 'nt' else Path.home() / '.local/state/codex-quiet-polling/wakes')
+
+if os.name == 'nt':
+    import ctypes
+    from ctypes import wintypes
+    import msvcrt
+
+    class Overlapped(ctypes.Structure):
+        _fields_ = [('Internal', ctypes.c_size_t), ('InternalHigh', ctypes.c_size_t),
+                    ('Offset', wintypes.DWORD), ('OffsetHigh', wintypes.DWORD), ('hEvent', wintypes.HANDLE)]
+
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel32.LockFileEx.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.DWORD,
+                                  wintypes.DWORD, wintypes.DWORD, ctypes.POINTER(Overlapped)]
+    kernel32.LockFileEx.restype = wintypes.BOOL
+else:
+    import fcntl
+
+
+def lock_file(file, *, shared=False, blocking=True):
+    # Lock handles are closed by their callers, releasing the lock on both OSes.
+    if os.name == 'nt':
+        flags = (0 if shared else 2) | (0 if blocking else 1)
+        if not kernel32.LockFileEx(msvcrt.get_osfhandle(file.fileno()), flags, 0, 1, 0, ctypes.byref(Overlapped())):
+            error = ctypes.get_last_error()
+            if error == 33:  # ERROR_LOCK_VIOLATION
+                raise BlockingIOError('Lock is held')
+            raise ctypes.WinError(error)
+    else:
+        fcntl.flock(file, (fcntl.LOCK_SH if shared else fcntl.LOCK_EX) | (0 if blocking else fcntl.LOCK_NB))
+
+
+def codex_executable():
+    name = 'codex.exe' if os.name == 'nt' else 'codex'
+    executable = shutil.which(name)
+    if not executable:
+        raise FileNotFoundError(f'{name} must be on PATH')
+    return executable
 
 PENDING = {'scheduled'}
 ENTERED = {'submitting': 'delivery_unknown', 'pausing': 'pause_unknown'}
 
 
 class CodexRPC:
-    """Synchronous app-server client over a same-user Unix WebSocket."""
+    """App-server WebSocket client; Windows socket access goes through Codex's proxy."""
 
     def __init__(self, path, timeout=10):
         self.path = str(path)
         self.timeout = timeout
         self.sequence = 0
-        self.sock = socket.socket(socket.AF_UNIX)
-        self.sock.settimeout(timeout)
+        self.proxy = self.bridge = None
+        self.relay_threads = []
         try:
-            self.sock.connect(self.path)
-            _, uid, _ = struct.unpack('3i', self.sock.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
-            if uid != os.getuid():
-                raise PermissionError('Codex socket belongs to another user')
+            self.connect()
+            self.sock.settimeout(timeout)
             self.stream = self.sock.makefile('rb')
             key = base64.b64encode(os.urandom(16)).decode()
             self.sock.sendall(('GET / HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: ' + key + '\r\nSec-WebSocket-Version: 13\r\n\r\n').encode())
@@ -62,10 +99,76 @@ class CodexRPC:
             self.close()
             raise
 
+    def connect(self):
+        if os.name == 'nt':
+            self.connect_proxy()
+        else:
+            self.sock = socket.socket(socket.AF_UNIX)
+            self.sock.settimeout(self.timeout)
+            self.sock.connect(self.path)
+            _, uid, _ = struct.unpack('3i', self.sock.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
+            if uid != os.getuid():
+                raise PermissionError('Codex socket belongs to another user')
+
+    def connect_proxy(self):
+        # A socketpair keeps the existing buffered reads and deadlines usable on Windows.
+        self.sock, self.bridge = socket.socketpair()
+        self.proxy = subprocess.Popen([codex_executable(), 'app-server', 'proxy', '--sock', self.path],
+                                      stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                      creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+
+        def relay(to_proxy):
+            try:
+                while True:
+                    data = self.bridge.recv(65536) if to_proxy else self.proxy.stdout.read1(65536)
+                    if not data:
+                        break
+                    if to_proxy:
+                        self.proxy.stdin.write(data)
+                        self.proxy.stdin.flush()
+                    else:
+                        self.bridge.sendall(data)
+            except OSError:
+                pass
+            finally:
+                if to_proxy:
+                    try:
+                        self.proxy.stdin.close()
+                    except OSError:
+                        pass
+                else:
+                    try:
+                        self.bridge.shutdown(socket.SHUT_WR)
+                    except OSError:
+                        pass
+
+        self.relay_threads = [threading.Thread(target=relay, args=(direction,), daemon=True)
+                              for direction in (True, False)]
+        for thread in self.relay_threads:
+            thread.start()
+
     def close(self):
+        if hasattr(self, 'sock'):
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
         if hasattr(self, 'stream'):
             self.stream.close()
-        self.sock.close()
+        if hasattr(self, 'sock'):
+            self.sock.close()
+        if getattr(self, 'proxy', None):
+            self.proxy.terminate()
+            try:
+                self.proxy.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.proxy.kill()
+                self.proxy.wait()
+            for thread in self.relay_threads:
+                thread.join()
+            self.proxy.stdout.close()
+        if getattr(self, 'bridge', None):
+            self.bridge.close()
 
     def __enter__(self):
         return self
@@ -172,9 +275,10 @@ class Store:
     def __init__(self, root):
         self.root = Path(root).expanduser().resolve()
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
-        if self.root.stat().st_uid != os.getuid():
-            raise PermissionError('State directory must belong to this user')
-        self.root.chmod(0o700)
+        if os.name != 'nt':
+            if self.root.stat().st_uid != os.getuid():
+                raise PermissionError('State directory must belong to this user')
+            self.root.chmod(0o700)
 
     def path(self, wake):
         if not isinstance(wake, str) or len(wake) != 32 or any(x not in '0123456789abcdef' for x in wake):
@@ -184,14 +288,14 @@ class Store:
     @contextmanager
     def locked(self, wake):
         with self.path(wake).with_suffix('.lock').open('a') as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            lock_file(lock)
             yield
 
     @contextmanager
     def thread_locked(self, thread):
         name = hashlib.sha256(thread.encode()).hexdigest() + '.goal.lock'
         with (self.root / name).open('a') as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            lock_file(lock)
             yield
 
     def read(self, wake):
@@ -226,7 +330,7 @@ class Service:
         # Check a live OS lock, never a persisted readiness flag or a reused PID.
         with self.store.path(wake).with_suffix('.worker.lock').open('a') as lock:
             try:
-                fcntl.flock(lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
+                lock_file(lock, shared=True, blocking=False)
             except BlockingIOError:
                 return True
             return False
@@ -244,7 +348,9 @@ class Service:
     def launch(self, wake):
         with (self.store.root / 'worker.log').open('ab', buffering=0) as log:
             command = [sys.executable, str(Path(__file__).resolve()), '--state-dir', str(self.store.root), '--socket', self.socket, '--worker', wake]
-            child = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True, close_fds=True)
+            detach = ({'creationflags': subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+                       | subprocess.CREATE_BREAKAWAY_FROM_JOB} if os.name == 'nt' else {'start_new_session': True})
+            child = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log, stderr=log, close_fds=True, **detach)
             # Reap it if this MCP process outlives it; the worker survives our exit.
             threading.Thread(target=child.wait, daemon=True).start()
 
@@ -348,7 +454,7 @@ class Service:
     def worker(self, wake):
         with self.store.path(wake).with_suffix('.worker.lock').open('a') as lock:
             # Shared status probes can delay acquisition, but cannot evict a worker.
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            lock_file(lock)
             while True:
                 record = self.store.read(wake)
                 if record['state'] not in PENDING:
@@ -452,8 +558,8 @@ def serve(service):
 def main():
     os.umask(0o077)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--state-dir', default=str(Path.home() / '.local/state/codex-quiet-polling/wakes'))
-    parser.add_argument('--socket', help='Native Codex app-server Unix socket; normally discovered from CODEX_HOME.')
+    parser.add_argument('--state-dir', default=DEFAULT_STATE)
+    parser.add_argument('--socket', help='Native Codex app-server control socket; normally discovered from CODEX_HOME.')
     parser.add_argument('--worker')
     args = parser.parse_args()
     service = Service(args.state_dir, args.socket)

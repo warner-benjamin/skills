@@ -1,4 +1,3 @@
-import fcntl
 from itertools import count
 from pathlib import Path
 import sys
@@ -9,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from quiet_polling import Service, bound_thread, seconds_value
+from quiet_polling import Service, bound_thread, lock_file, seconds_value
 
 META = {'threadId': 't'}
 OTHER = {'threadId': 'other'}
@@ -61,7 +60,7 @@ class Tests(unittest.TestCase):
     def launch(self, wake):
         self.launched.append(wake)
         lock = self.s.store.path(wake).with_suffix('.worker.lock').open('a')
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        lock_file(lock, blocking=False)
         self.workers[wake] = lock
 
     def update_record(self, wake, **changes):
@@ -285,7 +284,7 @@ class Tests(unittest.TestCase):
         self.due(result)
         self.stop_worker(wake)
         with self.s.store.path(wake).with_suffix('.worker.lock').open('a') as probe:
-            fcntl.flock(probe, fcntl.LOCK_SH)
+            lock_file(probe, shared=True)
             workers = [threading.Thread(target=self.s.worker, args=(wake,)) for _ in range(2)]
             for worker in workers:
                 worker.start()
