@@ -83,7 +83,7 @@ class Tests(unittest.TestCase):
         self.rpc.state = 'active'
         result = self.s.after({'seconds': 7200, 'idempotency_key': 'default'}, META)
         self.assertTrue(result['goal_paused'])
-        self.assertTrue(result['worker_running'])
+        self.assertTrue(self.s.worker_running(result['wake_id']))
         self.assertEqual(self.rpc.state, 'paused')
         self.due(result)
         self.s.deliver(result['wake_id'])
@@ -92,7 +92,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.rpc.mutations, ['paused', 'active'])
         self.assertFalse(self.rpc.messages)
         self.assertEqual(self.s.store.read(result['wake_id'])['state'], 'resumed')
-        self.assertFalse(self.s.invoke('wake_cancel', {'wake_id': result['wake_id']}, META)['cancelled'])
+        self.assertNotEqual(self.s.invoke('wake_cancel', {'wake_id': result['wake_id']}, META)['state'], 'cancelled')
         retry = self.s.after({'seconds': 7200, 'idempotency_key': 'default'}, META)
         self.assertEqual(retry['state'], 'resumed')
         self.assertFalse(retry['goal_paused'])
@@ -137,7 +137,7 @@ class Tests(unittest.TestCase):
         self.rpc.set_goal_status = fail
         result = self.after(pause_goal=True)
         self.assertEqual(result['state'], 'pause_unknown')
-        self.assertFalse(result['worker_running'])
+        self.assertFalse(self.s.worker_running(result['wake_id']))
         self.rpc.set_goal_status = lambda *args: self.fail('pause replayed')
         self.assertEqual(self.after(pause_goal=True)['state'], 'pause_unknown')
 
@@ -174,8 +174,9 @@ class Tests(unittest.TestCase):
     def test_register_later_wake(self):
         before = time.time()
         result = self.after(18000)
+        self.assertEqual(set(result), {'wake_id', 'due_at', 'state', 'goal_paused'})
         self.assertEqual(result['state'], 'scheduled')
-        self.assertTrue(result['worker_running'])
+        self.assertTrue(self.s.worker_running(result['wake_id']))
         self.assertFalse(result['goal_paused'])
         self.assertAlmostEqual(self.s.store.read(result['wake_id'])['deadline'], before + 18000, delta=1)
 
@@ -248,7 +249,7 @@ class Tests(unittest.TestCase):
         result = self.after()
         self.due(result)
         cancelled = self.s.invoke('wake_cancel', {'wake_id': result['wake_id']}, META)
-        self.assertTrue(cancelled['cancelled'])
+        self.assertEqual(cancelled['state'], 'cancelled')
         self.s.deliver(result['wake_id'])
         self.assertFalse(self.rpc.messages)
         self.assertEqual(self.after()['state'], 'cancelled')
@@ -257,7 +258,7 @@ class Tests(unittest.TestCase):
         result = self.after()
         self.due(result)
         self.s.deliver(result['wake_id'])
-        self.assertFalse(self.s.invoke('wake_cancel', {'wake_id': result['wake_id']}, META)['cancelled'])
+        self.assertNotEqual(self.s.invoke('wake_cancel', {'wake_id': result['wake_id']}, META)['state'], 'cancelled')
 
     def test_crash_during_submission_is_uncertain_and_not_resumed(self):
         result = self.after()

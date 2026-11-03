@@ -335,11 +335,12 @@ class Service:
                 return True
             return False
 
-    def public(self, record):
-        keys = ('wake_id', 'state', 'seconds', 'idempotency_key', 'due_at', 'created_at', 'submitted_at', 'cancelled_at', 'error', 'wake_turn_id', 'pause_goal', 'resumed_at')
+    def public(self, record, *, diagnostics=False):
+        keys = ('wake_id', 'due_at', 'state', 'error')
         result = {key: record[key] for key in keys if key in record}
         running = self.worker_running(record['wake_id']) if record['state'] in PENDING | ENTERED.keys() else False
-        result['worker_running'] = running
+        if diagnostics:
+            result['worker_running'] = running
         if result['state'] in ENTERED and not running:
             result.update(state=ENTERED[result['state']], error='Operation has no confirmed receipt; inspect the chat and goal before retrying.')
         result['goal_paused'] = bool(record.get('goal_pause')) and result['state'] in PENDING
@@ -415,8 +416,6 @@ class Service:
             result['instruction'] = 'Goal pause was not confirmed. Inspect the goal and recover on human instruction; no worker was started.'
         elif result['state'] == 'delivery_unknown':
             result['instruction'] = 'Delivery or goal resumption is uncertain and will not be replayed. Inspect the chat and goal; recover only on human instruction.'
-        elif result['goal_paused']:
-            result['instruction'] = 'Goal paused. Finish this turn; the timer resumes it when due.'
         return result
 
     def deliver(self, wake):
@@ -477,23 +476,25 @@ class Service:
         if name == 'wake_status' and wake is None:
             records = [self.store.read(p.stem) for p in self.store.root.glob('*.json')]
             owned = sorted((r for r in records if r['thread_id'] == thread), key=lambda r: r['created_at'], reverse=True)
-            return {'wakes': [self.public(r) for r in owned[:100]]}
+            return {'wakes': [self.public(r, diagnostics=True) for r in owned[:100]]}
         if name == 'wake_status':
-            return self.public(self.owned(wake, thread))
+            return self.public(self.owned(wake, thread), diagnostics=True)
         with self.store.locked(wake):
             record = self.owned(wake, thread)
             if record['state'] in PENDING:
                 record.update(state='cancelled', cancelled_at=utc(time.time()))
                 self.store.write(record)
-            result = {**self.public(record), 'cancelled': record['state'] == 'cancelled'}
-            if result['cancelled'] and record.get('goal_pause'):
+            result = self.public(record)
+            if result['state'] == 'cancelled' and record.get('goal_pause'):
                 result['instruction'] = 'Timer cancelled. Any goal paused by this timer stays paused; resume it explicitly when wanted.'
             return result
 
 
 TOOLS = [
     {'name': 'wake_after', 'description': (
-        'Schedule a later wake in this chat and return promptly. '
+        'Schedule a check more than 30 minutes away in this chat and return promptly. '
+        'For checks in 30 minutes or less, use native waits: write_stdin, functions.wait, collaboration.wait_agent, or clock.sleep. '
+        'Choose by the next-check delay, not total job runtime. Keep native waits when completion signals or session lifetime matter. '
         'May pause an active goal and resume it when due. '
         'Returns wake_id, due_at, state, and goal_paused. '
         'goal_paused is true only while this timer has a pending goal resume. '

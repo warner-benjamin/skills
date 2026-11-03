@@ -7,11 +7,11 @@ description: Wait quietly for long-running jobs or schedule a later wake in this
 
 The user prefers infrequent checks and brief updates to reduce unnecessary model calls, quota usage, and interruptions. Stay silent between scheduled checks; keep working until the job and required follow-up are complete.
 
-Stay in the turn with native waits when you need their completion signal or the job depends on the session staying alive. Use `wake_after` for a planned check after ending the turn, such as a requested check in hours or a detached remote job. Apply this to tests only when they are expected to take, or have already run for, more than several minutes.
+Use native wait tools when the next check is **30 minutes or less** away. Use `wake_after` only for checks **more than 30 minutes** away, when ending the turn is appropriate. Choose by the delay until the next check, not the job's total runtime: a five-minute poll of a twelve-hour job still uses native waits. Keep using native waits whenever you need their completion signal or the job depends on the session staying alive. Apply this to tests only when they are expected to take, or have already run for, more than several minutes.
 
 ## Wait for work
 
-While staying in the turn, use the tool that owns the work:
+For waits of 30 minutes or less, stay in the turn and use the tool that owns the work:
 
 - Shell session: `write_stdin` with its session ID and empty input.
 - Running exec cell: `functions.wait` with the cell ID returned by `functions.exec`.
@@ -24,7 +24,7 @@ For unknown runtimes, use delays of **5 → 10 → 15 → 20 → 25 → 30 minut
 
 ## Resume this chat later
 
-Use `wake_after` to schedule a later check, such as in 1, 5, or 12 hours, up to 24 hours away. Use a new descriptive `idempotency_key` for each new check; reuse a key only to retry the same registration.
+Use `wake_after` for a check more than 30 minutes away, such as in 1, 5, or 12 hours, up to 24 hours away. Use a new descriptive `idempotency_key` for each new check; reuse a key only to retry the same registration.
 
 Use `pause_goal: true` (the default) when this is the only outstanding wait and there is no other work to do in parallel. This pauses an active goal and resumes it when the timer is due. Otherwise, pass `pause_goal: false` so other work can continue. Choose this automatically from the remaining work. After confirmed registration with `goal_paused: true`, finish the current turn. Later goal changes do not cancel the timer; use `wake_cancel` to stop it.
 
