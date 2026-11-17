@@ -7,26 +7,28 @@ description: Coordinate explicitly requested Codex subagents, route tasks by dif
 
 Use for explicitly requested delegation or delegation authorized by a workflow such as ultraplan or ultragoal. The parent owns integration and acceptance. Each worker owns its assigned scope until acceptance or explicit transfer.
 
-Optimize for accepted results within the user's Codex allowance. Consider elapsed time, parent review effort, and errors that survive review. Honor requested models and efforts; otherwise choose among configurations the runtime exposes.
+Optimize for accepted results within the user's Codex allowance. Consider elapsed time, parent review effort, and errors that survive review. Honor requested models and efforts. If a specifically requested configuration is unavailable, report that and use a substitute only with the user's authorization.
 
 ## Route the task
 
-Choose by the delegated assignment's difficulty, how reliably the result can be checked, and the cost of supervision. A hard project can contain assignments suitable for Luna. A short answer can require difficult judgment. Route by the assignment, not the overall project or a role label such as researcher or reviewer. For development tasks, Luna/Terra roughly cover junior-developer work and Sol/Astra senior or expert work. Use this as shorthand for the task table below. Terra remains a good and cost effective choice for technical communication and visual work.
+Choose the least expensive worker that can make the decisions the assignment requires. Consider how the parent will catch an error. A known fix can suit Terra across many files. A small change can need Astra if the worker must discover a missing requirement with serious consequences.
+
+When choosing a worker's effort, every dispatcher, including a nested parent, is limited to `xhigh` or below. A higher effort requires the user's explicit request for that worker. This ceiling also applies to retries and inherited settings.
+
+Use at least `medium` for Luna and Terra when choosing the effort yourself. The mechanical fallback below is the only exception.
 
 | Task | Starting model and effort | Assignment boundary |
 | --- | --- | --- |
-| Mechanical lookup or extraction | `gpt-6-luna`, `low` | Locate definitions and callers, inventory files, extract explicit facts, classify with supplied rules, or summarize test output. |
-| Investigations or implementations with a clear approach | `gpt-6-luna`, `high` | Investigate an isolated failure, implement a change, or add tests when the approach is clear and few decisions remain. Use when reliable checks or a short review can detect mistakes. |
-| Visual interpretation, defined workflows, or technical communication | `gpt-6.1-terra`, `medium` | Interpret or create images, charts, and technical drawings; complete app workflows with defined outcomes; write or revise documentation grounded in code, verified findings, or supplied references. Route unresolved technical investigation by its difficulty. |
-| Well-specified outcomes requiring local implementation choices | `gpt-6.1-terra`, `high` | Implement a change or investigate a focused repository question when the outcome is clear but the worker must choose an approach or reconcile multiple local constraints. |
-| Implementation or investigation across interacting components | `gpt-6.1-sol`, `medium` | Implement features, debug reproductions, or refactor when the assignment requires reasoning across interacting components, reconciling conflicting evidence, or decisions that cheaper workers would need substantial help to make. |
-| Difficult debugging or substantive review | `gpt-6.1-sol`, `high` | Diagnose difficult failures or review interacting invariants when task evidence indicates a specific reasoning-depth need beyond medium. Review status or interacting components alone do not justify high effort. |
-| Persistent reasoning or complex deliverables | `gpt-6.1-sol`, `xhigh` | Trace long execution paths, resolve conflicting evidence, or produce polished deliverables with interacting requirements. Use when reliable checks support acceptance and task evidence justifies the extra time. |
-| Specialist knowledge | `gpt-6-astra`, `low` | Apply obscure specialist knowledge, analyze unfamiliar mechanisms, or connect evidence across domains when broader model capability is useful. |
-| Ambiguous or consequential judgment, including errors that are difficult to detect | `gpt-6-astra`, `medium` | Identify hidden assumptions, choose between architectural approaches, or independently review permissions, data, and concurrency decisions. Use when plausible consequential errors can survive review. |
-| Critical reasoning | `gpt-6-astra`, `high` | Resolve interacting high-risk constraints or exceptionally demanding reasoning and security judgments. |
-
-Start with the least expensive model suited to the assignment.
+| Mechanical lookup or extraction | `gpt-6-luna`, `medium` | Locate callers, inventory files, extract explicit facts, or classify records by supplied rules when the parent can spot-check the source. If Luna medium is unavailable for delegation, use `gpt-6.1-terra` at `low` for this work. |
+| Investigation or implementation with a known approach | `gpt-6.1-terra`, `medium` | Follow supplied reproduction steps, apply an established fix, or add a test using an existing pattern. Use when the approach is settled and a focused test or short review can expose mistakes. |
+| Visual interpretation, defined workflows, or technical communication | `gpt-6.1-terra`, `medium` | Interpret technical drawings, create charts from supplied data, complete a defined app workflow, or write documentation from verified findings. If the work also requires a diagnosis, route by the difficulty of that diagnosis. |
+| Well-specified outcome with local implementation choices | `gpt-6.2-sol`, `medium` | The assignment specifies the required behavior. The worker chooses where and how to implement it and can verify the result against an acceptance criterion. |
+| Implementation or investigation across components | `gpt-6.2-sol`, `medium` | Trace a request across services, implement a feature against a shared contract, or refactor several callers. Stay at medium when integration checks cover the required behavior. |
+| Difficult debugging or substantive review | `gpt-6.2-sol`, `high` | Distinguish competing explanations for a failure, or review whether a change preserves a known invariant across retries or reordered events. High is the usual Sol ceiling for repository work, including long investigations. Use Sol xhigh for coding only when comparable tasks have shown enough improvement over high to justify its cost. |
+| Constraint-heavy design or professional deliverables | `gpt-6.2-sol`, `xhigh` | Reconcile dimensions in a CAD assembly or keep calculations and conclusions consistent across a workbook and report. Use when requirements interact and the parent can check the result against measurements, source data, or a rubric. |
+| Focused specialist inference or design judgment | `gpt-6.2-astra`, `medium` | Infer which mechanism best explains conflicting observations, identify a hidden assumption in a design, or assess a deliverable against professional conventions the rubric omits. Sol high suits specialist work whose answer can be checked against an authoritative specification. |
+| Consequential judgment with hard-to-detect errors | `gpt-6.2-astra`, `high` | Identify missing invariants or choose between designs when several plausible failure modes could survive ordinary review. Examples include stale permissions after a retry and lost writes during recovery. |
+| Critical reasoning | `gpt-6.2-astra`, `xhigh` | Resolve consequential constraints when satisfying one can break another. For example, determine how to roll back a partial migration without restoring revoked access or losing writes accepted during the migration. |
 
 ## Manage Codex usage
 
@@ -34,7 +36,6 @@ Treat the routes as defaults. Adjust them using observed allowance consumption, 
 
 - Included Codex usage depends on context, reasoning, tools, and caching. API token-price ratios do not translate into fixed message counts or completed tasks. Purchased Codex credits track token consumption more directly.
 - Workers consume allowance too. Include coordination, retries, and parent review when judging savings.
-- Do not use max effort. Higher effort can increase cost and latency without improving coding results.
 - Use Codex usage information when making budget decisions.
 - Increase effort to address a specific reasoning problem, then evaluate the result. Higher effort does not guarantee better results.
 
@@ -65,13 +66,14 @@ Include the instructions below in the assignment. Workers without inherited hist
 - Message for decisions, blockers, changed interfaces, consequential findings, or usable handoffs. Combine related updates.
 - Omit acknowledgments, repeated plans, unchanged ownership reminders, tool narration, and heartbeat messages.
 - Report the outcome, changed paths, checks and results, deviations, and unresolved issues. Identify stable portions ready for inspection.
+- For research, cite the sources you inspected and identify any missing evidence that could change your conclusion. For a mechanical lookup, citing the source is enough.
 - Do not spawn children without explicit parent permission and the applicable coordination instructions.
 
 Specify the direct parent's task name and the available communication tool, normally `collaboration.send_message`. Use runtime capabilities rather than model names to determine tool access.
 
-Prefer `fork_turns: "none"` with a self-contained packet. Use a full-history fork when the worker needs the surrounding conversation. A full-history fork inherits model and effort and cannot take overrides. Use collaboration tools directly.
+By default, call `collaboration.spawn_agent` with `fork_turns: "none"`, set both `model` and `reasoning_effort`, and supply the context the worker needs. Use a full-history fork only when the worker needs the conversation and you know both inherited settings match the selected route. Omit both overrides for that fork.
 
-Briefly announce the task and selected model/effort. Batch related dispatch notices and report unknown inheritance honestly.
+Briefly announce the task, model, and effort. Group related dispatch notices.
 
 While a worker owns active work, do only independent parent work. Do not inspect its files, diffs, or sources to monitor progress, duplicate research, or anticipate findings. Overlap requires an explicit user request for duplicate analysis or a coordinated ownership transfer.
 
@@ -96,4 +98,6 @@ Choose the next step from the failure:
 
 Do not climb every effort level mechanically. For knowledge or taste limitations, favor a stronger model over more reasoning effort.
 
-Batch corrections into a `followup_task` for the same compatible agent. Use `send_message` for guidance during active work. After handoff, take ownership of a local correction when that is simpler than delegating it. Verify the correction. Before changing workers, reconcile partial changes and explicitly transfer the remaining scope.
+Use `collaboration.send_message` for guidance during active work. Group related corrections in one `collaboration.followup_task`. The worker keeps its model and effort.
+
+To change either setting, collect the worker's findings and identify its partial edits. End its ownership of the remaining scope before assigning that scope and evidence to a fresh worker. After handoff, the parent may take ownership of a small correction and verify it directly.
