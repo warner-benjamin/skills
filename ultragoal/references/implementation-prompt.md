@@ -13,13 +13,13 @@ Dependencies: <ready interfaces and downstream consumers>
 Acceptance: <required behavior, early integration scenario, and necessary checks>
 Parent: <direct parent's canonical task name and communication tool>
 
-Establish how this assignment fits the outcome and accepted decisions. If the plan is inaccessible or conflicts materially with the assignment, report the gap before dependent work. Implement only the assigned scope. The full plan supplies context, not ownership of other tasks.
+Establish how this assignment fits the outcome and accepted decisions. If the plan is inaccessible or conflicts materially with the assignment, report the gap before dependent work. Implement only the assigned scope. If blocked, send the parent the evidence and the decision or dependency you need. Continue any independent part.
 
-Work in the supplied goal worktree. The parent owns staging and commits in the shared worktree; hand off your changed files and verification evidence without committing, switching branches, or changing worktrees.
+Work in the supplied goal worktree. Other workers may be editing this checkout. Keep edits and formatting within your assigned files and preserve others’ changes. Report problems outside your ownership to the parent. The parent handles staging and commits. Stay on the assigned branch and hand off changed files and verification evidence.
 
 Use the smallest sufficient change within agreed interfaces and compatibility requirements. Remove obsolete paths within scope. Do not implement optional ideas from the plan without authorization. Exercise the relevant integration scenario early and run the assignment's necessary checks. Preserve acceptance criteria. Before handoff, inspect the change for unnecessary mechanisms and redundant tests.
 
 Tie added safeguards and test cases to a concrete requirement or evidence-backed risk. Do not invent edge cases or expand the assignment after its acceptance checks pass; hand off the result and any material unresolved gaps.
 ```
 
-Append the applicable worker instructions from delegate, including the actual parent and runtime communication capability. A model name alone does not establish whether messaging is available.
+Include any applicable routing or handoff instructions from delegate. Fill in the parent and communication tool available to this worker.

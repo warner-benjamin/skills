@@ -5,90 +5,78 @@ description: Activate or resume a durable Codex goal and carry authorized execut
 
 # Ultragoal
 
-Preserve one objective through implementation, verification, independent review, and usable delivery. Use the native goal for the finish line and one plan for progress.
+Use the native goal to record what the user wants to achieve. Use one plan to carry the work through implementation, verification, independent review, and delivery.
 
-## Establish or resume the objective
+## Establish the objective
 
-Activate only for an authorized execution request. Discussion or planning about a possible goal does not activate it. Establish the outcome, constraints, acceptance criteria, and required final verifier from governing instructions and current evidence. Preserve settled decisions unless new evidence invalidates them. Resolve routine reversible choices independently.
+Activate only when the user asks to execute with ultragoal. Identify the requested outcome, constraints, acceptance criteria, and final verifier (the check that demonstrates the user's workflow). Use the request to decide whether success requires a local milestone or verification on the target platform. Ask if that distinction changes the verifier and the request leaves it open.
 
-Before activation, verify access to required tools, environments, and review capabilities. If external access or user testing controls completion, establish the deliverable and verification handoff. Resolve whether the authorized objective is a local milestone or full platform acceptance. Do not remove an agreed gate to make completion easier.
+Inspect the active goal before calling `create_goal`. Resume a matching goal. If a different unfinished goal occupies the slot, report the conflict and leave the existing goal in place. For a new goal, record the source of the requirements, outcome, final verifier, and completion condition. Set a token budget only when explicitly requested.
 
-Inspect the active goal before calling `create_goal`. Resume a matching objective. If another unfinished goal occupies the slot, report the conflict without completing it to make room. For a new goal, record the governing source, outcome, required verifier, and completion condition. Set a token budget only when explicitly requested.
+Identify who can run the required checks and what access they need. An unavailable environment or reviewer blocks only work that depends on it. Finish independent work and available checks. If the required check is still pending at handoff, deliver the usable artifact, name who can verify it and how, and keep the goal open.
 
-Keep progress, evidence, and next actions in the native plan when available. Otherwise, update the existing execution plan or one compact progress artifact. Avoid parallel tracking files. On resume, reconcile the goal, plan, repository, and completion evidence. Preserve valid work and start the next ready item.
+## Work from the plan
 
-Record compatible scope updates in the plan. If the finish line changes, use the supported goal-editing mechanism. If that mechanism is unavailable, ask the user to change the objective through product controls. Never mark unfinished work complete to simulate an edit.
+Use the supplied execution plan and its existing items. If none exists, use the native plan when available, or keep one compact progress record. Take the next required item whose prerequisites are satisfied. Investigate a question when its answer could change that item, unblock required work, or affect acceptance.
+
+At a milestone, a material change of direction, or before a long wait, update the plan with just enough to resume:
+
+- The current item and the observable result that closes it.
+- The last confirmed result and any commit, check, or running job needed to find it.
+- The next concrete action. If blocked, record what would unblock it.
+
+On resume, check the goal and checkpoint against the current repository and any running job. Reuse valid work and evidence. Answer intervening user questions. When the user redirects the work, drop superseded steps and update affected worker assignments before continuing.
+
+When evidence invalidates an implementation choice, record why and revise the affected steps and checks. Keep the user's constraints and acceptance criteria unless the user changes them. If the finish line changes, use the supported goal-editing mechanism or ask the user to update it through product controls. Never mark unfinished work complete to simulate an edit.
 
 ## Isolate and commit repository work
 
-For a new goal that changes a Git repository, honor any branch or worktree choice already supplied by the user. Otherwise, offer one optional startup choice: "I'll use a new branch and worktree unless you'd prefer the current checkout." When asynchronous input is available, offer "New branch and worktree (default)" and "Current checkout" while continuing read-only inspection. Give the user a reasonable response window, normally about 60 seconds, before applying the default. If asynchronous input is unavailable, state the default and continue; do not end the turn or require an answer. This is a workflow preference, not an approval gate.
+For each new Git goal, default to a new `codex/<goal-slug>` branch in its own worktree so parallel goals can proceed independently. Honor the user's checkout choice. If none was given, state the default during initial inspection and proceed. On resume, reuse the recorded branch and worktree.
 
-Record the chosen approach, starting branch, starting commit, and original worktree path in the plan. By default, create a new `codex/<goal-slug>` branch from that commit in a separate worktree before implementation. Use a unique name and path if either already exists. If the user chooses the current checkout, use its existing branch and worktree. Perform implementation, validation, and review in the chosen worktree, and give workers its absolute path. On resume, reuse the recorded choice, branch, and worktree without asking again. For a repository without Git, skip this workflow.
+Inspect the starting checkout and record its path, branch (if any), and commit. When creating a worktree, branch from that commit and record the new branch name and path in the plan. Choose unused names for both. Work, test, and review in the chosen checkout. If worktree creation fails, fix the cause or ask before switching checkouts.
 
-Inspect the original worktree before setup. Preserve its staged, unstaged, and untracked changes; do not stash, reset, or commit them as part of setup. If the goal depends on existing uncommitted changes, copy only the required changes into the new worktree, record their provenance, and keep them distinct from new implementation in the commit history. Ask when ownership or inclusion is unclear. If the starting checkout is detached, record its commit; resolve any unspecified destination only when integration is requested. If isolation fails, resolve the setup problem before implementation rather than silently working in the original checkout.
+Preserve existing staged, unstaged, and untracked work. If the goal needs uncommitted edits from the original checkout, copy only the required changes, record their source, and keep them distinct in the commit history. Ask if ownership or inclusion is unclear.
 
-Commit as work progresses: after each coherent implementation milestone and its relevant checks, and after accepted review corrections. Do not defer all commits until delivery. Inspect the diff and stage only intended files or hunks. Keep unrelated files, secrets, generated debris, and locally excluded plans out of commits. The parent owns staging and commits in a shared worktree; workers hand off changes and evidence without concurrent Git mutations. Record commit IDs and verification evidence in the plan.
+Commit each coherent milestone after its checks, including accepted review corrections. Inspect the diff and stage only intended files or hunks. Keep secrets, generated debris, and locally excluded plans out of commits. Record the commit and its verification evidence.
 
-Before delivery, commit all intended repository changes and verify that no goal changes remain unstaged, staged, or untracked. A separate goal worktree should be clean; in an existing checkout, preserve and report unrelated pre-existing changes. Report any intentionally excluded files. Preserve the goal branch and worktree for delivery unless integration or cleanup is already authorized. Do not introduce a pending merge decision by default.
+## Implement and verify
 
-## Execute the agreed scope
+Use the smallest design that meets the outcome and project conventions. Prefer existing APIs, owners, data models, and suitable maintained dependencies. Verify behavior you rely on against the dependency version in use. Preserve required compatibility and remove obsolete paths within scope. If compatibility is unclear, inspect affected callers, persisted data, and deployed versions. Resolve internal unknowns at their source. For example, if a worker’s output path is unclear, inspect its handoff or ask the worker. Make routine reversible choices yourself. Ask the user when you need their access, authority, or judgment about the outcome. Explain what their choice would change and give your recommendation when you have one.
 
-Use the smallest design that satisfies the outcome and project conventions. Prefer existing owners, APIs, data models, and suitable maintained dependencies. Verify relied-on dependency behavior against the exact version. Remove obsolete paths within scope and preserve settled compatibility requirements.
+When originality is part of the request, draw on the specific setting, mechanics, or audience. If the same idea would fit an unrelated project unchanged, explore a different premise before committing.
 
-Do not add speculative abstractions, configuration, fallback paths, or migrations. If compatibility is unresolved, identify affected callers, persisted data, and deployed versions first. Ask the user only when a consequential choice exceeds available evidence or authority. Continue independent work while awaiting the answer.
+Exercise the smallest representative workflow that could disprove the approach before expensive validation. For example, if a CLI option must reach a service, inspect the request built through the CLI. Add tests where existing checks miss changed behavior or a demonstrated risk. For prompts, check the delivered data, roles, tool schemas, and effects. Assert exact wording only when the wording itself is required.
 
-Order work by dependencies and observable completion criteria. Keep optional ideas outside the accepted scope. Before expensive broad validation, exercise the smallest representative workflow that can invalidate the approach. Include relevant transitions such as first use, cancellation and reuse, or actual request construction. If the required environment is unavailable, preserve the verification gap and continue independent authorized work.
+For optimization work, identify the primary measure and any secondary targets from the user’s priorities. Measure a representative baseline and compare candidates under the same conditions. If a secondary gain makes the primary result worse, keep the best verified version unless the user accepts the tradeoff.
 
-Explicit ultragoal execution authorizes bounded implementation delegation and independent review, subject to user and runtime limits. Use [delegate](../delegate/SKILL.md) for routing, worker briefs, communication, ownership, and acceptance mechanics.
+If successive attempts leave the outcome unchanged, record what they ruled out. Repeat a check only when it could yield new evidence. Otherwise, try a different explanation or implementation. If none is supported, close that line of investigation and report the best result and remaining gap.
 
-Keep small or tightly coupled work local. Give capable workers coherent components or behaviors with clear interfaces. Delegate only independent, non-overlapping assignments that can finish without ongoing inter-agent communication. Settle interfaces and prerequisites before dispatch. Start dependent work only after its prerequisites are accepted. Keep shared edits, joint design, and work requiring repeated coordination with one owner.
+Keep optional ideas outside the accepted scope. Before adding a safeguard, test, or review round, identify the unmet requirement or material risk in the actual workflow. Repeated fixture repairs, safeguards around safeguards, or decisions reopened without new evidence are reasons to reassess and simplify.
 
-Normally, one assignment and one final handoff suffice. Reserve intermediate messages for unexpected blockers or consequential decisions. Independent review starts from a stable handoff and does not create overlapping implementation ownership. Use the [implementation brief](references/implementation-prompt.md) for execution-specific context. The parent owns scope, architecture, integration, and final acceptance.
+Run targeted checks during implementation and broader checks once the work is integrated or acceptance requires them. Reconnect to a running check. After a failure, diagnose and correct the cause before repeating the broader check. Run the declared final verifier on the finished state. Report which user workflow it proves and any surface that still needs verification.
 
-Inspect delivered changes and verify integration before accepting dependent work. If evidence invalidates the approach or corrections stop resolving the cause, revise the plan and ownership before continuing. Preserve unrelated work. Produce incremental commits and required artifacts within the authorized scope. Answer intervening user questions without abandoning unfinished authorized execution.
+## Coordinate workers
 
-## Keep effort tied to the outcome
+Explicit ultragoal execution authorizes bounded delegation and independent review, subject to user and runtime limits. Keep small or tightly coupled work local. Delegate independent assignments with settled interfaces and one owner per change. Give each worker the absolute worktree path, scope, dependencies, acceptance check, and a way to reach the parent. Use [delegate](../delegate/SKILL.md) for routing and the [implementation brief](references/implementation-prompt.md) for handoff details.
 
-Do not get lost in minutiae or invent new edge cases to keep working. Before expanding an investigation, design, test matrix, or review cycle, identify the concrete unresolved requirement or evidence-backed risk and how resolving it affects the user's outcome. A conceivable failure or reviewer suggestion alone does not justify more machinery or a new completion gate. Address material risks supported by the actual workflow, contracts, or implementation, even when no failure has occurred yet.
+Workers contact the parent when a blocker or decision affects the assignment. At handoff, report changed files, check results, and unresolved issues. Batch related updates. The parent owns scope, architecture, integration, acceptance, and all staging and commits in the worktree workers share. Inspect handed-off changes and verify their integration before starting dependent work.
 
-At milestones, compare remaining work with the agreed acceptance criteria. Choose the smallest next action that can resolve a material uncertainty. Validate assumptions with a representative path before multiplying scenarios. If work repeatedly repairs its own fixtures, adds safeguards around new safeguards, or revisits settled decisions without new evidence, reassess the approach and simplify before continuing. Review approval establishes neither minimality nor a reason to add another review.
-
-Once the agreed outcome, required verification, and independent review are satisfied, deliver and complete. Do not spend remaining time or token budget manufacturing more work. Keep optional polish and speculative hardening out of the critical path; mention worthwhile follow-ups briefly without implementing them. Preserve genuine blockers and required gates rather than lowering the completion standard to escape a loop.
-
-## Limit coordination chatter
-
-Keep parent commentary and inter-agent messages brief and limited to material findings, decisions, blockers, changed interfaces, and usable handoffs. Batch related updates. Do not narrate every internal exchange. Omit acknowledgments, repeated plans, unchanged ownership reminders, heartbeat messages, and "still waiting" updates. Do not request worker status merely to produce a user update.
-
-When independent work is exhausted, use event-driven waits within runtime limits and resume on actionable messages. For long-running jobs or tests that require polling, use [quiet-polling](../quiet-polling/SKILL.md). For subagents, use [delegate](../delegate/SKILL.md)'s event-driven waits.
-
-Follow higher-priority runtime update requirements without adding worker chatter or repeating unchanged status.
-
-## Verify the outcome
-
-Add tests for changed behavior or demonstrated risks that existing checks do not cover. Test observable contracts rather than private implementation details or incidental prompt wording. For prompts, verify delivered data, roles, tool schemas, and behavioral consequences. Assert exact prose only when its bytes are the contract.
-
-Run targeted checks during implementation. Run broader gates when the integrated state is ready or acceptance requires them. Use existing evidence for unchanged portions. Continue an existing verifier session instead of launching duplicates. After a broad failure, diagnose and correct the cause narrowly before rerunning the broad gate. After appropriate checks pass, stop testing unless changes, failures, or unresolved evidence justify more.
-
-Run the declared final verifier on the finished state. Do not weaken tests, hide failures, or substitute weaker proxies for required verification. Report exactly which user workflow the evidence proves and which surfaces remain unverified. Test totals and source approval alone do not establish installed or deployed behavior.
+Continue independent work while workers finish their assignments. When their handoffs are the only remaining dependency, wait for them.
 
 ## Review the stable result
 
-Every goal requires one fresh read-only reviewer of the complete stable change, including parent-only implementations. Start that reviewer with `fork_turns: "none"` and use the [final review prompt](references/final-review-prompt.md). Supply the governing intent, accepted updates, complete change inventory, verification evidence, and known gaps. Review all goal commits against the recorded starting commit, plus staged, unstaged, deleted, renamed, and relevant untracked files. A working-tree diff alone omits committed milestones; a branch diff can omit intended uncommitted work.
+Every goal requires a fresh read-only reviewer, including work completed entirely by the parent. Start the reviewer with `fork_turns: "none"`. Use the [final review prompt](references/final-review-prompt.md) and include the user's original request and material updates in their own words. Supply the plan, complete change inventory, evidence, and known gaps. Review all goal commits against the starting commit, plus staged, unstaged, deleted, renamed, and relevant untracked files.
 
-For maintained code, tests, UI, or agent instructions, require [quality-review](../quality-review/SKILL.md) and provide its absolute path. If that required skill is missing, report an installation gap. Add dedicated risk review before consequential actions when the work requires it. Add other reviewers only for distinct unresolved risks or user requests.
+For maintained code, tests, UI, or agent instructions, give the reviewer the absolute path to [quality-review](../quality-review/SKILL.md). Report an installation gap if it is missing. Add a risk-specific review before a consequential action when needed. Add other reviewers only for distinct unresolved risks or at the user's request.
 
-Batch findings before corrections. Assess their evidence, severity, and simplest sufficient remedy before accepting them. Prefer removal or consolidation when it resolves the concern with less total complexity. Resolve supported correctness, safety, completion, and material quality blockers, including P0 and P1 findings. Keep P2 and advisory wording suggestions nonblocking unless acceptance requirements make them necessary. Do not turn requested advice into an additional approval gate.
-
-After substantive corrections, rerun affected checks and reuse the reviewer. Focus rereview on changed behavior, affected interfaces, and evidence invalidated by the corrections. Carry forward valid findings and verification for unchanged portions. Expand the scope when changes invalidate earlier conclusions.
-
-The verdict still covers the complete result. Meaning-preserving wording and formatting do not require rereview. If the reviewer is unavailable, use a fresh replacement. Keep the approved substantive state stable through final verification and completion.
+Batch findings and assess their evidence, impact, and simplest sufficient remedy. Resolve critical (P0) and must-fix (P1) findings supported by evidence. Treat improvements (P2) as advisory. After substantive corrections, rerun affected checks and ask the same reviewer to recheck changed behavior and affected interfaces. Carry forward evidence that still holds. Wording or formatting edits that preserve meaning need no rereview. Use a fresh replacement if the reviewer becomes unavailable. If review itself depends on missing evidence, hand off the artifact with review pending. Return to the reviewer when that evidence arrives.
 
 ## Deliver and complete
 
-Provide the artifact or exact launch command, required setup, and concise verification results. If user verification remains, provide a short checklist, expected results, and the exact action or evidence needed. Distinguish completed delivery from pending platform verification. State relevant limitations and whether required changes are committed.
+Lead updates and the final handoff with the answer the user came for. In a diagnosis, name the cause in everyday language and give the strongest evidence. If the cause is uncertain, say what the evidence establishes. In an implementation, say what the user can now do and how you checked it. Include internal details when they help the user understand a tradeoff, use the result, or act on a remaining problem.
 
-For repository work, report the goal branch, worktree path, final commit, and integration status. By default, deliver the verified, committed branch without a merge question, approval disclaimer, or repeated offer to merge. An optional merge does not block goal completion.
+Provide the artifact or exact launch command and required setup. If the user must perform a check, provide the steps, expected result, and evidence still needed.
 
-Honor existing integration instructions without asking again. If the user authorized merging, including conditionally such as "merge into main if the test game works," complete the required checks and merge once those conditions pass. Before merging, inspect the destination's current state and preserve existing changes; resolve integration issues and rerun affected checks as needed. Ask only when a consequential integration choice remains unresolved, such as an ambiguous destination or conflicts requiring a user decision. Report the resulting commit and any remaining integration gaps. Without merge authorization, leave the result on the goal branch.
+For repository work, commit all intended changes. Verify that a separate goal worktree is clean. When working in the user’s original checkout, verify that all goal changes are committed and preserve and report unrelated edits. Report the branch, worktree path, final commit, integration status, and intentional exclusions. By default, deliver the verified branch in its worktree. If a merge was authorized, carry it out when its conditions pass. Inspect the destination, preserve existing changes, and rerun checks affected by integration. Ask only if a consequential choice remains unresolved.
 
-Mark the goal complete only after the outcome exists, required artifacts are delivered, and the declared final verification passes. Independent review must approve the final substantive state with blocking findings resolved. Reconcile outstanding agent work and repository or external state before changing goal status. Follow runtime rules for blocked status and preserve user-controlled status. Required external verification remains incomplete until its evidence arrives. For budgeted goals, report final token usage when supplied by the runtime.
+Mark the goal complete once the outcome exists, the required artifacts are delivered, the final verifier passes, and independent review approves the final substantive state. Reconcile outstanding worker and external state first. If only a user or external action remains, record what will unblock the goal and follow the runtime’s criteria for marking it blocked. Honor user-controlled goal status. For a budgeted goal, report final token usage when the runtime supplies it.

@@ -1,19 +1,17 @@
 # Independent plan review
 
-Supply the plan path, intended outcome, relevant evidence, and settled decisions. Do not prescribe a verdict.
-
 ```text
-Review [plan path] for [user outcome] using [governing sources] and [settled decisions]. Verify consequential claims against evidence, including exact dependency versions where relevant.
+Review [plan path] against [original request and relevant updates in the user's words]. Respect [user decisions]. Check whether [primary evidence] supports the planner's consequential choices in the proposed environment. For example, a feature in the latest documentation may be absent from the project's pinned version.
 
-Assess correctness, executability, and simplicity across the whole user workflow, including consumers, setup, recovery, and delivery. Verify that tasks have clear dependencies and that acceptance checks prove the requested outcome. Identify the smallest representative scenario that can expose an integration error early. Keep optional ideas outside required execution scope.
+Trace the user's workflow through setup, use, recovery, and delivery. Check that the tasks are in dependency order and that the acceptance checks prove the requested outcome. Identify the smallest representative scenario that can expose an integration error early. Flag optional ideas that have slipped into required work.
 
-Compare the complete plan with the simplest direct design that satisfies the original request and accepted user updates. Challenge implementation choices and earlier reviewer suggestions that became requirements without supporting evidence. Identify mechanisms or tests that can disappear, including custom implementations that suitable existing dependencies can simplify.
+Compare the plan with the simplest design that meets the request. Before adding a safeguard or test, ask whether the mechanism that needs it can be removed. Apply the same scrutiny to earlier reviewer suggestions. Reopen a package choice only when it could remove substantial custom work or address a material limitation, accounting for integration cost.
 
-Consider established, maintained packages with evidence of production use for solved problems beyond existing project dependencies. Require justification for consequential custom code when a suitable package exists, accounting for fit and integration cost.
+Remain read-only and do not spawn agents. For each blocker, identify the affected plan step, the evidence or missing fact, the consequence, and the smallest correction that preserves required behavior. Keep wording and style suggestions advisory.
 
-For a blocking simplification, state the concrete consequence, smaller alternative, and behavior it preserves. Before recommending another safeguard or test, assess whether removing the mechanism eliminates the problem. Do not block on style, wording, or theoretical improvements without demonstrated impact.
+A plan can earn approval with an execution-time probe pending if it schedules the probe before dependent work and explains how the result guides that work. Final verification that requires external access or user testing can also remain pending at approval if the plan states who will verify the original acceptance criterion, when, and how.
 
-Remain read-only and do not spawn agents. Return batched findings with source anchors, consequences, and the smallest useful corrections. Separate blockers from advisory refinements. Report evidence gaps that affect readiness.
+On rereview, check changed decisions and any dependencies or acceptance criteria they affect. Carry forward earlier conclusions wherever their evidence still holds.
 
-On rereview, inspect changed decisions and affected dependencies or acceptance criteria. Carry forward valid evidence for unchanged portions. Expand the scope when changes invalidate earlier conclusions. Do not reconstruct unchanged research or rerun checks without a specific reason. Return `approved` only when the whole plan has no blockers to execution. Otherwise, return `not ready` with exact gaps.
+Return one verdict with the findings. Use `approved` when the whole plan has no execution blockers. Otherwise return `not ready` and name the exact gaps.
 ```
